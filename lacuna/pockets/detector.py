@@ -1,33 +1,49 @@
-"""Grid-based binding pocket detection.
+"""Grid-based binding pocket detection using alpha-sphere-inspired segmentation.
 
-Algorithm (no external dependencies):
-  1. Build a 3D occupancy grid over the protein bounding box.
-  2. Mark voxels as PROTEIN if any atom's VDW sphere overlaps them.
-  3. Mark voxels as SOLVENT_EXPOSED by flood-filling from the grid boundary.
-  4. Remaining voxels (inside protein surface but not bulk solvent) are cavity.
-  5. Label connected cavity regions → candidate pockets.
-  6. Filter by minimum volume, compute pocket centroid and lining residues.
+Algorithm:
+  1. Build protein occupancy grid (VDW spheres).
+  2. Compute Euclidean distance transform: dist[i,j,k] = Å to nearest protein atom.
+  3. Find LOCAL MAXIMA of the distance field inside the interaction zone.
+     Each local max is an "alpha point" — a sphere that fits snugly into a
+     protein concavity and touches multiple atoms on all sides.  This is the
+     core idea behind fpocket / CASTp.
+  4. Cluster nearby alpha points into pockets (DBSCAN-style dilation + labelling).
+  5. Grow each pocket cluster outward into its surrounding interaction zone
+     to compute volume, lining residues, and druggability features.
 
-This is a simplified implementation of the algorithm used by fpocket/CASTp.
-Probe radius 1.4 Å (water). Grid spacing 1.0 Å balances speed and resolution.
+This correctly segments the protein into DISTINCT POCKETS rather than treating
+the entire surface as one connected region.
 """
 
 from __future__ import annotations
 
-from collections import deque
-
 import numpy as np
 from scipy import ndimage
+from scipy.ndimage import (
+    distance_transform_edt,
+    maximum_filter,
+    binary_dilation,
+    uniform_filter,
+)
 
 from lacuna.models import Atom, Pocket, Residue, Structure
 from lacuna.io.structure import get_vdw_radius, is_hydrophobic, is_aromatic
 
 
-GRID_SPACING = 1.0      # Å per voxel
-PROBE_RADIUS = 1.4      # Å, water probe
-PADDING = 4.0           # Å padding around bounding box
-MIN_VOLUME_A3 = 80.0    # Minimum pocket volume to report
-MAX_VOLUME_A3 = 3000.0  # Ignore unrealistically large cavities
+GRID_SPACING = 1.0       # Å per voxel
+PADDING = 5.0            # Å padding around bounding box
+MIN_VOLUME_A3 = 80.0     # minimum pocket volume to report
+MAX_VOLUME_A3 = 5000.0
+
+# Interaction zone
+ALPHA_DIST_MIN = 1.6     # Å  — too small: inside VDW sphere
+ALPHA_DIST_MAX = 6.0     # Å  — too large: bulk solvent alpha sphere
+
+# Cluster radius: alpha points within this distance are merged into one pocket
+CLUSTER_RADIUS_A = 4.0   # Å
+
+# Pocket volume growth: expand each alpha-point cluster by this much
+GROW_RADIUS_A = 3.0      # Å from any alpha point
 
 
 def detect_pockets(
@@ -40,99 +56,89 @@ def detect_pockets(
 
     Args:
         coords: (N_atoms, 3) float32 coordinate array for this conformer.
-        structure: Structure object with atom metadata (residue assignments, elements).
+        structure: Structure object with atom metadata.
         grid_spacing: Voxel size in Å.
-        min_volume_a3: Minimum cavity volume to report.
+        min_volume_a3: Minimum pocket volume to report.
 
     Returns:
         List of Pocket objects, unsorted.
     """
     atoms = structure.atoms
     residues = structure.residues
-
-    # Build spatial lookup: residue index for each atom
     atom_res_idx = _build_atom_residue_map(atoms, residues)
 
-    # 1. Build occupancy grid
     lo = coords.min(axis=0) - PADDING
-    hi = coords.max(axis=0) + PADDING
-    shape = np.ceil((hi - lo) / grid_spacing).astype(int) + 1
+    shape = np.ceil((coords.max(axis=0) + PADDING - lo) / grid_spacing).astype(int) + 1
 
-    grid = np.zeros(shape, dtype=np.int8)  # 0=empty, 1=protein, 2=solvent
+    # 1. Protein occupancy grid
+    protein_mask = _build_protein_mask(coords, atoms, lo, shape, grid_spacing)
 
-    # Mark protein voxels (VDW + probe sphere)
-    for i, atom in enumerate(atoms):
-        r = get_vdw_radius(atom.element) + PROBE_RADIUS
-        center_vox = ((coords[i] - lo) / grid_spacing).astype(int)
-        r_vox = int(np.ceil(r / grid_spacing)) + 1
+    # 2. Distance transform (Å to nearest protein atom, for non-protein voxels)
+    dist = distance_transform_edt(~protein_mask).astype(np.float32) * grid_spacing
 
-        ix0, ix1 = max(0, center_vox[0] - r_vox), min(shape[0], center_vox[0] + r_vox + 1)
-        iy0, iy1 = max(0, center_vox[1] - r_vox), min(shape[1], center_vox[1] + r_vox + 1)
-        iz0, iz1 = max(0, center_vox[2] - r_vox), min(shape[2], center_vox[2] + r_vox + 1)
+    # 3. Alpha points: local maxima of dist in the interaction zone
+    #    Local max size 3 → a point is max if no neighbour within 1 voxel is larger
+    local_max_mask = (dist == maximum_filter(dist, size=3))
+    alpha_points = local_max_mask & (dist >= ALPHA_DIST_MIN) & (dist <= ALPHA_DIST_MAX)
 
-        xi = np.arange(ix0, ix1)
-        yi = np.arange(iy0, iy1)
-        zi = np.arange(iz0, iz1)
-        xx, yy, zz = np.meshgrid(xi, yi, zi, indexing="ij")
+    if not alpha_points.any():
+        return []
 
-        dist2 = (
-            ((xx - center_vox[0]) * grid_spacing) ** 2
-            + ((yy - center_vox[1]) * grid_spacing) ** 2
-            + ((zz - center_vox[2]) * grid_spacing) ** 2
-        )
-        mask = dist2 <= r ** 2
-        grid[ix0:ix1, iy0:iy1, iz0:iz1][mask] = 1
+    # 4. Cluster alpha points: dilate so nearby ones merge, then label
+    cluster_radius_vox = max(1, int(np.ceil(CLUSTER_RADIUS_A / grid_spacing)))
+    struct_el = ndimage.generate_binary_structure(3, 1)
+    dilated_alpha = binary_dilation(alpha_points, structure=struct_el,
+                                    iterations=cluster_radius_vox)
+    labeled, n_labels = ndimage.label(dilated_alpha)
 
-    # 2. Flood-fill from boundary to mark bulk solvent
-    _flood_fill_solvent(grid)
+    if n_labels == 0:
+        return []
 
-    # 3. Cavity = voxels still marked 0 (not protein, not bulk solvent)
-    cavity_mask = grid == 0
+    # 5. For each cluster, grow into the nearby interaction zone and compute props
+    grow_vox = max(1, int(np.ceil(GROW_RADIUS_A / grid_spacing)))
+    interaction_zone = (~protein_mask) & (dist >= 0.5) & (dist <= ALPHA_DIST_MAX + 1.0)
 
-    # 4. Label connected cavity regions
-    labeled, n_labels = ndimage.label(cavity_mask)
-
-    # 5. Build Pocket objects
     voxel_vol = grid_spacing ** 3
     pockets: list[Pocket] = []
 
     for label_id in range(1, n_labels + 1):
-        region = labeled == label_id
-        volume = float(region.sum()) * voxel_vol
+        alpha_cluster = labeled == label_id
+        # Expand the cluster into the surrounding interaction zone
+        grown = binary_dilation(alpha_cluster, structure=struct_el, iterations=grow_vox)
+        pocket_region = grown & interaction_zone
 
+        volume = float(pocket_region.sum()) * voxel_vol
         if volume < min_volume_a3 or volume > MAX_VOLUME_A3:
             continue
 
-        # Centroid in real space
-        vox_indices = np.argwhere(region)
+        vox_indices = np.argwhere(pocket_region)
         centroid_vox = vox_indices.mean(axis=0)
         centroid = tuple((centroid_vox * grid_spacing + lo).tolist())
 
-        # Find lining residues: atoms within (pocket_radius + 4 Å) of centroid.
-        # Using a fixed radius misses lining atoms for large pockets, so we scale
-        # with the estimated pocket sphere radius from its volume.
+        # Lining residues: atoms within (pocket_radius + 4 Å) of centroid
         pocket_radius = (volume * 3 / (4 * 3.14159)) ** (1 / 3)
         search_dist = pocket_radius + 4.0
-
         centroid_arr = np.array(centroid)
-        dists = np.linalg.norm(coords - centroid_arr, axis=1)
-        nearby_atom_indices = np.where(dists < search_dist)[0]
+        dists_to_center = np.linalg.norm(coords - centroid_arr, axis=1)
+        nearby = np.where(dists_to_center < search_dist)[0]
 
         lining_res_set: set[int] = set()
-        for ai in nearby_atom_indices:
+        for ai in nearby:
             ri = atom_res_idx.get(ai)
             if ri is not None:
                 lining_res_set.add(ri)
 
         lining_residues = [residues[ri].label for ri in sorted(lining_res_set)]
 
-        # Enclosure: fraction of voxels adjacent to protein vs. total boundary
-        enclosure = _compute_enclosure(region, grid)
+        # Enclosure: local protein density at the alpha point cluster centroid
+        local_density = uniform_filter(protein_mask.astype(np.float32), size=9)
+        enclosure_raw = float(local_density[alpha_cluster].mean())
+        enclosure = min(enclosure_raw / 0.4, 1.0)  # normalise to [0,1]
 
-        # Hydrophobic fraction and aromatic count
         lining_res_objs = [residues[ri] for ri in sorted(lining_res_set)]
         hyd_frac = (
-            sum(1 for r in lining_res_objs if is_hydrophobic(r.name)) / max(len(lining_res_objs), 1)
+            sum(1 for r in lining_res_objs if is_hydrophobic(r.name))
+            / max(len(lining_res_objs), 1)
         )
         arom_count = sum(1 for r in lining_res_objs if is_aromatic(r.name))
 
@@ -143,67 +149,43 @@ def detect_pockets(
             hydrophobic_fraction=hyd_frac,
             aromatic_count=arom_count,
             lining_residues=lining_residues,
-            conformer_idx=-1,  # set by caller
+            conformer_idx=-1,
         ))
 
     return pockets
 
 
+def _build_protein_mask(
+    coords: np.ndarray,
+    atoms: list[Atom],
+    lo: np.ndarray,
+    shape: np.ndarray,
+    grid_spacing: float,
+) -> np.ndarray:
+    mask = np.zeros(shape, dtype=bool)
+    for i, atom in enumerate(atoms):
+        r = get_vdw_radius(atom.element)
+        center_vox = ((coords[i] - lo) / grid_spacing).astype(int)
+        r_vox = int(np.ceil(r / grid_spacing)) + 1
+
+        ix0 = max(0, center_vox[0] - r_vox); ix1 = min(shape[0], center_vox[0] + r_vox + 1)
+        iy0 = max(0, center_vox[1] - r_vox); iy1 = min(shape[1], center_vox[1] + r_vox + 1)
+        iz0 = max(0, center_vox[2] - r_vox); iz1 = min(shape[2], center_vox[2] + r_vox + 1)
+
+        xi = np.arange(ix0, ix1); yi = np.arange(iy0, iy1); zi = np.arange(iz0, iz1)
+        xx, yy, zz = np.meshgrid(xi, yi, zi, indexing="ij")
+        dist2 = (
+            ((xx - center_vox[0]) * grid_spacing) ** 2
+            + ((yy - center_vox[1]) * grid_spacing) ** 2
+            + ((zz - center_vox[2]) * grid_spacing) ** 2
+        )
+        mask[ix0:ix1, iy0:iy1, iz0:iz1] |= dist2 <= r ** 2
+    return mask
+
+
 def _build_atom_residue_map(atoms: list[Atom], residues: list[Residue]) -> dict[int, int]:
-    """Map atom serial → residue index."""
     m: dict[int, int] = {}
     for ri, res in enumerate(residues):
         for ai in res.atom_indices:
             m[ai] = ri
     return m
-
-
-def _flood_fill_solvent(grid: np.ndarray) -> None:
-    """BFS from all boundary voxels to mark bulk solvent (value 2)."""
-    shape = grid.shape
-    q: deque[tuple[int, int, int]] = deque()
-
-    # Seed from all boundary faces
-    for i in range(shape[0]):
-        for j in range(shape[1]):
-            for k in [0, shape[2] - 1]:
-                if grid[i, j, k] == 0:
-                    grid[i, j, k] = 2
-                    q.append((i, j, k))
-        for k in range(shape[2]):
-            for j_edge in [0, shape[1] - 1]:
-                if grid[i, j_edge, k] == 0:
-                    grid[i, j_edge, k] = 2
-                    q.append((i, j_edge, k))
-    for j in range(shape[1]):
-        for k in range(shape[2]):
-            for i_edge in [0, shape[0] - 1]:
-                if grid[i_edge, j, k] == 0:
-                    grid[i_edge, j, k] = 2
-                    q.append((i_edge, j, k))
-
-    neighbors = [
-        (1, 0, 0), (-1, 0, 0),
-        (0, 1, 0), (0, -1, 0),
-        (0, 0, 1), (0, 0, -1),
-    ]
-    while q:
-        x, y, z = q.popleft()
-        for dx, dy, dz in neighbors:
-            nx, ny, nz = x + dx, y + dy, z + dz
-            if 0 <= nx < shape[0] and 0 <= ny < shape[1] and 0 <= nz < shape[2]:
-                if grid[nx, ny, nz] == 0:
-                    grid[nx, ny, nz] = 2
-                    q.append((nx, ny, nz))
-
-
-def _compute_enclosure(region: np.ndarray, grid: np.ndarray) -> float:
-    """Fraction of pocket boundary voxels that are adjacent to protein (vs. solvent)."""
-    # Dilate pocket region by 1 voxel and intersect with protein
-    dilated = ndimage.binary_dilation(region)
-    shell = dilated & ~region
-    if not shell.any():
-        return 0.0
-    protein_adjacent = (grid[shell] == 1).sum()
-    total_shell = shell.sum()
-    return float(protein_adjacent) / float(total_shell)
