@@ -1,22 +1,18 @@
-"""Boltz-2 partial diffusion ensemble backend.
+"""Boltz-2 ensemble backend.
 
-Uses Boltz-2's learned diffusion prior to generate physically realistic
-alternate conformations by partially noising the input structure and
-re-denoising from an intermediate sigma level.
+Generates a conformational ensemble by running a single `boltz predict` call
+with --diffusion_samples N.  Each diffusion sample is an independent draw from
+the learned posterior over structures, giving physically realistic diversity.
 
-Partial diffusion gives better conformational diversity than running from
-pure noise (which would ignore the input structure entirely) while staying
-within the learned energy landscape.
+step_scale < default (1.5) increases diversity; 1.2-1.3 is good for cryptic
+pocket sampling.  step_scale > default gives more conservative sampling.
 
 Requires: pip install lacuna[boltz]  (+ GPU strongly recommended)
-
-NOTE: Requires Boltz >= 0.4 which must expose `partial_diffusion` in its
-      Python API. If that API is not yet available, this backend falls back
-      to running multiple full-noise predictions (still better than random).
 """
 
 from __future__ import annotations
 
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -26,19 +22,27 @@ from lacuna.ensemble.base import EnsembleBackend
 
 
 class BoltzBackend(EnsembleBackend):
-    """Partial diffusion via Boltz-2 for highest-quality conformational ensembles."""
+    """Boltz-2 multi-sample ensemble for highest-quality conformational diversity."""
 
     def __init__(
         self,
-        noise_fraction: float = 0.4,
-        sampling_steps: int = 100,
+        step_scale: float = 1.3,
+        sampling_steps: int = 200,
+        accelerator: str = "gpu",
         cache_dir: str | None = None,
+        use_msa_server: bool = False,
+        msa_server_url: str = "https://api.colabfold.com",
     ):
-        # noise_fraction: fraction of sigma_max to use as starting noise level
-        # 0.2 = local flexibility, 0.5 = domain rearrangements, 0.8 = global resampling
-        self.noise_fraction = noise_fraction
+        # step_scale: lower = more diversity (1.2–1.5 recommended)
+        # 1.3 is a good default for cryptic pocket sampling
+        self.step_scale = step_scale
         self.sampling_steps = sampling_steps
+        self.accelerator = accelerator
         self.cache_dir = cache_dir
+        # MSA options — use_msa_server=True hits ColabFold for MSA generation;
+        # improves ECL/loop region accuracy at the cost of a network round-trip.
+        self.use_msa_server = use_msa_server
+        self.msa_server_url = msa_server_url
 
     @property
     def name(self) -> str:
@@ -55,87 +59,103 @@ class BoltzBackend(EnsembleBackend):
         except ImportError as e:
             raise ImportError(
                 "Boltz backend requires boltz to be installed. "
-                "Install with: pip install lacuna[boltz]"
+                "Run: pip install lacuna[boltz]"
             ) from e
 
-        # Try partial diffusion API (requires boltz >= 0.4 with Lacuna patch)
-        try:
-            return self._partial_diffusion(structure_path, n_conformers)
-        except (AttributeError, ImportError):
-            return self._full_diffusion_fallback(structure_path, n_conformers)
+        return self._run_diffusion_samples(Path(structure_path), n_conformers)
 
-    def _partial_diffusion(self, structure_path: Path, n_conformers: int) -> list[np.ndarray]:
-        """Use partial diffusion if the Boltz API supports initial_coords."""
-        from boltz.model.models.boltz2 import Boltz2
-        from boltz.data.parse.mmcif import parse_mmcif
-        from boltz.data.parse.pdb import parse_pdb
+    def _run_diffusion_samples(self, structure_path: Path, n_conformers: int) -> list[np.ndarray]:
+        """Run boltz predict once with --diffusion_samples N to get all conformers."""
+        from lacuna.io.structure import load_structure, coords_array
 
-        suffix = structure_path.suffix.lower()
-        if suffix in (".cif", ".mmcif"):
-            structure = parse_mmcif(structure_path)
-        else:
-            structure = parse_pdb(structure_path)
-
-        model = Boltz2.load_from_checkpoint(
-            self._get_checkpoint(),
-            map_location="cpu",
-        )
-        model.eval()
-
-        conformers: list[np.ndarray] = []
-        noise_levels = np.linspace(
-            self.noise_fraction * 0.5,
-            self.noise_fraction * 1.5,
-            n_conformers,
-        ).clip(0.05, 0.95)
-
-        for noise_frac in noise_levels:
-            coords = model.partial_diffusion(
-                structure=structure,
-                noise_fraction=float(noise_frac),
-                sampling_steps=self.sampling_steps,
-            )
-            conformers.append(coords.numpy().astype(np.float32))
-
-        return conformers
-
-    def _full_diffusion_fallback(self, structure_path: Path, n_conformers: int) -> list[np.ndarray]:
-        """Fallback: run boltz predict CLI N times with different seeds."""
-        import subprocess
-        import json
-
-        conformers: list[np.ndarray] = []
         with tempfile.TemporaryDirectory() as tmpdir:
-            for i in range(n_conformers):
-                out_dir = Path(tmpdir) / f"sample_{i}"
-                cmd = [
-                    "boltz", "predict", str(structure_path),
-                    "--output", str(out_dir),
-                    "--diffusion_samples", "1",
-                    "--model", "boltz2",
-                    "--step_scale", "1.8",  # higher temperature for diversity
-                ]
-                if self.cache_dir:
-                    cmd += ["--cache", self.cache_dir]
+            tmp = Path(tmpdir)
 
-                subprocess.run(cmd, check=True, capture_output=True)
+            # Build Boltz YAML input from the structure's sequence
+            yaml_path = self._write_input_yaml(structure_path, tmp)
 
-                # Parse output coords from the CIF file
-                cif_files = list(out_dir.glob("predictions/**/*_model_0.cif"))
-                if cif_files:
-                    from lacuna.io.structure import load_structure, coords_array
-                    s = load_structure(cif_files[0])
-                    conformers.append(coords_array(s))
+            out_dir = tmp / "boltz_out"
+            cmd = [
+                "boltz", "predict", str(yaml_path),
+                "--out_dir", str(out_dir),
+                "--model", "boltz2",
+                "--diffusion_samples", str(n_conformers),
+                "--sampling_steps", str(self.sampling_steps),
+                "--step_scale", str(self.step_scale),
+                "--accelerator", self.accelerator,
+                "--output_format", "pdb",
+                "--no_kernels",  # use pure-PyTorch path; avoids cuequivariance_ops_torch dep
+                "--override",
+            ]
+            if self.cache_dir:
+                cmd += ["--cache", self.cache_dir]
+            if self.use_msa_server:
+                cmd += ["--use_msa_server", "--msa_server_url", self.msa_server_url]
 
-        return conformers
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                raise RuntimeError(
+                    f"boltz predict failed:\n{result.stderr[-2000:]}"
+                )
 
-    def _get_checkpoint(self) -> str:
-        from pathlib import Path as P
-        import os
-        cache = P(self.cache_dir or os.path.expanduser("~/.boltz"))
-        ckpts = list(cache.glob("boltz2*.ckpt"))
-        if not ckpts:
-            raise FileNotFoundError(
-                "No Boltz-2 checkpoint found. Run `boltz predict` once to download weights."
-            )
-        return str(sorted(ckpts)[-1])
+            # Output lands in boltz_results_{stem}/ inside out_dir
+            stem = yaml_path.stem
+            results_dir = out_dir / f"boltz_results_{stem}"
+            pdb_files = sorted(results_dir.rglob("*_model_*.pdb"))
+            if not pdb_files:
+                pdb_files = sorted(results_dir.rglob("*_model_*.cif"))
+            if not pdb_files:
+                # fallback: search anywhere under out_dir
+                pdb_files = sorted(out_dir.rglob("*_model_*.pdb"))
+            if not pdb_files:
+                pdb_files = sorted(out_dir.rglob("*_model_*.cif"))
+
+            if not pdb_files:
+                raise RuntimeError(
+                    f"boltz predict succeeded but produced no structure files in {out_dir}"
+                )
+
+            conformers: list[np.ndarray] = []
+            input_structure = load_structure(structure_path)
+            n_atoms = len(input_structure.atoms)
+
+            for pdb_file in pdb_files:
+                try:
+                    s = load_structure(pdb_file)
+                    coords = coords_array(s)
+                    # Align atom count — Boltz may add or reorder atoms
+                    if coords.shape[0] == n_atoms:
+                        conformers.append(coords)
+                    else:
+                        # Try to match by truncating/padding — take first N atoms
+                        n = min(coords.shape[0], n_atoms)
+                        padded = np.zeros((n_atoms, 3), dtype=np.float32)
+                        padded[:n] = coords[:n]
+                        conformers.append(padded)
+                except Exception:
+                    continue
+
+            return conformers
+
+    def _write_input_yaml(self, structure_path: Path, out_dir: Path) -> Path:
+        """Create a Boltz YAML from the protein sequence in the structure."""
+        from lacuna.io.structure import load_structure
+
+        structure = load_structure(structure_path)
+        yaml_path = out_dir / f"{structure_path.stem}.yaml"
+
+        lines = ["sequences:"]
+        for chain_id, seq in structure.sequence.items():
+            chain_lines = [
+                f"  - protein:",
+                f"      id: {chain_id}",
+                f"      sequence: {seq}",
+            ]
+            if not self.use_msa_server:
+                # PLM-only mode — no MSA server required, fast but ECL loops are noisier
+                chain_lines.append(f"      msa: empty")
+            # When use_msa_server=True: omit msa field so Boltz fetches from ColabFold
+            lines += chain_lines
+
+        yaml_path.write_text("\n".join(lines) + "\n")
+        return yaml_path

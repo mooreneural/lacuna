@@ -123,7 +123,7 @@ def detect_pockets(
         pocket_region = grown & interaction_zone
 
         pocket_radius = (volume * 3 / (4 * 3.14159)) ** (1 / 3)
-        search_dist = pocket_radius + 6.0
+        search_dist = pocket_radius + 9.0  # +9 Å captures full TM-helix span
         centroid_arr = np.array(centroid)
         dists_to_center = np.linalg.norm(coords - centroid_arr, axis=1)
         nearby = np.where(dists_to_center < search_dist)[0]
