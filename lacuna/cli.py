@@ -1,0 +1,287 @@
+"""Lacuna CLI — cryptic binding pocket discovery."""
+
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+import click
+from rich.console import Console
+from rich.table import Table
+
+console = Console()
+
+
+def _resolve_backend(name: str):
+    if name == "random":
+        from lacuna.ensemble.random_backend import RandomBackend
+        return RandomBackend()
+    elif name == "openmm":
+        from lacuna.ensemble.openmm_backend import OpenMMBackend
+        return OpenMMBackend()
+    elif name == "boltz":
+        from lacuna.ensemble.boltz_backend import BoltzBackend
+        return BoltzBackend()
+    else:
+        raise click.BadParameter(f"Unknown backend '{name}'. Choose: random, openmm, boltz")
+
+
+def _auto_backend():
+    """Pick the best available backend at runtime."""
+    for name in ("boltz", "openmm", "random"):
+        try:
+            return _resolve_backend(name)
+        except ImportError:
+            continue
+    raise RuntimeError("No ensemble backend available.")
+
+
+@click.group()
+@click.version_option(package_name="lacuna")
+def main():
+    """Lacuna — cryptic binding pocket discovery via conformational ensemble analysis.
+
+    \b
+    Typical workflow:
+      lacuna discover protein.pdb            # run with defaults
+      lacuna discover protein.pdb --backend boltz --conformers 30
+      lacuna discover protein.pdb --emit-boltz-constraints --emit-vina-boxes
+    """
+
+
+@main.command()
+@click.argument("input_path", type=click.Path(exists=True, path_type=Path))
+@click.option(
+    "--backend", "-b",
+    type=click.Choice(["auto", "random", "openmm", "boltz"]),
+    default="auto",
+    show_default=True,
+    help="Ensemble generation backend.",
+)
+@click.option("--conformers", "-n", default=20, show_default=True,
+              help="Number of conformers to generate.")
+@click.option("--output", "-o", type=click.Path(path_type=Path), default=None,
+              help="Output directory (default: <input_stem>_lacuna/).")
+@click.option("--min-druggability", default=0.0, show_default=True,
+              help="Filter: minimum druggability score [0–1].")
+@click.option("--min-persistence", default=0.0, show_default=True,
+              help="Filter: minimum persistence (fraction of conformers).")
+@click.option("--emit-boltz-constraints", is_flag=True, default=False,
+              help="Write Boltz YAML constraint files for each pocket.")
+@click.option("--emit-vina-boxes", is_flag=True, default=False,
+              help="Write AutoDock Vina box config files for each pocket.")
+@click.option("--emit-pocket-pdbs", is_flag=True, default=False,
+              help="Write pocket pseudoatom PDB files for visualization.")
+@click.option("--top", default=10, show_default=True,
+              help="Maximum number of pockets to report.")
+@click.option("--quiet", is_flag=True, default=False, help="Suppress progress output.")
+def discover(
+    input_path: Path,
+    backend: str,
+    conformers: int,
+    output: Path | None,
+    min_druggability: float,
+    min_persistence: float,
+    emit_boltz_constraints: bool,
+    emit_vina_boxes: bool,
+    emit_pocket_pdbs: bool,
+    top: int,
+    quiet: bool,
+):
+    """Discover cryptic binding pockets in a protein structure.
+
+    INPUT_PATH: Path to a PDB or mmCIF file (from AlphaFold, Boltz, Chai, or PDB).
+    """
+    from lacuna.io.structure import load_structure, coords_array
+    from lacuna.pockets.detector import detect_pockets
+    from lacuna.pockets.clusterer import cluster_pockets
+    from lacuna.io.writers import (
+        write_report, write_pocket_pdb, write_boltz_constraint, write_vina_box
+    )
+
+    output_dir = output or Path(f"{input_path.stem}_lacuna")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    if not quiet:
+        console.print(f"\n[bold cyan]Lacuna[/bold cyan] — cryptic pocket discovery")
+        console.print(f"  Input:    [green]{input_path}[/green]")
+        console.print(f"  Backend:  {backend}")
+        console.print(f"  Output:   {output_dir}\n")
+
+    # Load structure
+    if not quiet:
+        console.print("[dim]Loading structure...[/dim]")
+    structure = load_structure(input_path)
+    if not quiet:
+        n_res = len(structure.residues)
+        n_chains = len(structure.sequence)
+        console.print(f"  [dim]{n_res} residues, {n_chains} chain(s)[/dim]")
+
+    # Resolve backend
+    if backend == "auto":
+        be = _auto_backend()
+        backend = be.name
+    else:
+        be = _resolve_backend(backend)
+
+    if not quiet:
+        console.print(f"\n[dim]Generating {conformers} conformers with '{backend}' backend...[/dim]")
+
+    coord_sets = be.generate(input_path, conformers)
+
+    if not quiet:
+        console.print(f"  [dim]Generated {len(coord_sets)} conformers.[/dim]")
+        console.print("\n[dim]Detecting pockets across ensemble...[/dim]")
+
+    # Detect pockets in each conformer
+    pocket_lists = []
+    base_coords = coords_array(structure)
+
+    # Always include pockets from the input structure itself (conformer 0)
+    all_coord_sets = [base_coords] + list(coord_sets)
+
+    for ci, coords in enumerate(all_coord_sets):
+        pockets = detect_pockets(coords, structure)
+        for p in pockets:
+            p.conformer_idx = ci
+        pocket_lists.append(pockets)
+        if not quiet and (ci + 1) % 5 == 0:
+            console.print(f"  [dim]{ci + 1}/{len(all_coord_sets)} conformers processed[/dim]")
+
+    total_pockets = sum(len(pl) for pl in pocket_lists)
+    if not quiet:
+        console.print(f"  [dim]Found {total_pockets} raw pockets across ensemble.[/dim]")
+        console.print("\n[dim]Clustering and ranking pockets...[/dim]")
+
+    # Cluster across ensemble
+    clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coord_sets))
+
+    # Apply filters
+    clusters = [
+        c for c in clusters
+        if c.druggability >= min_druggability and c.persistence >= min_persistence
+    ][:top]
+
+    if not quiet:
+        console.print(f"  [dim]{len(clusters)} pocket clusters after filtering.[/dim]\n")
+
+    # Write outputs
+    report_path = write_report(clusters, structure, len(all_coord_sets), output_dir)
+
+    written: list[str] = [f"[green]{report_path.name}[/green]"]
+
+    for i, cluster in enumerate(clusters):
+        if emit_pocket_pdbs:
+            p = write_pocket_pdb(cluster, output_dir, i)
+            written.append(p.name)
+        if emit_boltz_constraints:
+            p = write_boltz_constraint(cluster, structure, output_dir, i)
+            written.append(p.name)
+        if emit_vina_boxes:
+            p = write_vina_box(cluster, output_dir, i)
+            written.append(p.name)
+
+    # Print results table
+    if not quiet:
+        _print_table(clusters)
+        console.print(f"\n[bold]Output written to:[/bold] {output_dir}/")
+        for name in written[:6]:
+            console.print(f"  {name}")
+        if len(written) > 6:
+            console.print(f"  [dim]... and {len(written) - 6} more[/dim]")
+        console.print()
+
+    return clusters
+
+
+@main.command("dock-prep")
+@click.argument("report_path", type=click.Path(exists=True, path_type=Path))
+@click.argument("protein_path", type=click.Path(exists=True, path_type=Path))
+@click.option("--format", "fmt",
+              type=click.Choice(["boltz", "vina", "pdb", "all"]),
+              default="all", show_default=True,
+              help="Docking tool output format.")
+@click.option("--output", "-o", type=click.Path(path_type=Path), default=None)
+@click.option("--top", default=5, show_default=True,
+              help="Prepare files for top N pockets.")
+def dock_prep(
+    report_path: Path,
+    protein_path: Path,
+    fmt: str,
+    output: Path | None,
+    top: int,
+):
+    """Generate docking input files from a pocket report.
+
+    REPORT_PATH: pocket_report.json from a previous 'lacuna discover' run.
+    PROTEIN_PATH: The protein structure file (PDB or mmCIF).
+    """
+    from lacuna.io.structure import load_structure
+    from lacuna.io.writers import write_boltz_constraint, write_vina_box, write_pocket_pdb
+    from lacuna.models import PocketCluster
+
+    report = json.loads(report_path.read_text())
+    structure = load_structure(protein_path)
+
+    output_dir = output or report_path.parent / "docking_inputs"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    pockets_data = report["pockets"][:top]
+
+    for i, pd in enumerate(pockets_data):
+        cluster = PocketCluster(
+            rank=pd["rank"],
+            centroid=tuple(pd["centroid"]),
+            volume_a3=pd["volume_A3"],
+            druggability=pd["druggability"],
+            persistence=pd["persistence"],
+            cryptic=pd["cryptic"],
+            lining_residues=pd["lining_residues"],
+            appears_in_conformers=pd["appears_in_conformers"],
+        )
+
+        if fmt in ("boltz", "all"):
+            write_boltz_constraint(cluster, structure, output_dir, i)
+        if fmt in ("vina", "all"):
+            write_vina_box(cluster, output_dir, i)
+        if fmt in ("pdb", "all"):
+            write_pocket_pdb(cluster, output_dir, i)
+
+    console.print(f"Docking inputs written to [green]{output_dir}[/green]")
+
+
+def _print_table(clusters: list) -> None:
+    if not clusters:
+        console.print("[yellow]No pockets found.[/yellow]")
+        return
+
+    table = Table(title="Discovered Pockets", show_lines=True)
+    table.add_column("Rank", style="bold", justify="right")
+    table.add_column("Druggability", justify="right")
+    table.add_column("Persistence", justify="right")
+    table.add_column("Volume (Å³)", justify="right")
+    table.add_column("Cryptic", justify="center")
+    table.add_column("Key Residues")
+
+    for c in clusters:
+        cryptic_str = "[bold yellow]YES[/bold yellow]" if c.cryptic else "no"
+        drug_color = "green" if c.druggability > 0.6 else ("yellow" if c.druggability > 0.3 else "red")
+        key_res = ", ".join(c.lining_residues[:5])
+        if len(c.lining_residues) > 5:
+            key_res += f" (+{len(c.lining_residues) - 5})"
+
+        table.add_row(
+            str(c.rank),
+            f"[{drug_color}]{c.druggability:.3f}[/{drug_color}]",
+            f"{c.persistence:.0%}",
+            f"{c.volume_a3:.0f}",
+            cryptic_str,
+            key_res,
+        )
+
+    console.print(table)
+
+
+if __name__ == "__main__":
+    main()
