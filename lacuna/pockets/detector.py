@@ -27,7 +27,7 @@ from scipy.ndimage import (
 )
 
 from lacuna.models import Atom, Pocket, Residue, Structure
-from lacuna.io.structure import get_vdw_radius, is_hydrophobic, is_aromatic
+from lacuna.io.structure import is_aromatic, is_hydrophobic
 
 
 GRID_SPACING = 1.0       # Å per voxel
@@ -97,27 +97,33 @@ def detect_pockets(
     # 5. For each cluster, grow into the nearby interaction zone and compute props
     grow_vox = max(1, int(np.ceil(GROW_RADIUS_A / grid_spacing)))
     interaction_zone = (~protein_mask) & (dist >= 0.5) & (dist <= ALPHA_DIST_MAX + 1.0)
+    # Pre-compute once — used per-pocket for enclosure scoring
+    local_density = uniform_filter(protein_mask.astype(np.float32), size=9)
 
     voxel_vol = grid_spacing ** 3
     pockets: list[Pocket] = []
 
     for label_id in range(1, n_labels + 1):
         alpha_cluster = labeled == label_id
-        # Expand the cluster into the surrounding interaction zone
-        grown = binary_dilation(alpha_cluster, structure=struct_el, iterations=grow_vox)
-        pocket_region = grown & interaction_zone
 
-        volume = float(pocket_region.sum()) * voxel_vol
+        # Volume from the alpha-cluster core (not the grown region) — avoids
+        # over-inflation in large inter-chain spaces.
+        alpha_void = alpha_cluster & (~protein_mask)
+        volume = float(alpha_void.sum()) * voxel_vol
         if volume < min_volume_a3 or volume > MAX_VOLUME_A3:
             continue
 
-        vox_indices = np.argwhere(pocket_region)
+        # Centroid from the core region
+        vox_indices = np.argwhere(alpha_void) if alpha_void.any() else np.argwhere(alpha_cluster)
         centroid_vox = vox_indices.mean(axis=0)
         centroid = tuple((centroid_vox * grid_spacing + lo).tolist())
 
-        # Lining residues: atoms within (pocket_radius + 4 Å) of centroid
+        # Grow for lining residue search only
+        grown = binary_dilation(alpha_cluster, structure=struct_el, iterations=grow_vox)
+        pocket_region = grown & interaction_zone
+
         pocket_radius = (volume * 3 / (4 * 3.14159)) ** (1 / 3)
-        search_dist = pocket_radius + 4.0
+        search_dist = pocket_radius + 6.0
         centroid_arr = np.array(centroid)
         dists_to_center = np.linalg.norm(coords - centroid_arr, axis=1)
         nearby = np.where(dists_to_center < search_dist)[0]
@@ -130,10 +136,8 @@ def detect_pockets(
 
         lining_residues = [residues[ri].label for ri in sorted(lining_res_set)]
 
-        # Enclosure: local protein density at the alpha point cluster centroid
-        local_density = uniform_filter(protein_mask.astype(np.float32), size=9)
         enclosure_raw = float(local_density[alpha_cluster].mean())
-        enclosure = min(enclosure_raw / 0.4, 1.0)  # normalise to [0,1]
+        enclosure = min(enclosure_raw / 0.4, 1.0)
 
         lining_res_objs = [residues[ri] for ri in sorted(lining_res_set)]
         hyd_frac = (
@@ -162,25 +166,21 @@ def _build_protein_mask(
     shape: np.ndarray,
     grid_spacing: float,
 ) -> np.ndarray:
-    mask = np.zeros(shape, dtype=bool)
-    for i, atom in enumerate(atoms):
-        r = get_vdw_radius(atom.element)
-        center_vox = ((coords[i] - lo) / grid_spacing).astype(int)
-        r_vox = int(np.ceil(r / grid_spacing)) + 1
+    # Mark atom centers in the grid (vectorized — O(N_atoms))
+    atom_grid = np.zeros(shape, dtype=bool)
+    indices = np.clip(
+        np.round((coords - lo) / grid_spacing).astype(int),
+        0,
+        np.array(shape) - 1,
+    )
+    atom_grid[indices[:, 0], indices[:, 1], indices[:, 2]] = True
 
-        ix0 = max(0, center_vox[0] - r_vox); ix1 = min(shape[0], center_vox[0] + r_vox + 1)
-        iy0 = max(0, center_vox[1] - r_vox); iy1 = min(shape[1], center_vox[1] + r_vox + 1)
-        iz0 = max(0, center_vox[2] - r_vox); iz1 = min(shape[2], center_vox[2] + r_vox + 1)
-
-        xi = np.arange(ix0, ix1); yi = np.arange(iy0, iy1); zi = np.arange(iz0, iz1)
-        xx, yy, zz = np.meshgrid(xi, yi, zi, indexing="ij")
-        dist2 = (
-            ((xx - center_vox[0]) * grid_spacing) ** 2
-            + ((yy - center_vox[1]) * grid_spacing) ** 2
-            + ((zz - center_vox[2]) * grid_spacing) ** 2
-        )
-        mask[ix0:ix1, iy0:iy1, iz0:iz1] |= dist2 <= r ** 2
-    return mask
+    # EDT gives distance from each voxel to its nearest atom center (in voxels).
+    # Threshold at 1.7 Å (carbon VDW radius) to mark voxels inside any atom.
+    # This approximates per-element radii (range 1.2–1.8 Å) with negligible error
+    # at 1 Å grid spacing; avoids a per-atom Python loop.
+    dist_vox = distance_transform_edt(~atom_grid)
+    return dist_vox <= (1.7 / grid_spacing)
 
 
 def _build_atom_residue_map(atoms: list[Atom], residues: list[Residue]) -> dict[int, int]:

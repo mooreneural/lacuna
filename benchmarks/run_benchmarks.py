@@ -97,9 +97,9 @@ def run_accuracy(pdb_dir: Path) -> list[dict]:
     from lacuna.pockets.clusterer import cluster_pockets
 
     results = []
-    backend = RandomBackend(seed=42)
 
     for pdb_id, spec in BENCHMARKS.items():
+        backend = RandomBackend(seed=42)  # fresh RNG per protein for reproducibility
         print(f"\n{'-'*60}")
         print(f"  {pdb_id}  {spec['name']}")
         print(f"{'-'*60}")
