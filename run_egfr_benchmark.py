@@ -34,13 +34,13 @@ print()
 known_sites = {
     "ATP/orthosteric site": {
         "residues": {745, 762, 769, 790, 797, 854, 855, 856},
-        "note": "Lys745, Glu762 (αC), Met769 (hinge), Thr790 (gatekeeper), Cys797, DFG motif — all approved EGFR drugs bind here"
+        "note": "Lys745, Glu762 (alphaC), Met769 (hinge), Thr790 (gatekeeper), Cys797, DFG motif -- all approved EGFR drugs bind here"
     },
     "Covalent C797 pocket": {
         "residues": {790, 792, 793, 797, 854, 855},
         "note": "Osimertinib/afatinib covalent site — T790M resistance mutant pocket"
     },
-    "αC-helix allosteric back pocket": {
+    "alphaC-helix allosteric back pocket": {
         "residues": {773, 776, 777, 779, 780, 793, 841},
         "note": "Cryptic in DFG-in active state. Opened in inactive/DFG-out conformations."
     },

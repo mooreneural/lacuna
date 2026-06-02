@@ -43,9 +43,9 @@ dev = [
 lacuna = "lacuna.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/lacuna-bio/lacuna"
-Repository = "https://github.com/lacuna-bio/lacuna"
-Issues = "https://github.com/lacuna-bio/lacuna/issues"
+Homepage = "https://github.com/mooreneural/lacuna"
+Repository = "https://github.com/mooreneural/lacuna"
+Issues = "https://github.com/mooreneural/lacuna/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["lacuna"]
