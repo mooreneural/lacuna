@@ -165,6 +165,49 @@ T4L L99A and K-Ras switch-II are the canonical validation cases for cryptic pock
 
 ---
 
+## Extended benchmark: 15-protein curated cryptic pocket set
+
+Apo/holo PDB pairs spanning three categories. For holo entries, binding-site residues are auto-extracted at 4.5 Å from the principal ligand. Success: ≥30% residue overlap in top-5 pockets, RandomBackend, 20 conformers.
+
+### Cryptic pockets (5 / 7 — 71%)
+
+| Protein | Apo | Holo / site | Overlap | Rank | Time |
+|---------|-----|-------------|---------|------|------|
+| T4L L99A hydrophobic cavity | 1L90 | literature | 100% | 1 | 0.9s |
+| K-Ras switch-II pocket | 4OBE | literature | 93% | 4 | 2.6s |
+| MDM2 p53-binding cleft | 1Z1M | 4HBM (nutlin-3) | 95% | 3 | 1.1s |
+| p38α MAPK DFG-out | 1P38 | 2ZB1 (BIRB 796) | 38% | 3 | 3.0s |
+| Glucokinase allosteric activator | 1V4S | 3IMX (B84) | 30% | 3 | 3.7s |
+| IL-2 cryptic site *(near-miss)* | 1M47 | 1M49 (CMM) | 21% | 2 | 0.7s |
+| Src myristate pocket *(near-miss)* | 2SRC | 3EL8 (PD5) | 28% | 2 | 4.1s |
+
+### Conformational pocket (1 / 1 — 100%)
+
+| Protein | Apo | Holo | Overlap | Rank | Time |
+|---------|-----|------|---------|------|------|
+| Adenylate kinase (open→closed) | 4AKE | 1AKE (AP5A) | 49% | 3 | 3.1s |
+
+### Orthosteric controls (3 / 4 — 75%)
+
+| Protein | Apo | Holo / site | Overlap | Rank | Time |
+|---------|-----|-------------|---------|------|------|
+| Hen lysozyme active site | 1HEL | literature | 100% | 2 | 0.6s |
+| HIV-1 protease active site | 1HPV | literature | 100% | 1 | 1.1s |
+| DHFR folate/MTX site | 7DFR | 4DFR (MTX) | 100% | 4 | 0.8s |
+| Trypsin S1 *(numbering mismatch)* | 1S0Q | 3PTB (BEN) | — | — | 1.1s |
+
+**Overall: 9 / 12 scored proteins (75%).** 3 entries skipped at default settings: HIV-1 RT (heterodimer, 3700+ residues) and thrombin (multichain complex, 940+ residues) exceed the 600-residue guard; cyclophilin A holo stores cyclosporin A as ATOM records rather than HETATM.
+
+The two cryptic near-misses (IL-2 at 21%, Src at 28%) sit just below the 30% threshold and are likely recoverable with the `boltz` or `openmm` backend, which samples larger conformational rearrangements.
+
+> **Reproduce:**
+> ```bash
+> python benchmarks/cryptic_benchmark.py          # full run (~5 min)
+> python benchmarks/cryptic_benchmark.py --quick  # 10 conformers (~2 min)
+> ```
+
+---
+
 ## Example: K-Ras switch-II
 
 ```bash
