@@ -261,14 +261,32 @@ Accepts PDB or mmCIF from any predictor or database:
 
 ## Citation
 
-If you use Lacuna in published research, the methodology builds on:
+If you use Lacuna in published research, please cite:
+
+> Moore, C.W. (2026). *Lacuna: Cryptic Binding Pocket Discovery via Conformational Ensemble Analysis.* https://github.com/mooreneural/lacuna
+
+**BibTeX:**
+```bibtex
+@software{moore2026lacuna,
+  author  = {Moore, Clayton W.},
+  title   = {Lacuna: Cryptic Binding Pocket Discovery
+             via Conformational Ensemble Analysis},
+  year    = {2026},
+  url     = {https://github.com/mooreneural/lacuna},
+  version = {0.1.0}
+}
+```
+
+**Methodology papers Lacuna builds on:**
 
 - Halgren (2009) *J. Chem. Inf. Model.* 49(2):377–389 — SiteMap druggability scoring
-- Le Guilloux et al. (2009) *BMC Bioinformatics* 10:168 — fpocket alpha-sphere approach  
+- Le Guilloux et al. (2009) *BMC Bioinformatics* 10:168 — fpocket alpha-sphere approach
 - Schmidtke & Barril (2010) *J. Med. Chem.* 53(15):5858–5867 — enclosure scoring
 
 ---
 
 ## License
 
-MIT
+Non-commercial. Free for academic research, education, and non-profit use.  
+Commercial use requires a written license — contact claytonwaynemoore@gmail.com.  
+See [LICENSE](LICENSE) for full terms.
