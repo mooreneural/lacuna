@@ -29,8 +29,13 @@ VDW_RADII: dict[str, float] = {
 }
 
 
-def load_structure(path: str | Path) -> Structure:
-    """Parse a PDB or mmCIF file and return a Structure object."""
+def load_structure(path: str | Path, chain: str | None = None) -> Structure:
+    """Parse a PDB or mmCIF file and return a Structure object.
+
+    Args:
+        path: Path to PDB or mmCIF file.
+        chain: If given, load only this chain ID (e.g. "A"). Default loads all chains.
+    """
     path = Path(path)
     suffix = path.suffix.lower()
 
@@ -48,12 +53,14 @@ def load_structure(path: str | Path) -> Structure:
 
     serial = 0
     for model in bio_struct.get_models():
-        for chain in model.get_chains():
-            for res in chain.get_residues():
+        for chain_obj in model.get_chains():
+            if chain is not None and chain_obj.get_id() != chain:
+                continue
+            for res in chain_obj.get_residues():
                 if res.get_id()[0] != " ":
                     continue  # skip HETATM / water
                 res_name = res.get_resname().strip()
-                chain_id = chain.get_id()
+                chain_id = chain_obj.get_id()
                 res_seq = res.get_id()[1]
 
                 res_idx = len(residues)
@@ -85,12 +92,14 @@ def load_structure(path: str | Path) -> Structure:
     ppb = PPBuilder()
     sequence: dict[str, str] = {}
     for model in bio_struct.get_models():
-        for chain in model.get_chains():
+        for chain_obj in model.get_chains():
+            if chain is not None and chain_obj.get_id() != chain:
+                continue
             seq = ""
-            for pp in ppb.build_peptides(chain):
+            for pp in ppb.build_peptides(chain_obj):
                 seq += str(pp.get_sequence())
             if seq:
-                sequence[chain.get_id()] = seq
+                sequence[chain_obj.get_id()] = seq
         break
 
     return Structure(path=str(path), atoms=atoms, residues=residues, sequence=sequence)

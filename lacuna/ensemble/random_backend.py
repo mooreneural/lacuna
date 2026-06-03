@@ -38,9 +38,10 @@ class RandomBackend(EnsembleBackend):
         self,
         structure_path: Path,
         n_conformers: int,
+        chain: str | None = None,
         **kwargs,
     ) -> list[np.ndarray]:
-        structure = load_structure(structure_path)
+        structure = load_structure(structure_path, chain=chain)
         base_coords = coords_array(structure)  # (N, 3)
 
         if self.noise_levels is not None:
