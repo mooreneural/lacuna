@@ -9,6 +9,7 @@ tags:
   - bioinformatics
 authors:
   - name: Clayton W. Moore
+    orcid: 0009-0001-1033-6320
     affiliation: 1
 affiliations:
   - name: Independent Researcher
