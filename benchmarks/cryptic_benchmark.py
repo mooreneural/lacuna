@@ -117,7 +117,7 @@ DATASET = [
         "apo_pdb": "1HMV", "apo_chain": "A",
         "holo_pdb": "1RTH", "holo_chain": "A",
         "extra_exclude": frozenset({"AZT", "TMP", "MG"}),
-        "max_residues": 500,  # heterodimer >900 res; skip to keep runtime sane
+        "max_residues": 600,  # chain A = 536 res; was 500, raised to allow it to run
         "citation": "Kohlstaedt 1992; Ren 1995",
     },
     {
@@ -300,6 +300,76 @@ DATASET = [
         "holo_pdb": "4QTA", "holo_chain": "A",  # 38Z = allosteric inhibitor (44 atoms)
         "extra_exclude": frozenset(),
         "citation": "Hancock 2015",
+    },
+
+    # ── ADDITIONAL CRYPTIC POCKETS (round 3) — targets N ≥ 20 ────────────────
+
+    {
+        "id": "BCL2_BH3",
+        "name": "BCL-2 BH3-binding groove (venetoclax/ABT-199)",
+        "category": "cryptic",
+        # 1G5M = apo BCL-2 isoform 1 — no small-molecule HETATM, BH3 groove
+        # partially occluded by the C-terminal flexible loop (cf. BCL-XL in 1LXL).
+        # 6O0K = BCL-2 co-crystallised with venetoclax (LBM, 55 atoms).
+        "apo_pdb": "1G5M", "apo_chain": "A",
+        "holo_pdb": "6O0K", "holo_chain": "A",
+        "extra_exclude": frozenset(),
+        "citation": "Tse 2008 Cancer Cell; Souers 2013 Nat Med (venetoclax FDA-approved 2016)",
+    },
+    {
+        "id": "IDH1_R132H",
+        "name": "IDH1 R132H allosteric dimer-interface (ivosidenib target)",
+        "category": "cryptic",
+        # 3MAP = IDH1 R132H homodimer with NADP+/isocitrate substrates but NO
+        # allosteric inhibitor — dimer-interface pocket is absent/closed.
+        # 4UMX = IDH1 R132H + CPD-1 allosteric inhibitor (VVS, 27 atoms) at the
+        # dimer interface.  NAP (NADP+, 96 atoms) must be excluded so VVS wins
+        # the principal-ligand selection.
+        "apo_pdb": "3MAP", "apo_chain": "A",
+        "holo_pdb": "4UMX", "holo_chain": "A",
+        "extra_exclude": frozenset({"NAP", "ICT"}),
+        "citation": "Ward 2010 Nature; Rohle 2013 Science (ivosidenib FDA-approved 2018)",
+    },
+    {
+        "id": "PKM2_activator",
+        "name": "PKM2 allosteric activator pocket (TEPP-46 / subunit interface)",
+        "category": "cryptic",
+        # 1ZJH = human PKM2 apo (2005, Dombrauckas) — no HETATM at all; activator
+        # pocket at the dimer-dimer interface is absent in this T-state structure.
+        # 3U2Z = activator-bound PKM2 R-state (Anastasiou 2012).  Exclude FBP and
+        # oxalate so the synthetic activator compound (residue "551", 100 atoms)
+        # becomes the principal ligand for binding-site extraction.
+        "apo_pdb": "1ZJH", "apo_chain": "A",
+        "holo_pdb": "3U2Z", "holo_chain": "A",
+        "extra_exclude": frozenset({"FBP", "OXL", "OXA", "AMP", "ADP", "ATP"}),
+        "citation": "Anastasiou 2012 Cell (TEPP-46 activator class)",
+    },
+    {
+        "id": "PPARG_allosteric",
+        "name": "PPARγ LBD allosteric helix-12 site (metaglidasen/MBX-102)",
+        "category": "cryptic",
+        # 2PRG = PPARγ LBD with rosiglitazone at the canonical TZD agonist site;
+        # the surface AF-2/helix-12 allosteric pocket is unoccupied.
+        # 4PVU = PPARγ LBD + MBX-102 (MGZ, 22 atoms) at the allosteric site.
+        # Exclude rosiglitazone (RSG) so MGZ wins principal-ligand selection.
+        "apo_pdb": "2PRG", "apo_chain": "A",
+        "holo_pdb": "4PVU", "holo_chain": "A",
+        "extra_exclude": frozenset({"RSG", "RLX"}),
+        "citation": "Nettles 2008 PNAS; Bruning 2007 Structure (metaglidasen Phase 3)",
+    },
+    {
+        "id": "MMP13_allosteric",
+        "name": "MMP-13 non-zinc allosteric S1′ tunnel",
+        "category": "cryptic",
+        # 2OZR = MMP-13 catalytic domain with a zinc-chelating hydroxamate inhibitor
+        # (GG1, 256 atoms) at the orthosteric zinc site; the allosteric S1′ tunnel
+        # is empty and unformed in this structure.
+        # 3I7G = MMP-13 with a non-zinc-chelating allosteric inhibitor that opens
+        # the S1′ tunnel (Engel 2005 paradigm, confirmed by Becker 2010).
+        "apo_pdb": "2OZR", "apo_chain": "A",
+        "holo_pdb": "3I7G", "holo_chain": "A",
+        "extra_exclude": frozenset({"GG1", "HAE", "ZN", "CA"}),
+        "citation": "Engel 2005 J Med Chem; Becker 2010 Nat Chem Biol",
     },
 ]
 

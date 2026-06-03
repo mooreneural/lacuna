@@ -11,7 +11,7 @@
     "overlap": 1.0,
     "rank": 1,
     "n_clusters": 39,
-    "elapsed_s": 0.95,
+    "elapsed_s": 0.93,
     "n_known_residues": 8
   },
   {
@@ -26,7 +26,7 @@
     "overlap": 0.929,
     "rank": 4,
     "n_clusters": 28,
-    "elapsed_s": 0.97,
+    "elapsed_s": 0.92,
     "n_known_residues": 14
   },
   {
@@ -41,7 +41,7 @@
     "overlap": 0.214,
     "rank": 2,
     "n_clusters": 37,
-    "elapsed_s": 0.68,
+    "elapsed_s": 0.67,
     "n_known_residues": 14
   },
   {
@@ -56,7 +56,7 @@
     "overlap": 0.304,
     "rank": 3,
     "n_clusters": 110,
-    "elapsed_s": 3.86,
+    "elapsed_s": 3.65,
     "n_known_residues": 23
   },
   {
@@ -71,7 +71,7 @@
     "overlap": 0.381,
     "rank": 3,
     "n_clusters": 89,
-    "elapsed_s": 2.96,
+    "elapsed_s": 2.99,
     "n_known_residues": 21
   },
   {
@@ -79,14 +79,15 @@
     "name": "HIV-1 RT NNRTI binding pocket (nevirapine)",
     "category": "cryptic",
     "apo_pdb": "1HMV",
-    "apo_chain": "A",
-    "holo_pdb": "1RTH",
-    "holo_chain": "A",
-    "extra_exclude": "frozenset({'TMP', 'MG', 'AZT'})",
-    "max_residues": 500,
-    "citation": "Kohlstaedt 1992; Ren 1995",
-    "status": "skip_too_large",
-    "n_residues": 536
+    "status": "PASS",
+    "pass_by": "ov",
+    "centroid_dist_A": 14.18,
+    "centroid_rank": 3,
+    "overlap": 0.375,
+    "rank": 3,
+    "n_clusters": 139,
+    "elapsed_s": 8.26,
+    "n_known_residues": 16
   },
   {
     "id": "SRC_myristate",
@@ -100,7 +101,7 @@
     "overlap": 0.28,
     "rank": 2,
     "n_clusters": 104,
-    "elapsed_s": 4.04,
+    "elapsed_s": 4.02,
     "n_known_residues": 25
   },
   {
@@ -115,7 +116,7 @@
     "overlap": 0.947,
     "rank": 3,
     "n_clusters": 21,
-    "elapsed_s": 1.09,
+    "elapsed_s": 1.11,
     "n_known_residues": 19
   },
   {
@@ -130,7 +131,7 @@
     "overlap": 0.235,
     "rank": 2,
     "n_clusters": 100,
-    "elapsed_s": 5.75,
+    "elapsed_s": 5.74,
     "n_known_residues": 17
   },
   {
@@ -145,7 +146,7 @@
     "overlap": 0.438,
     "rank": 3,
     "n_clusters": 72,
-    "elapsed_s": 1.72,
+    "elapsed_s": 1.73,
     "n_known_residues": 16
   },
   {
@@ -160,7 +161,7 @@
     "overlap": 0.412,
     "rank": 1,
     "n_clusters": 72,
-    "elapsed_s": 2.07,
+    "elapsed_s": 2.08,
     "n_known_residues": 17
   },
   {
@@ -175,7 +176,7 @@
     "overlap": 0.333,
     "rank": 1,
     "n_clusters": 119,
-    "elapsed_s": 4.38,
+    "elapsed_s": 4.42,
     "n_known_residues": 15
   },
   {
@@ -190,7 +191,7 @@
     "overlap": 0.351,
     "rank": 1,
     "n_clusters": 47,
-    "elapsed_s": 1.33,
+    "elapsed_s": 1.37,
     "n_known_residues": 37
   },
   {
@@ -217,7 +218,7 @@
     "overlap": 1.0,
     "rank": 2,
     "n_clusters": 37,
-    "elapsed_s": 0.59,
+    "elapsed_s": 0.6,
     "n_known_residues": 8
   },
   {
@@ -232,7 +233,7 @@
     "overlap": 1.0,
     "rank": 5,
     "n_clusters": 25,
-    "elapsed_s": 0.54,
+    "elapsed_s": 0.55,
     "n_known_residues": 11
   },
   {
@@ -247,7 +248,7 @@
     "overlap": 0.222,
     "rank": 2,
     "n_clusters": 111,
-    "elapsed_s": 3.69,
+    "elapsed_s": 3.71,
     "n_known_residues": 18
   },
   {
@@ -277,7 +278,7 @@
     "overlap": 1.0,
     "rank": 4,
     "n_clusters": 35,
-    "elapsed_s": 0.79,
+    "elapsed_s": 0.81,
     "n_known_residues": 18
   },
   {
@@ -292,7 +293,7 @@
     "overlap": 0.909,
     "rank": 5,
     "n_clusters": 50,
-    "elapsed_s": 2.86,
+    "elapsed_s": 2.89,
     "n_known_residues": 22
   },
   {
@@ -322,7 +323,7 @@
     "overlap": 0.083,
     "rank": 1,
     "n_clusters": 53,
-    "elapsed_s": 1.63,
+    "elapsed_s": 1.64,
     "n_known_residues": 12
   },
   {
@@ -337,7 +338,82 @@
     "overlap": 0.269,
     "rank": 1,
     "n_clusters": 89,
-    "elapsed_s": 2.87,
+    "elapsed_s": 2.83,
     "n_known_residues": 26
+  },
+  {
+    "id": "BCL2_BH3",
+    "name": "BCL-2 BH3-binding groove (venetoclax/ABT-199)",
+    "category": "cryptic",
+    "apo_pdb": "1G5M",
+    "status": "PASS",
+    "pass_by": "ov",
+    "centroid_dist_A": 10.01,
+    "centroid_rank": 4,
+    "overlap": 0.727,
+    "rank": 4,
+    "n_clusters": 42,
+    "elapsed_s": 1.19,
+    "n_known_residues": 22
+  },
+  {
+    "id": "IDH1_R132H",
+    "name": "IDH1 R132H allosteric dimer-interface (ivosidenib target)",
+    "category": "cryptic",
+    "apo_pdb": "3MAP",
+    "status": "MISS",
+    "pass_by": null,
+    "centroid_dist_A": 23.91,
+    "centroid_rank": 3,
+    "overlap": 0.0,
+    "rank": null,
+    "n_clusters": 74,
+    "elapsed_s": 3.63,
+    "n_known_residues": 14
+  },
+  {
+    "id": "PKM2_activator",
+    "name": "PKM2 allosteric activator pocket (TEPP-46 / subunit interface)",
+    "category": "cryptic",
+    "apo_pdb": "1ZJH",
+    "status": "PASS",
+    "pass_by": "ov",
+    "centroid_dist_A": 14.13,
+    "centroid_rank": 1,
+    "overlap": 0.333,
+    "rank": 1,
+    "n_clusters": 101,
+    "elapsed_s": 4.35,
+    "n_known_residues": 12
+  },
+  {
+    "id": "PPARG_allosteric",
+    "name": "PPAR\u03b3 LBD allosteric helix-12 site (metaglidasen/MBX-102)",
+    "category": "cryptic",
+    "apo_pdb": "2PRG",
+    "status": "PASS",
+    "pass_by": "ov",
+    "centroid_dist_A": 16.14,
+    "centroid_rank": 2,
+    "overlap": 0.353,
+    "rank": 2,
+    "n_clusters": 59,
+    "elapsed_s": 1.67,
+    "n_known_residues": 17
+  },
+  {
+    "id": "MMP13_allosteric",
+    "name": "MMP-13 non-zinc allosteric S1\u2032 tunnel",
+    "category": "cryptic",
+    "apo_pdb": "2OZR",
+    "status": "PASS",
+    "pass_by": "ov",
+    "centroid_dist_A": 9.86,
+    "centroid_rank": 4,
+    "overlap": 0.5,
+    "rank": 4,
+    "n_clusters": 49,
+    "elapsed_s": 1.06,
+    "n_known_residues": 16
   }
 ]
