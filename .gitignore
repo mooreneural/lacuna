@@ -9,3 +9,6 @@ build/
 venv/
 *_lacuna/
 *.npz
+*.npy
+*.log
+benchmarks/pdb_cache/

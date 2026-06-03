@@ -139,6 +139,28 @@ def write_boltz_constraint(
     return out
 
 
+def write_structure_pdb(structure: "Structure", path: Path) -> None:
+    """Write a Structure object to PDB format for use as a temporary input file."""
+    lines: list[str] = []
+    for atom in structure.atoms:
+        x, y, z = atom.coords
+        name = atom.name
+        # PDB atom name convention: 1-char elements get a leading space in col 13
+        if len(name) < 4:
+            name_str = f" {name:<3}"
+        else:
+            name_str = f"{name:<4}"
+        chain = (atom.chain_id[0] if atom.chain_id else "A")
+        elem = atom.element[:2].rjust(2) if atom.element else " C"
+        lines.append(
+            f"ATOM  {atom.serial + 1:5d} {name_str}{atom.res_name:>3s} {chain}"
+            f"{atom.res_seq:4d}    {x:8.3f}{y:8.3f}{z:8.3f}  1.00  0.00"
+            f"          {elem}  "
+        )
+    lines.append("END")
+    path.write_text("\n".join(lines) + "\n")
+
+
 def write_vina_box(
     cluster: PocketCluster,
     output_dir: Path,

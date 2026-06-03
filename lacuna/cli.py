@@ -17,6 +17,9 @@ def _resolve_backend(name: str):
     if name == "random":
         from lacuna.ensemble.random_backend import RandomBackend
         return RandomBackend()
+    elif name == "nma":
+        from lacuna.ensemble.nma_backend import NMABackend
+        return NMABackend()
     elif name == "openmm":
         from lacuna.ensemble.openmm_backend import OpenMMBackend
         return OpenMMBackend()
@@ -24,12 +27,12 @@ def _resolve_backend(name: str):
         from lacuna.ensemble.boltz_backend import BoltzBackend
         return BoltzBackend()
     else:
-        raise click.BadParameter(f"Unknown backend '{name}'. Choose: random, openmm, boltz")
+        raise click.BadParameter(f"Unknown backend '{name}'. Choose: random, nma, openmm, boltz")
 
 
 def _auto_backend():
     """Pick the best available backend at runtime."""
-    for name in ("boltz", "openmm", "random"):
+    for name in ("boltz", "openmm", "nma", "random"):
         try:
             return _resolve_backend(name)
         except ImportError:
@@ -54,7 +57,7 @@ def main():
 @click.argument("input_path", type=click.Path(exists=True, path_type=Path))
 @click.option(
     "--backend", "-b",
-    type=click.Choice(["auto", "random", "openmm", "boltz"]),
+    type=click.Choice(["auto", "random", "nma", "openmm", "boltz"]),
     default="auto",
     show_default=True,
     help="Ensemble generation backend.",
@@ -76,6 +79,15 @@ def main():
 @click.option("--top", default=10, show_default=True,
               help="Maximum number of pockets to report.")
 @click.option("--quiet", is_flag=True, default=False, help="Suppress progress output.")
+@click.option(
+    "--homodimer", is_flag=True, default=False,
+    help=(
+        "Analyze the biological assembly rather than the asymmetric unit. "
+        "Reads BIOMT records (PDB) or _pdbx_struct_oper_list (mmCIF) to create "
+        "the full assembly; required to detect pockets at dimer interfaces. "
+        "For best results, use the biological assembly download from RCSB."
+    ),
+)
 def discover(
     input_path: Path,
     backend: str,
@@ -88,16 +100,20 @@ def discover(
     emit_pocket_pdbs: bool,
     top: int,
     quiet: bool,
+    homodimer: bool,
 ):
     """Discover cryptic binding pockets in a protein structure.
 
     INPUT_PATH: Path to a PDB or mmCIF file (from AlphaFold, Boltz, Chai, or PDB).
     """
-    from lacuna.io.structure import load_structure, coords_array
+    import tempfile
+
+    from lacuna.io.structure import load_structure, coords_array, make_biological_assembly
     from lacuna.pockets.detector import detect_pockets
     from lacuna.pockets.clusterer import cluster_pockets
     from lacuna.io.writers import (
-        write_report, write_pocket_pdb, write_boltz_constraint, write_vina_box
+        write_report, write_pocket_pdb, write_boltz_constraint, write_vina_box,
+        write_structure_pdb,
     )
 
     output_dir = output or Path(f"{input_path.stem}_lacuna")
@@ -113,22 +129,45 @@ def discover(
     if not quiet:
         console.print("[dim]Loading structure...[/dim]")
     structure = load_structure(input_path)
-    if not quiet:
-        n_res = len(structure.residues)
-        n_chains = len(structure.sequence)
-        console.print(f"  [dim]{n_res} residues, {n_chains} chain(s)[/dim]")
 
-    # Resolve backend
-    if backend == "auto":
-        be = _auto_backend()
-        backend = be.name
-    else:
-        be = _resolve_backend(backend)
+    # Optionally expand to biological assembly for dimer-interface pocket detection
+    effective_path = input_path
+    with tempfile.TemporaryDirectory() as _tmpdir:
+        if homodimer:
+            assembly = make_biological_assembly(input_path, structure)
+            if len(assembly.atoms) > len(structure.atoms):
+                tmp_pdb = Path(_tmpdir) / f"{input_path.stem}_assembly.pdb"
+                write_structure_pdb(assembly, tmp_pdb)
+                structure = assembly
+                effective_path = tmp_pdb
+                if not quiet:
+                    console.print(
+                        f"  [dim]Homodimer: biological assembly built "
+                        f"({len(structure.sequence)} chains, {len(structure.residues)} residues)[/dim]"
+                    )
+            elif not quiet:
+                console.print(
+                    "  [yellow]--homodimer: no BIOMT symmetry records found. "
+                    "For dimer-interface pockets, download the biological assembly "
+                    "PDB from RCSB (use the 'Download Files → Biological Assembly' option).[/yellow]"
+                )
 
-    if not quiet:
-        console.print(f"\n[dim]Generating {conformers} conformers with '{backend}' backend...[/dim]")
+        if not quiet:
+            n_res = len(structure.residues)
+            n_chains = len(structure.sequence)
+            console.print(f"  [dim]{n_res} residues, {n_chains} chain(s)[/dim]")
 
-    coord_sets = be.generate(input_path, conformers)
+        # Resolve backend
+        if backend == "auto":
+            be = _auto_backend()
+            backend = be.name
+        else:
+            be = _resolve_backend(backend)
+
+        if not quiet:
+            console.print(f"\n[dim]Generating {conformers} conformers with '{backend}' backend...[/dim]")
+
+        coord_sets = be.generate(effective_path, conformers)
 
     if not quiet:
         console.print(f"  [dim]Generated {len(coord_sets)} conformers.[/dim]")

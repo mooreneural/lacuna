@@ -3,18 +3,18 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "lacuna"
+name = "lacuna-pockets"
 version = "0.1.0"
 description = "Cryptic binding pocket discovery via conformational ensemble analysis"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "Lacuna Non-Commercial License" }
+license = { file = "LICENSE" }
 authors = [{ name = "Clayton Moore" }]
 keywords = ["drug-discovery", "protein-structure", "cryptic-pockets", "cheminformatics"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
-    "License :: Other/Proprietary License",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Topic :: Scientific/Engineering :: Chemistry",
@@ -31,7 +31,7 @@ dependencies = [
 [project.optional-dependencies]
 openmm = ["openmm>=8.0", "pdbfixer>=1.9"]
 boltz = ["boltz>=0.4"]
-all = ["lacuna[openmm]", "lacuna[boltz]"]
+all = ["lacuna-pockets[openmm]", "lacuna-pockets[boltz]"]
 dev = [
     "pytest>=7.0",
     "pytest-cov",

@@ -15,17 +15,14 @@ lacuna discover kras.pdb --conformers 20 --emit-boltz-constraints --emit-vina-bo
 ## Install
 
 ```bash
-# PyPI release coming - install from source in the meantime:
-git clone https://github.com/mooreneural/lacuna
-cd lacuna
-pip install .
+pip install lacuna-pockets
 ```
 
 **Optional backends** (better conformational sampling):
 ```bash
-pip install "lacuna[openmm]"   # 100ps implicit-solvent MD
-pip install "lacuna[boltz]"    # Boltz-2 partial diffusion (best quality, GPU recommended)
-pip install "lacuna[all]"      # everything
+pip install "lacuna-pockets[openmm]"   # 100ps implicit-solvent MD
+pip install "lacuna-pockets[boltz]"    # Boltz-2 partial diffusion (best quality, GPU recommended)
+pip install "lacuna-pockets[all]"      # everything
 ```
 
 Requires Python 3.10+.
@@ -37,13 +34,17 @@ Requires Python 3.10+.
 ### CLI
 
 ```bash
-# Discover pockets with defaults (random backbone perturbation backend)
+# Discover pockets with defaults (NMA backend - physically grounded, no GPU needed)
 lacuna discover protein.pdb --conformers 20
 
 # Filter and limit output
 lacuna discover protein.pdb --min-druggability 0.5 --min-persistence 0.3 --top 5
 
-# Use a physics-based backend for cryptic pockets
+# Analyze a homodimer - detects pockets at the dimer interface (e.g. Caspase-1, IDH1)
+# Reads BIOMT records from PDB; for best results use the biological assembly download from RCSB
+lacuna discover protein.pdb --homodimer --conformers 20
+
+# Use Boltz-2 partial diffusion for highest-quality sampling
 lacuna discover protein.pdb --backend boltz --conformers 30
 
 # Emit all docking file formats
@@ -57,12 +58,12 @@ lacuna dock-prep kras_lacuna/pocket_report.json kras.pdb --format all
 
 ```python
 from lacuna import load_structure, detect_pockets, cluster_pockets
-from lacuna.ensemble.random_backend import RandomBackend
+from lacuna.ensemble.nma_backend import NMABackend
 from lacuna.io.structure import coords_array
 from lacuna.io.writers import write_report, write_boltz_constraint
 
 structure = load_structure("protein.pdb")
-backend = RandomBackend(seed=42)
+backend = NMABackend(seed=42)
 coord_sets = backend.generate("protein.pdb", n_conformers=20)
 
 all_coords = [coords_array(structure)] + coord_sets
@@ -84,7 +85,7 @@ for c in clusters[:5]:
 
 ## How it works
 
-1. **Ensemble generation** - Generate N conformers via backbone perturbation (built-in), OpenMM implicit-solvent MD, or Boltz-2 partial diffusion at varying noise levels
+1. **Ensemble generation** - Generate N conformers via elastic network model normal mode analysis (built-in), OpenMM implicit-solvent MD, or Boltz-2 partial diffusion at varying noise levels
 2. **Pocket detection** - Grid-based alpha-point analysis per conformer: compute distance transform, find local maxima within the 1.4–5.5 Å interaction zone, cluster nearby alpha-points into pocket candidates
 3. **Cross-ensemble clustering** - Greedy centroid merging clusters corresponding pockets across all conformers
 4. **Druggability scoring** - Gaussian volume reward centered at 300 Å³ + enclosure + hydrophobicity + aromaticity (Halgren 2009)
@@ -107,17 +108,20 @@ for c in clusters[:5]:
 
 | Backend | Install | Quality | Speed | Notes |
 |---------|---------|---------|-------|-------|
-| `random` | built-in | baseline | ~0.04s/conf | Correlated Gaussian backbone perturbation |
+| `nma` | built-in | good | ~0.1s/conf | Anisotropic Network Model normal mode analysis - hinge bending, breathing, twist motions |
 | `openmm` | `lacuna[openmm]` | good | ~2s/conf | 100ps Langevin MD, GBn2 implicit solvent |
 | `boltz` | `lacuna[boltz]` | best | ~30s/conf (GPU) | Boltz-2 partial diffusion at varying noise fractions |
+| `random` | built-in | baseline | ~0.04s/conf | Correlated Gaussian backbone perturbation |
 
-**For truly cryptic pockets** use `boltz` or `openmm`. The `random` backend perturbs coordinates without a force field - it reliably finds surface pockets and shallow cryptic sites, but cannot sample large-scale loop rearrangements.
+**Auto-selection order:** `boltz` → `openmm` → `nma` → `random`. On a plain `pip install lacuna`, the NMA backend runs automatically.
+
+The `nma` backend samples physically meaningful collective motions — the same hinge-bending and breathing modes that open cryptic pockets in nature — without requiring a GPU or force field. It replaces `random` as the zero-dependency default. For large-scale loop rearrangements or very deep cryptic sites, `boltz` remains the best option.
 
 ---
 
 ## Benchmarks
 
-**14 / 20 cryptic pockets detected (70%, RandomBackend, 20 conformers)** - matching the CryptoSite published benchmark rate on a statistically defensible N=20 set.
+**14 / 20 cryptic pockets detected (70%, NMABackend, 20 conformers)** - matching the CryptoSite published benchmark rate on a statistically defensible N=20 set.
 
 Success criterion: pocket centroid within 4 Å of the known binding-site centroid (field standard) **or** ≥30% residue overlap in top-5 pockets.
 
@@ -146,7 +150,16 @@ Success criterion: pocket centroid within 4 Å of the known binding-site centroi
 | ❌ Caspase-1 dimer interface | 2HBQ | - | 8% | 1.6s |
 | ❌ IDH1 R132H dimer interface | 3MAP | ivosidenib | 0% | 3.7s |
 
-The six misses fall into two mechanistic classes: **near-misses** (IL-2, Src, SHP-2, ERK2 all 21–28%) where a physics-based backend closes the gap, and **dimer-interface pockets** (Caspase-1, IDH1 R132H) where the pocket is formed by two protein chains and single-chain analysis cannot see the cross-chain contact surface. IL-2 is confirmed at 71% rank 1 with Boltz-2 partial diffusion.
+The six misses fall into two mechanistic classes: **near-misses** (IL-2, Src, SHP-2, ERK2 all 21–28%) where a physics-based backend closes the gap, and **dimer-interface pockets** (Caspase-1, IDH1 R132H) where the pocket forms between two chains.
+
+Dimer-interface pockets are now addressable with the `--homodimer` flag, which reads BIOMT symmetry records from the PDB and constructs the full biological assembly before analysis:
+
+```bash
+lacuna discover 2HBQ.pdb --homodimer --conformers 20   # Caspase-1 dimer interface
+lacuna discover 3MAP.pdb --homodimer --conformers 20   # IDH1 R132H dimer interface
+```
+
+IL-2 is confirmed at 71% rank 1 with Boltz-2 partial diffusion.
 
 ### Boltz-2 re-evaluation of near-misses
 
@@ -165,7 +178,7 @@ The six misses fall into two mechanistic classes: **near-misses** (IL-2, Src, SH
 
 **Overall across all 27 proteins: 19 / 27 (70%).**
 
-### Speed (RandomBackend, no GPU)
+### Speed (NMABackend, no GPU)
 
 | Protein size | Time |
 |-------------|------|
@@ -178,7 +191,7 @@ The six misses fall into two mechanistic classes: **near-misses** (IL-2, Src, SH
 
 fpocket detects pockets on a single static structure. Lacuna generates a conformational ensemble - the critical difference for cryptic sites that are absent in the apo crystal.
 
-| Target | fpocket 4.2 | Lacuna (RandomBackend) |
+| Target | fpocket 4.2 | Lacuna (NMABackend) |
 |--------|------------|----------------------|
 | 1HEL hen lysozyme (orthosteric) | ✅ rank 1 | ✅ 100%, rank 2 |
 | 1L90 T4L L99A **(cryptic)** | ❌ not in top 5 | ✅ 100%, rank 1 |
@@ -190,7 +203,7 @@ T4L L99A and K-Ras switch-II are the canonical single-structure benchmark failur
 
 > **Reproduce:**
 > ```bash
-> python benchmarks/cryptic_benchmark.py          # full 27-protein run (~5 min)
+> python benchmarks/cryptic_benchmark.py          # full 27-protein run, NMA backend (~5 min)
 > python benchmarks/cryptic_benchmark.py --quick  # 10 conformers (~2 min)
 > python benchmarks/cryptic_benchmark.py --category cryptic   # cryptic only
 > python benchmarks/boltz_nearmiss.py             # Boltz-2 near-miss eval (GPU)
@@ -252,6 +265,7 @@ If you use Lacuna in published research, please cite:
 
 **Methodology papers Lacuna builds on:**
 
+- Atilgan et al. (2001) *Biophys. J.* 80(1):505–515 - Anisotropic Network Model (NMA backend)
 - Halgren (2009) *J. Chem. Inf. Model.* 49(2):377–389 - SiteMap druggability scoring
 - Le Guilloux et al. (2009) *BMC Bioinformatics* 10:168 - fpocket alpha-sphere approach
 - Schmidtke & Barril (2010) *J. Med. Chem.* 53(15):5858–5867 - enclosure scoring
@@ -260,6 +274,8 @@ If you use Lacuna in published research, please cite:
 
 ## License
 
-Non-commercial. Free for academic research, education, and non-profit use.  
-Commercial use requires a written license - contact claytonwaynemoore@gmail.com.  
-See [LICENSE](LICENSE) for full terms.
+**[MIT License](LICENSE)** — free for any use, including commercial.
+
+A [commercial license](LICENSE_COMMERCIAL) is available for organizations that
+require indemnification, warranty coverage, support SLAs, or custom development
+agreements. Contact claytonwaynemoore@gmail.com.

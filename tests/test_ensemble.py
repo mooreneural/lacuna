@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 from lacuna.ensemble.random_backend import RandomBackend
+from lacuna.ensemble.nma_backend import NMABackend
 
 
 # Minimal valid PDB content — 10 alanine residues in a helix
@@ -95,3 +96,91 @@ class TestRandomBackend:
         c2 = b2.generate(mini_pdb, n_conformers=3)
         for a, b in zip(c1, c2):
             np.testing.assert_array_equal(a, b)
+
+
+# Larger mini PDB — enough Cα atoms for ENM to have non-trivial modes
+_MINI_PDB_LARGE = """\
+ATOM      1  N   ALA A   1       0.000   0.000   0.000  1.00  0.00           N
+ATOM      2  CA  ALA A   1       1.520   0.000   0.000  1.00  0.00           C
+ATOM      3  C   ALA A   1       2.100   1.200   0.000  1.00  0.00           C
+ATOM      4  N   ALA A   2       3.620   1.200   0.000  1.00  0.00           N
+ATOM      5  CA  ALA A   2       4.200   2.400   0.000  1.00  0.00           C
+ATOM      6  C   ALA A   2       5.720   2.400   0.000  1.00  0.00           C
+ATOM      7  N   ALA A   3       6.300   3.600   0.000  1.00  0.00           N
+ATOM      8  CA  ALA A   3       7.820   3.600   0.000  1.00  0.00           C
+ATOM      9  C   ALA A   3       8.400   4.800   0.000  1.00  0.00           C
+ATOM     10  N   ALA A   4       9.920   4.800   0.000  1.00  0.00           N
+ATOM     11  CA  ALA A   4      10.500   6.000   0.000  1.00  0.00           C
+ATOM     12  C   ALA A   4      12.020   6.000   0.000  1.00  0.00           C
+ATOM     13  N   ALA A   5      12.600   7.200   0.000  1.00  0.00           N
+ATOM     14  CA  ALA A   5      14.120   7.200   0.000  1.00  0.00           C
+ATOM     15  C   ALA A   5      14.700   8.400   0.000  1.00  0.00           C
+ATOM     16  N   ALA A   6      16.220   8.400   0.000  1.00  0.00           N
+ATOM     17  CA  ALA A   6      16.800   9.600   0.000  1.00  0.00           C
+ATOM     18  C   ALA A   6      18.320   9.600   0.000  1.00  0.00           C
+ATOM     19  N   ALA A   7      18.900  10.800   0.000  1.00  0.00           N
+ATOM     20  CA  ALA A   7      20.420  10.800   0.000  1.00  0.00           C
+ATOM     21  C   ALA A   7      21.000  12.000   0.000  1.00  0.00           C
+ATOM     22  N   ALA A   8      22.520  12.000   0.000  1.00  0.00           N
+ATOM     23  CA  ALA A   8      23.100  13.200   0.000  1.00  0.00           C
+ATOM     24  C   ALA A   8      24.620  13.200   0.000  1.00  0.00           C
+ATOM     25  N   ALA A   9      25.200  14.400   0.000  1.00  0.00           N
+ATOM     26  CA  ALA A   9      26.720  14.400   0.000  1.00  0.00           C
+ATOM     27  C   ALA A   9      27.300  15.600   0.000  1.00  0.00           C
+ATOM     28  N   ALA A  10      28.820  15.600   0.000  1.00  0.00           N
+ATOM     29  CA  ALA A  10      29.400  16.800   0.000  1.00  0.00           C
+ATOM     30  C   ALA A  10      30.920  16.800   0.000  1.00  0.00           C
+END
+"""
+
+
+@pytest.fixture
+def large_pdb(tmp_path: Path) -> Path:
+    p = tmp_path / "large.pdb"
+    p.write_text(_MINI_PDB_LARGE)
+    return p
+
+
+class TestNMABackend:
+    def test_generates_correct_count(self, large_pdb):
+        backend = NMABackend()
+        conformers = backend.generate(large_pdb, n_conformers=5)
+        assert len(conformers) == 5
+
+    def test_output_shape_matches_input(self, large_pdb):
+        from lacuna.io.structure import load_structure, coords_array
+        structure = load_structure(large_pdb)
+        n_atoms = len(structure.atoms)
+
+        backend = NMABackend()
+        conformers = backend.generate(large_pdb, n_conformers=3)
+        for c in conformers:
+            assert c.shape == (n_atoms, 3)
+
+    def test_conformers_are_diverse(self, large_pdb):
+        from lacuna.io.structure import load_structure, coords_array
+        base = coords_array(load_structure(large_pdb))
+
+        backend = NMABackend()
+        conformers = backend.generate(large_pdb, n_conformers=5)
+        rmsds = [float(np.sqrt(((c - base) ** 2).mean())) for c in conformers]
+
+        assert max(rmsds) > 0.1
+
+    def test_amplitude_increases_with_conformer_index(self, large_pdb):
+        """Later conformers should have larger RMSD (amplitude is monotonically scaled)."""
+        from lacuna.io.structure import load_structure, coords_array
+        base = coords_array(load_structure(large_pdb))
+
+        backend = NMABackend(max_rmsd=2.0)
+        conformers = backend.generate(large_pdb, n_conformers=6)
+        rmsds = [float(np.sqrt(((c - base) ** 2).mean())) for c in conformers]
+
+        # First conformer should have smaller RMSD than last
+        assert rmsds[0] < rmsds[-1]
+
+    def test_falls_back_on_tiny_structure(self, mini_pdb):
+        """Structures with fewer than 6 Cα atoms should still return conformers."""
+        backend = NMABackend()
+        conformers = backend.generate(mini_pdb, n_conformers=4)
+        assert len(conformers) == 4
