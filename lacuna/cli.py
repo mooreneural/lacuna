@@ -10,6 +10,8 @@ import click
 from rich.console import Console
 from rich.table import Table
 
+from lacuna import __version__
+
 console = Console()
 
 
@@ -41,7 +43,7 @@ def _auto_backend():
 
 
 @click.group()
-@click.version_option(package_name="lacuna")
+@click.version_option(version=__version__, prog_name="lacuna")
 def main():
     """Lacuna — cryptic binding pocket discovery via conformational ensemble analysis.
 
