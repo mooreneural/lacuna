@@ -34,6 +34,11 @@ if hasattr(sys.stdout, "reconfigure"):
 
 # ── constants ─────────────────────────────────────────────────────────────────
 
+# When citing results produced by this benchmark, please use:
+#   Moore CW (2026) Lacuna: Cryptic Binding Pocket Discovery via Conformational
+#   Ensemble Analysis. https://github.com/mooreneural/lacuna
+TOOL_CITATION = "Moore 2026 Lacuna (github.com/mooreneural/lacuna)"
+
 CONFORMERS = 20
 HOLO_CUTOFF = 4.5          # Å — residue within this of any ligand atom → binding site
 CENTROID_THRESHOLD = 4.0   # Å — primary: pocket centroid within this of site centroid
@@ -73,7 +78,7 @@ DATASET = [
         "apo_pdb": "1L90", "apo_chain": "A",
         # Known lining residues from Eriksson/Mobley literature
         "known_residues": {99, 102, 106, 111, 118, 121, 133, 153},
-        "citation": "Eriksson 1992; Mobley 2007",
+        "citation": "Eriksson 1992; Mobley 2007; Moore 2026 Lacuna",
     },
     {
         "id": "KRAS_SIIP",
@@ -81,7 +86,7 @@ DATASET = [
         "category": "cryptic",
         "apo_pdb": "4OBE", "apo_chain": "A",
         "known_residues": {12, 13, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36},
-        "citation": "Ostrem 2013",
+        "citation": "Ostrem 2013; Moore 2026 Lacuna",
     },
     {
         "id": "IL2",
@@ -90,7 +95,7 @@ DATASET = [
         "apo_pdb": "1M47", "apo_chain": "A",
         "holo_pdb": "1M49", "holo_chain": "A",
         "extra_exclude": frozenset(),
-        "citation": "Braisted 2003; Arkin 2003",
+        "citation": "Braisted 2003; Arkin 2003; Moore 2026 Lacuna",
     },
     {
         "id": "GCK",
@@ -99,7 +104,7 @@ DATASET = [
         "apo_pdb": "1V4S", "apo_chain": "A",
         "holo_pdb": "3IMX", "holo_chain": "A",  # compound B84; 1V4T has no activator
         "extra_exclude": frozenset({"GLC", "FRU", "ATP", "ADP", "AMP"}),
-        "citation": "Kamata 2004; Zhi 2010",
+        "citation": "Kamata 2004; Zhi 2010; Moore 2026 Lacuna",
     },
     {
         "id": "p38_DFGout",
@@ -108,7 +113,7 @@ DATASET = [
         "apo_pdb": "1P38", "apo_chain": "A",
         "holo_pdb": "2ZB1", "holo_chain": "A",
         "extra_exclude": frozenset(),
-        "citation": "Pargellis 2002; Regan 2003",
+        "citation": "Pargellis 2002; Regan 2003; Moore 2026 Lacuna",
     },
     {
         "id": "HIVRT_NNRTI",
@@ -118,7 +123,7 @@ DATASET = [
         "holo_pdb": "1RTH", "holo_chain": "A",
         "extra_exclude": frozenset({"AZT", "TMP", "MG"}),
         "max_residues": 600,  # chain A = 536 res; was 500, raised to allow it to run
-        "citation": "Kohlstaedt 1992; Ren 1995",
+        "citation": "Kohlstaedt 1992; Ren 1995; Moore 2026 Lacuna",
     },
     {
         "id": "SRC_myristate",
@@ -127,7 +132,7 @@ DATASET = [
         "apo_pdb": "2SRC", "apo_chain": "A",
         "holo_pdb": "3EL8", "holo_chain": "A",
         "extra_exclude": frozenset({"MYR", "ADP", "ATP", "ANP"}),
-        "citation": "Cowan-Jacob 2005; Shekhar 2009",
+        "citation": "Cowan-Jacob 2005; Shekhar 2009; Moore 2026 Lacuna",
     },
     {
         "id": "MDM2",
@@ -136,7 +141,7 @@ DATASET = [
         "apo_pdb": "1Z1M", "apo_chain": "A",
         "holo_pdb": "4HBM", "holo_chain": "A",  # 1T4F had no ligand; 4HBM=nutlin-3
         "extra_exclude": frozenset(),
-        "citation": "Vassilev 2004; Kussie 1996",
+        "citation": "Vassilev 2004; Kussie 1996; Moore 2026 Lacuna",
     },
 
     {
@@ -149,7 +154,7 @@ DATASET = [
         "apo_pdb": "2SHP", "apo_chain": "A",
         "holo_pdb": "5EHP", "holo_chain": "A",
         "extra_exclude": frozenset(),
-        "citation": "Chen 2016 Nature; Tonks 2006 Nature Rev Mol Cell Biol",
+        "citation": "Chen 2016 Nature; Tonks 2006 Nature Rev Mol Cell Biol; Moore 2026 Lacuna",
     },
     {
         "id": "ABL1_myristate",
@@ -161,7 +166,7 @@ DATASET = [
         "apo_pdb": "3CS9", "apo_chain": "A",
         "holo_pdb": "2FO0", "holo_chain": "A",
         "extra_exclude": frozenset({"NIL", "P16", "SEP"}),
-        "citation": "Nagar 2002 Cell; Wylie 2017 Nature (asciminib)",
+        "citation": "Nagar 2002 Cell; Wylie 2017 Nature (asciminib); Moore 2026 Lacuna",
     },
     {
         "id": "PTP1B_allosteric",
@@ -172,7 +177,7 @@ DATASET = [
         "apo_pdb": "1A5Y", "apo_chain": "A",
         "holo_pdb": "2F6V", "holo_chain": "A",
         "extra_exclude": frozenset(),
-        "citation": "Wiesmann 2004 Nature; Bhatt 2007 J Med Chem",
+        "citation": "Wiesmann 2004 Nature; Bhatt 2007 J Med Chem; Moore 2026 Lacuna",
     },
     {
         "id": "NS5B_thumb",
@@ -183,7 +188,7 @@ DATASET = [
         "apo_pdb": "1NB4", "apo_chain": "A",
         "holo_pdb": "2I1R", "holo_chain": "A",
         "extra_exclude": frozenset(),
-        "citation": "Koch 2006 J Biol Chem; Boyce 2009 PNAS",
+        "citation": "Koch 2006 J Biol Chem; Boyce 2009 PNAS; Moore 2026 Lacuna",
     },
 
     # ── CONFORMATIONAL / ALLOSTERIC ───────────────────────────────────────────
@@ -196,7 +201,7 @@ DATASET = [
         "apo_pdb": "4AKE", "apo_chain": "A",  # open/unbound form
         "holo_pdb": "1AKE", "holo_chain": "A",  # closed form with AP5A; was swapped
         "extra_exclude": frozenset({"AMP", "ADP", "MG"}),  # pick AP5, not AMP
-        "citation": "Muller 1996",
+        "citation": "Muller 1996; Moore 2026 Lacuna",
     },
     {
         "id": "CypA",
@@ -205,7 +210,7 @@ DATASET = [
         "apo_pdb": "1OCA", "apo_chain": "A",  # apo CypA
         "holo_pdb": "2CPL", "holo_chain": "A",  # cyclosporin A bound
         "extra_exclude": frozenset(),
-        "citation": "Ke 1994; Kallen 1991",
+        "citation": "Ke 1994; Kallen 1991; Moore 2026 Lacuna",
     },
 
     # ── ORTHOSTERIC CONTROLS ──────────────────────────────────────────────────
@@ -217,7 +222,7 @@ DATASET = [
         "category": "orthosteric",
         "apo_pdb": "1HEL", "apo_chain": "A",
         "known_residues": {35, 52, 101, 102, 103, 104, 107, 108},
-        "citation": "Blake 1965",
+        "citation": "Blake 1965; Moore 2026 Lacuna",
     },
     {
         "id": "HIV_PR",
@@ -225,7 +230,7 @@ DATASET = [
         "category": "orthosteric",
         "apo_pdb": "1HPV", "apo_chain": "A",
         "known_residues": {25, 26, 27, 28, 29, 30, 49, 50, 51, 52, 53},
-        "citation": "Lapatto 1989",
+        "citation": "Lapatto 1989; Moore 2026 Lacuna",
     },
     {
         "id": "thrombin",
@@ -234,7 +239,7 @@ DATASET = [
         "apo_pdb": "2RGL", "apo_chain": "A",  # 1HGT had hirudin; 2RGL is clean apo
         "holo_pdb": "1TOM", "holo_chain": "H",  # MIN (melagatran) is in chain H
         "extra_exclude": frozenset({"TYS"}),
-        "citation": "Stubbs 1990",
+        "citation": "Stubbs 1990; Moore 2026 Lacuna",
     },
     {
         "id": "trypsin",
@@ -248,7 +253,7 @@ DATASET = [
         "apo_pdb": "1S0Q", "apo_chain": "A",
         "holo_pdb": "3PTB", "holo_chain": "A",  # benzamidine (BEN); 1PPH has BPTI protein
         "extra_exclude": frozenset({"CA"}),
-        "citation": "Walter 1982; Marquart 1983",
+        "citation": "Walter 1982; Marquart 1983; Moore 2026 Lacuna",
     },
     {
         "id": "DHFR",
@@ -257,7 +262,7 @@ DATASET = [
         "apo_pdb": "7DFR", "apo_chain": "A",
         "holo_pdb": "4DFR", "holo_chain": "A",
         "extra_exclude": frozenset({"NADP", "NAP", "NAI"}),
-        "citation": "Bolin 1982",
+        "citation": "Bolin 1982; Moore 2026 Lacuna",
     },
 
     # ── ADDITIONAL CRYPTIC POCKETS (round 2) ──────────────────────────────────
@@ -269,7 +274,7 @@ DATASET = [
         "apo_pdb": "1LXL", "apo_chain": "A",  # C-terminal helix occludes groove
         "holo_pdb": "2YXJ", "holo_chain": "A",  # N3C = ABT-737 (112 atoms)
         "extra_exclude": frozenset(),
-        "citation": "Oltersdorf 2005; Tse 2008",
+        "citation": "Oltersdorf 2005; Tse 2008; Moore 2026 Lacuna",
     },
     {
         "id": "HIF2a",
@@ -281,7 +286,7 @@ DATASET = [
         "apo_pdb": "3F1O", "apo_chain": "A",
         "holo_pdb": "5TBM", "holo_chain": "A",  # 79A = PT2385 (26 atoms); FDA-approved
         "extra_exclude": frozenset({"2XY"}),
-        "citation": "Scheuermann 2009; Courtney 2018",
+        "citation": "Scheuermann 2009; Courtney 2018; Moore 2026 Lacuna",
     },
     {
         "id": "CASP1",
@@ -290,7 +295,7 @@ DATASET = [
         "apo_pdb": "2HBQ", "apo_chain": "A",  # active site inhibitor PHQ; allosteric site empty
         "holo_pdb": "3NKT", "holo_chain": "A",  # 1HN = allosteric inhibitor (14 atoms)
         "extra_exclude": frozenset(),
-        "citation": "Scheer 2006; Datta 2008",
+        "citation": "Scheer 2006; Datta 2008; Moore 2026 Lacuna",
     },
     {
         "id": "ERK2",
@@ -299,7 +304,7 @@ DATASET = [
         "apo_pdb": "2ERK", "apo_chain": "A",  # active phospho-ERK2, no allosteric ligand
         "holo_pdb": "4QTA", "holo_chain": "A",  # 38Z = allosteric inhibitor (44 atoms)
         "extra_exclude": frozenset(),
-        "citation": "Hancock 2015",
+        "citation": "Hancock 2015; Moore 2026 Lacuna",
     },
 
     # ── ADDITIONAL CRYPTIC POCKETS (round 3) — targets N ≥ 20 ────────────────
@@ -314,7 +319,7 @@ DATASET = [
         "apo_pdb": "1G5M", "apo_chain": "A",
         "holo_pdb": "6O0K", "holo_chain": "A",
         "extra_exclude": frozenset(),
-        "citation": "Tse 2008 Cancer Cell; Souers 2013 Nat Med (venetoclax FDA-approved 2016)",
+        "citation": "Tse 2008 Cancer Cell; Souers 2013 Nat Med (venetoclax FDA-approved 2016); Moore 2026 Lacuna",
     },
     {
         "id": "IDH1_R132H",
@@ -328,7 +333,7 @@ DATASET = [
         "apo_pdb": "3MAP", "apo_chain": "A",
         "holo_pdb": "4UMX", "holo_chain": "A",
         "extra_exclude": frozenset({"NAP", "ICT"}),
-        "citation": "Ward 2010 Nature; Rohle 2013 Science (ivosidenib FDA-approved 2018)",
+        "citation": "Ward 2010 Nature; Rohle 2013 Science (ivosidenib FDA-approved 2018); Moore 2026 Lacuna",
     },
     {
         "id": "PKM2_activator",
@@ -342,7 +347,7 @@ DATASET = [
         "apo_pdb": "1ZJH", "apo_chain": "A",
         "holo_pdb": "3U2Z", "holo_chain": "A",
         "extra_exclude": frozenset({"FBP", "OXL", "OXA", "AMP", "ADP", "ATP"}),
-        "citation": "Anastasiou 2012 Cell (TEPP-46 activator class)",
+        "citation": "Anastasiou 2012 Cell (TEPP-46 activator class); Moore 2026 Lacuna",
     },
     {
         "id": "PPARG_allosteric",
@@ -355,7 +360,7 @@ DATASET = [
         "apo_pdb": "2PRG", "apo_chain": "A",
         "holo_pdb": "4PVU", "holo_chain": "A",
         "extra_exclude": frozenset({"RSG", "RLX"}),
-        "citation": "Nettles 2008 PNAS; Bruning 2007 Structure (metaglidasen Phase 3)",
+        "citation": "Nettles 2008 PNAS; Bruning 2007 Structure (metaglidasen Phase 3); Moore 2026 Lacuna",
     },
     {
         "id": "MMP13_allosteric",
@@ -369,7 +374,7 @@ DATASET = [
         "apo_pdb": "2OZR", "apo_chain": "A",
         "holo_pdb": "3I7G", "holo_chain": "A",
         "extra_exclude": frozenset({"GG1", "HAE", "ZN", "CA"}),
-        "citation": "Engel 2005 J Med Chem; Becker 2010 Nat Chem Biol",
+        "citation": "Engel 2005 J Med Chem; Becker 2010 Nat Chem Biol; Moore 2026 Lacuna",
     },
 ]
 
@@ -733,6 +738,7 @@ def main():
     with open(out_path, "w") as f:
         json.dump(results, f, indent=2, default=str)
     print(f"\n  Full results → {out_path}")
+    print(f"\n  Tool citation: {TOOL_CITATION}")
 
 
 if __name__ == "__main__":
