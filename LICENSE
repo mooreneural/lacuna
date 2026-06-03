@@ -1,21 +1,34 @@
-MIT License
-
-Copyright (c) 2025 Clayton Moore
+Lacuna Non-Commercial License
+Copyright (c) 2025 Clayton Moore. All rights reserved.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+of this software and associated documentation files (the "Software"), to use,
+copy, modify, and distribute the Software solely for non-commercial purposes,
+subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. NON-COMMERCIAL USE ONLY. "Non-commercial" means academic research,
+   education, personal projects, and non-profit work where the Software is
+   not used to generate revenue, provide a commercial service, or support a
+   for-profit product or pipeline. Use by a for-profit entity — including
+   internal research use at a company — requires a separate written commercial
+   license from the copyright holder.
+
+2. ATTRIBUTION. All copies or substantial portions of the Software must
+   include this license notice and the following attribution:
+   "Lacuna — cryptic pocket discovery (https://github.com/mooreneural/lacuna)"
+
+3. SHARE-ALIKE. Any modified versions of the Software distributed for
+   non-commercial purposes must be released under this same license.
+
+4. NO SUBLICENSING. You may not sublicense the Software or grant third parties
+   rights beyond those granted here.
+
+5. COMMERCIAL LICENSING. To obtain a commercial license, contact:
+   claytonwaynemoore@gmail.com
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

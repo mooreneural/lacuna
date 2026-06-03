@@ -8,13 +8,13 @@ version = "0.1.0"
 description = "Cryptic binding pocket discovery via conformational ensemble analysis"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
-authors = [{ name = "Lacuna Contributors" }]
+license = { text = "Lacuna Non-Commercial License" }
+authors = [{ name = "Clayton Moore" }]
 keywords = ["drug-discovery", "protein-structure", "cryptic-pockets", "cheminformatics"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
+    "License :: Other/Proprietary License",
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
     "Topic :: Scientific/Engineering :: Chemistry",
