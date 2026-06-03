@@ -197,6 +197,45 @@ DATASET = [
         "extra_exclude": frozenset({"NADP", "NAP", "NAI"}),
         "citation": "Bolin 1982",
     },
+
+    # ── ADDITIONAL CRYPTIC POCKETS (round 2) ──────────────────────────────────
+
+    {
+        "id": "BCLXL",
+        "name": "BCL-XL BH3-binding groove (navitoclax/ABT-737)",
+        "category": "cryptic",
+        "apo_pdb": "1LXL", "apo_chain": "A",  # C-terminal helix occludes groove
+        "holo_pdb": "2YXJ", "holo_chain": "A",  # N3C = ABT-737 (112 atoms)
+        "extra_exclude": frozenset(),
+        "citation": "Oltersdorf 2005; Tse 2008",
+    },
+    {
+        "id": "HIF2a",
+        "name": "HIF-2α PAS-B internal cavity (belzutifan/PT2385)",
+        "category": "cryptic",
+        "apo_pdb": "3F1O", "apo_chain": "A",  # endogenous-ligand state
+        "holo_pdb": "5TBM", "holo_chain": "A",  # 79A = PT2385 (26 atoms); FDA-approved
+        "extra_exclude": frozenset(),
+        "citation": "Scheuermann 2009; Courtney 2018",
+    },
+    {
+        "id": "CASP1",
+        "name": "Caspase-1 allosteric dimer-interface pocket",
+        "category": "cryptic",
+        "apo_pdb": "2HBQ", "apo_chain": "A",  # active site inhibitor PHQ; allosteric site empty
+        "holo_pdb": "3NKT", "holo_chain": "A",  # 1HN = allosteric inhibitor (14 atoms)
+        "extra_exclude": frozenset(),
+        "citation": "Scheer 2006; Datta 2008",
+    },
+    {
+        "id": "ERK2",
+        "name": "ERK2 allosteric binding site",
+        "category": "cryptic",
+        "apo_pdb": "2ERK", "apo_chain": "A",  # active phospho-ERK2, no allosteric ligand
+        "holo_pdb": "4QTA", "holo_chain": "A",  # 38Z = allosteric inhibitor (44 atoms)
+        "extra_exclude": frozenset(),
+        "citation": "Hancock 2015",
+    },
 ]
 
 

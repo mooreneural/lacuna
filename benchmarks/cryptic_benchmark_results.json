@@ -8,7 +8,7 @@
     "overlap": 1.0,
     "rank": 1,
     "n_clusters": 39,
-    "elapsed_s": 0.95,
+    "elapsed_s": 0.93,
     "n_known_residues": 8
   },
   {
@@ -20,7 +20,7 @@
     "overlap": 0.929,
     "rank": 4,
     "n_clusters": 46,
-    "elapsed_s": 2.64,
+    "elapsed_s": 2.67,
     "n_known_residues": 14
   },
   {
@@ -32,7 +32,7 @@
     "overlap": 0.214,
     "rank": 2,
     "n_clusters": 37,
-    "elapsed_s": 0.68,
+    "elapsed_s": 0.7,
     "n_known_residues": 14
   },
   {
@@ -44,7 +44,7 @@
     "overlap": 0.304,
     "rank": 3,
     "n_clusters": 110,
-    "elapsed_s": 3.68,
+    "elapsed_s": 3.71,
     "n_known_residues": 23
   },
   {
@@ -67,7 +67,7 @@
     "apo_chain": "A",
     "holo_pdb": "1RTH",
     "holo_chain": "A",
-    "extra_exclude": "frozenset({'AZT', 'MG', 'TMP'})",
+    "extra_exclude": "frozenset({'MG', 'TMP', 'AZT'})",
     "max_residues": 500,
     "citation": "Kohlstaedt 1992; Ren 1995",
     "status": "skip_too_large",
@@ -94,7 +94,7 @@
     "overlap": 0.947,
     "rank": 3,
     "n_clusters": 21,
-    "elapsed_s": 1.11,
+    "elapsed_s": 1.13,
     "n_known_residues": 19
   },
   {
@@ -106,7 +106,7 @@
     "overlap": 0.486,
     "rank": 3,
     "n_clusters": 93,
-    "elapsed_s": 3.11,
+    "elapsed_s": 3.21,
     "n_known_residues": 37
   },
   {
@@ -130,7 +130,7 @@
     "overlap": 1.0,
     "rank": 2,
     "n_clusters": 37,
-    "elapsed_s": 0.6,
+    "elapsed_s": 0.63,
     "n_known_residues": 8
   },
   {
@@ -142,7 +142,7 @@
     "overlap": 1.0,
     "rank": 1,
     "n_clusters": 56,
-    "elapsed_s": 1.11,
+    "elapsed_s": 1.12,
     "n_known_residues": 11
   },
   {
@@ -167,7 +167,7 @@
     "overlap": 0.0,
     "rank": null,
     "n_clusters": 48,
-    "elapsed_s": 1.09,
+    "elapsed_s": 1.1,
     "n_known_residues": 13
   },
   {
@@ -179,7 +179,55 @@
     "overlap": 1.0,
     "rank": 4,
     "n_clusters": 35,
-    "elapsed_s": 0.79,
+    "elapsed_s": 0.8,
     "n_known_residues": 18
+  },
+  {
+    "id": "BCLXL",
+    "name": "BCL-XL BH3-binding groove (navitoclax/ABT-737)",
+    "category": "cryptic",
+    "apo_pdb": "1LXL",
+    "status": "PASS",
+    "overlap": 0.909,
+    "rank": 5,
+    "n_clusters": 50,
+    "elapsed_s": 2.93,
+    "n_known_residues": 22
+  },
+  {
+    "id": "HIF2a",
+    "name": "HIF-2\u03b1 PAS-B internal cavity (belzutifan/PT2385)",
+    "category": "cryptic",
+    "apo_pdb": "3F1O",
+    "status": "PASS",
+    "overlap": 1.0,
+    "rank": 1,
+    "n_clusters": 42,
+    "elapsed_s": 1.63,
+    "n_known_residues": 24
+  },
+  {
+    "id": "CASP1",
+    "name": "Caspase-1 allosteric dimer-interface pocket",
+    "category": "cryptic",
+    "apo_pdb": "2HBQ",
+    "status": "MISS",
+    "overlap": 0.083,
+    "rank": 3,
+    "n_clusters": 75,
+    "elapsed_s": 2.24,
+    "n_known_residues": 12
+  },
+  {
+    "id": "ERK2",
+    "name": "ERK2 allosteric binding site",
+    "category": "cryptic",
+    "apo_pdb": "2ERK",
+    "status": "MISS",
+    "overlap": 0.269,
+    "rank": 1,
+    "n_clusters": 89,
+    "elapsed_s": 2.89,
+    "n_known_residues": 26
   }
 ]
