@@ -249,7 +249,7 @@ Accepts PDB or mmCIF from any predictor or database:
 
 If you use Lacuna in published research, please cite:
 
-> Moore, C.W. (2026). *Lacuna: Cryptic Binding Pocket Discovery via Conformational Ensemble Analysis.* https://github.com/mooreneural/lacuna
+> Moore, C. (2026). *Lacuna: Cryptic Binding Pocket Discovery via Conformational Ensemble Analysis.* https://github.com/mooreneural/lacuna
 
 **BibTeX:**
 ```bibtex
