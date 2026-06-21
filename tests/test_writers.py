@@ -63,6 +63,27 @@ class TestWriteReport:
             assert p["cryptic"] is True
             assert p["rank"] == 1
 
+    def test_report_includes_crypticity_fields(self):
+        from lacuna.io.writers import write_report
+        c = PocketCluster(
+            rank=1, centroid=(0.0, 0.0, 0.0), volume_a3=300.0,
+            druggability=0.6, max_druggability=0.8, persistence=0.4,
+            cryptic=True, crypticity=0.55, apo_volume_a3=0.0,
+            volume_min_a3=120.0, volume_max_a3=400.0,
+            lining_residues=["ALA1:A"], appears_in_conformers=[1, 2],
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out = write_report([c], _make_structure(), n_conformers=5,
+                               output_dir=Path(tmpdir), rank_by="crypticity")
+            data = json.loads(out.read_text())
+            assert data["ranked_by"] == "crypticity"
+            assert data["n_cryptic_pockets"] == 1
+            p = data["pockets"][0]
+            assert p["crypticity"] == pytest.approx(0.55, abs=0.01)
+            assert p["max_druggability"] == pytest.approx(0.8, abs=0.01)
+            assert p["apo_volume_A3"] == 0.0
+            assert p["volume_range_A3"] == [120.0, 400.0]
+
 
 class TestWriteVinaBox:
     def test_creates_conf_file(self):

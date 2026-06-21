@@ -532,14 +532,35 @@ def residue_overlap(cluster_residues: list[str], known: set[int]) -> float:
 
 # ── Lacuna runner ──────────────────────────────────────────────────────────────
 
-def run_lacuna(pdb_path: Path, n_conformers: int, chain: str | None = None) -> tuple[list, float]:
+def _make_backend(name: str):
+    if name == "nma":
+        from lacuna.ensemble.nma_backend import NMABackend
+        return NMABackend(seed=42)
+    if name == "random":
+        from lacuna.ensemble.random_backend import RandomBackend
+        return RandomBackend(seed=42)
+    if name == "openmm":
+        from lacuna.ensemble.openmm_backend import OpenMMBackend
+        return OpenMMBackend()
+    if name == "boltz":
+        from lacuna.ensemble.boltz_backend import BoltzBackend
+        return BoltzBackend()
+    raise ValueError(f"Unknown backend {name!r}")
+
+
+def run_lacuna(
+    pdb_path: Path,
+    n_conformers: int,
+    chain: str | None = None,
+    backend_name: str = "nma",
+    rank_by: str = "druggability",
+) -> tuple[list, float]:
     from lacuna.io.structure import load_structure, coords_array
-    from lacuna.ensemble.random_backend import RandomBackend
     from lacuna.pockets.detector import detect_pockets
     from lacuna.pockets.clusterer import cluster_pockets
 
     structure = load_structure(pdb_path, chain=chain)
-    backend = RandomBackend(seed=42)
+    backend = _make_backend(backend_name)
 
     t0 = time.perf_counter()
     coord_sets = backend.generate(pdb_path, n_conformers=n_conformers, chain=chain)
@@ -553,7 +574,7 @@ def run_lacuna(pdb_path: Path, n_conformers: int, chain: str | None = None) -> t
             p.conformer_idx = ci
         pocket_lists.append(pockets)
 
-    clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coords))
+    clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coords), rank_by=rank_by)
     elapsed = time.perf_counter() - t0
     return clusters, elapsed
 
@@ -568,6 +589,13 @@ def main():
     parser.add_argument("--category", choices=["cryptic", "conformational",
                                                 "orthosteric", "all"],
                         default="all")
+    parser.add_argument("--backend", choices=["nma", "random", "openmm", "boltz"],
+                        default="nma",
+                        help="Ensemble backend (default: nma — the package default)")
+    parser.add_argument("--rank-by", dest="rank_by",
+                        choices=["druggability", "persistence", "balanced", "crypticity"],
+                        default="druggability",
+                        help="Pocket ranking strategy (default: druggability)")
     args = parser.parse_args()
 
     n_conf = 10 if args.quick else args.conformers
@@ -581,6 +609,7 @@ def main():
 
     print("=" * 70)
     print(f"  LACUNA — CRYPTIC POCKET BENCHMARK  ({len(entries)} proteins, {n_conf} conformers)")
+    print(f"  backend={args.backend}  rank_by={args.rank_by}")
     print("=" * 70)
 
     results = []
@@ -645,7 +674,10 @@ def main():
             pass
 
         try:
-            clusters, elapsed = run_lacuna(apo_path, n_conf, chain=apo_chain)
+            clusters, elapsed = run_lacuna(
+                apo_path, n_conf, chain=apo_chain,
+                backend_name=args.backend, rank_by=args.rank_by,
+            )
         except Exception as e:
             print(f"  [ERROR] Lacuna failed: {e}")
             results.append({**entry, "status": "error", "error": str(e)})
@@ -725,10 +757,30 @@ def main():
 
     cryptic_rows = [r for r in ran if r.get("category") == "cryptic"]
     cr_pass = sum(1 for r in cryptic_rows if r["status"] == "PASS")
+
+    # Per-metric transparency: how many pass by the strict centroid criterion vs
+    # the (more permissive) residue-overlap criterion vs either. Reported so the
+    # headline OR-number cannot be mistaken for a strict-centroid result.
+    def _metric_counts(rows):
+        dist = sum(1 for r in rows if (r.get("centroid_dist_A") or 1e9) <= CENTROID_THRESHOLD)
+        ov = sum(1 for r in rows if (r.get("overlap") or 0.0) >= OVERLAP_THRESHOLD)
+        either = sum(1 for r in rows if r["status"] == "PASS")
+        return dist, ov, either
+
     print(f"\n{'─'*70}")
     print(f"  CRYPTIC ONLY (primary headline): {cr_pass}/{len(cryptic_rows)}")
     print(f"  TOTAL (all categories): {grand_pass}/{grand_total}")
-    print(f"  Success criterion: pocket centroid ≤ {CENTROID_THRESHOLD} Å from site centroid")
+    print(f"  Success criterion (top-5, OR): centroid ≤ {CENTROID_THRESHOLD} Å from "
+          f"site centroid  OR  residue overlap ≥ {OVERLAP_THRESHOLD:.0%}")
+    print(f"\n  Per-metric breakdown (transparency):")
+    print(f"    {'category':16s}  centroid≤{CENTROID_THRESHOLD:.0f}Å  overlap≥{OVERLAP_THRESHOLD:.0%}   either")
+    for cat in categories + ["__all__"]:
+        rows = ran if cat == "__all__" else [r for r in ran if r.get("category") == cat]
+        if not rows:
+            continue
+        dist, ov, either = _metric_counts(rows)
+        label = "ALL" if cat == "__all__" else cat
+        print(f"    {label:16s}  {dist:8d}    {ov:7d}   {either:5d}   (n={len(rows)})")
     if skipped:
         print(f"  Skipped: {len(skipped)} "
               f"({', '.join(s['id'] for s in skipped)})")

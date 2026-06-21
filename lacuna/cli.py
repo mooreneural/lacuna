@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Clayton Moore
 """Lacuna CLI — cryptic binding pocket discovery."""
 
 from __future__ import annotations
@@ -80,6 +82,19 @@ def main():
               help="Write pocket pseudoatom PDB files for visualization.")
 @click.option("--top", default=10, show_default=True,
               help="Maximum number of pockets to report.")
+@click.option(
+    "--rank-by", "rank_by",
+    type=click.Choice(["druggability", "persistence", "balanced", "crypticity"]),
+    default="druggability", show_default=True,
+    help=(
+        "Pocket ranking strategy. 'druggability' ranks by peak open-state "
+        "druggability; 'crypticity' surfaces transiently-open cryptic sites "
+        "first; 'balanced' adds a mild persistence bonus; 'persistence' is the "
+        "legacy persistence x druggability rule."
+    ),
+)
+@click.option("--min-crypticity", default=0.0, show_default=True,
+              help="Filter: minimum crypticity score [0-1].")
 @click.option("--quiet", is_flag=True, default=False, help="Suppress progress output.")
 @click.option(
     "--homodimer", is_flag=True, default=False,
@@ -101,6 +116,8 @@ def discover(
     emit_vina_boxes: bool,
     emit_pocket_pdbs: bool,
     top: int,
+    rank_by: str,
+    min_crypticity: float,
     quiet: bool,
     homodimer: bool,
 ):
@@ -196,19 +213,21 @@ def discover(
         console.print("\n[dim]Clustering and ranking pockets...[/dim]")
 
     # Cluster across ensemble
-    clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coord_sets))
+    clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coord_sets), rank_by=rank_by)
 
     # Apply filters
     clusters = [
         c for c in clusters
-        if c.druggability >= min_druggability and c.persistence >= min_persistence
+        if c.druggability >= min_druggability
+        and c.persistence >= min_persistence
+        and c.crypticity >= min_crypticity
     ][:top]
 
     if not quiet:
         console.print(f"  [dim]{len(clusters)} pocket clusters after filtering.[/dim]\n")
 
     # Write outputs
-    report_path = write_report(clusters, structure, len(all_coord_sets), output_dir)
+    report_path = write_report(clusters, structure, len(all_coord_sets), output_dir, rank_by=rank_by)
 
     written: list[str] = [f"[green]{report_path.name}[/green]"]
 
@@ -300,24 +319,30 @@ def _print_table(clusters: list) -> None:
     table = Table(title="Discovered Pockets", show_lines=True)
     table.add_column("Rank", style="bold", justify="right")
     table.add_column("Druggability", justify="right")
+    table.add_column("Crypticity", justify="right")
     table.add_column("Persistence", justify="right")
     table.add_column("Volume (Å³)", justify="right")
-    table.add_column("Cryptic", justify="center")
     table.add_column("Key Residues")
 
     for c in clusters:
-        cryptic_str = "[bold yellow]YES[/bold yellow]" if c.cryptic else "no"
-        drug_color = "green" if c.druggability > 0.6 else ("yellow" if c.druggability > 0.3 else "red")
+        drug = max(c.druggability, c.max_druggability)
+        drug_color = "green" if drug > 0.6 else ("yellow" if drug > 0.3 else "red")
+        cryp_color = "bold yellow" if c.crypticity > 0.4 else ("yellow" if c.crypticity > 0.2 else "dim")
+        # Show volume as apo -> open when the pocket breathes meaningfully.
+        if c.volume_max_a3 - c.volume_min_a3 > 50:
+            vol_str = f"{c.apo_volume_a3:.0f} -> {c.volume_max_a3:.0f}"
+        else:
+            vol_str = f"{c.volume_a3:.0f}"
         key_res = ", ".join(c.lining_residues[:5])
         if len(c.lining_residues) > 5:
             key_res += f" (+{len(c.lining_residues) - 5})"
 
         table.add_row(
             str(c.rank),
-            f"[{drug_color}]{c.druggability:.3f}[/{drug_color}]",
+            f"[{drug_color}]{drug:.3f}[/{drug_color}]",
+            f"[{cryp_color}]{c.crypticity:.2f}[/{cryp_color}]",
             f"{c.persistence:.0%}",
-            f"{c.volume_a3:.0f}",
-            cryptic_str,
+            vol_str,
             key_res,
         )
 

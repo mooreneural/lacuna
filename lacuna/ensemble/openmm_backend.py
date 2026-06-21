@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Clayton Moore
 """OpenMM implicit-solvent MD ensemble backend.
 
 Runs short MD trajectories (~100 ps) at physiological temperature using

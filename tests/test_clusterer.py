@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from lacuna.models import Atom, Residue, Structure, Pocket
-from lacuna.pockets.clusterer import cluster_pockets
+from lacuna.pockets.clusterer import cluster_pockets, compute_crypticity
 
 
 def _make_pocket(centroid, volume=200.0, conformer_idx=0, lining=None):
@@ -86,3 +86,70 @@ class TestClusterPockets:
         clusters = cluster_pockets([[p1], [p2]], n_conformers=2)
         assert len(clusters) == 1
         assert "ALA1:A" in clusters[0].lining_residues or "GLY2:A" in clusters[0].lining_residues
+
+
+class TestComputeCrypticity:
+    def test_absent_in_apo_is_maximally_cryptic(self):
+        """A pocket absent in the apo state scores crypticity == druggability-when-open."""
+        assert compute_crypticity(apo_volume=0.0, max_volume=300.0,
+                                  max_druggability=0.8) == pytest.approx(0.8)
+
+    def test_constitutive_pocket_is_not_cryptic(self):
+        """A pocket the same size in apo and open states is not cryptic."""
+        assert compute_crypticity(apo_volume=300.0, max_volume=300.0,
+                                  max_druggability=0.9) == 0.0
+
+    def test_partial_opening(self):
+        """Half-opening yields half-weighted crypticity."""
+        # opening = (300-150)/300 = 0.5 -> crypticity = 0.5 * 0.6 = 0.3
+        assert compute_crypticity(apo_volume=150.0, max_volume=300.0,
+                                  max_druggability=0.6) == pytest.approx(0.3)
+
+    def test_zero_volume_is_safe(self):
+        assert compute_crypticity(apo_volume=0.0, max_volume=0.0,
+                                  max_druggability=0.5) == 0.0
+
+
+class TestCrypticityIntegration:
+    def _scenario(self):
+        """Constitutive pocket C (always open) + cryptic pocket X (absent in apo)."""
+        constitutive = [
+            [_make_pocket((0.0, 0.0, 0.0), volume=300.0, conformer_idx=i)]
+            for i in range(4)
+        ]
+        # X absent from conformer 0, appears in 1,2,3
+        cryptic = [[],
+                   [_make_pocket((40.0, 0.0, 0.0), volume=300.0, conformer_idx=1)],
+                   [_make_pocket((40.0, 0.0, 0.0), volume=300.0, conformer_idx=2)],
+                   [_make_pocket((40.0, 0.0, 0.0), volume=300.0, conformer_idx=3)]]
+        pocket_lists = [constitutive[i] + cryptic[i] for i in range(4)]
+        return pocket_lists
+
+    def _by_centroid(self, clusters, x):
+        return next(c for c in clusters if abs(c.centroid[0] - x) < 1.0)
+
+    def test_cryptic_pocket_has_higher_crypticity(self):
+        clusters = cluster_pockets(self._scenario(), n_conformers=4)
+        C = self._by_centroid(clusters, 0.0)
+        X = self._by_centroid(clusters, 40.0)
+        assert X.crypticity > C.crypticity
+        assert C.crypticity == 0.0  # constitutive
+        assert X.apo_volume_a3 == 0.0  # absent in apo
+
+    def test_crypticity_ranking_surfaces_cryptic_first(self):
+        clusters = cluster_pockets(self._scenario(), n_conformers=4, rank_by="crypticity")
+        assert abs(clusters[0].centroid[0] - 40.0) < 1.0  # X ranks first
+
+    def test_balanced_ranking_favors_persistent(self):
+        clusters = cluster_pockets(self._scenario(), n_conformers=4, rank_by="balanced")
+        assert abs(clusters[0].centroid[0] - 0.0) < 1.0  # constitutive C ranks first
+
+    def test_volume_dynamics_recorded(self):
+        clusters = cluster_pockets(self._scenario(), n_conformers=4)
+        for c in clusters:
+            assert c.volume_min_a3 <= c.volume_a3 <= c.volume_max_a3
+            assert c.max_druggability >= c.druggability - 1e-9
+
+    def test_invalid_rank_by_raises(self):
+        with pytest.raises(ValueError):
+            cluster_pockets(self._scenario(), n_conformers=4, rank_by="nonsense")

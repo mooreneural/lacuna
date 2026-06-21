@@ -32,11 +32,12 @@ problems in computational drug discovery.
 Lacuna addresses this by generating a conformational ensemble from any input
 structure, detecting surface pockets in every conformer via a grid-based
 alpha-sphere algorithm, clustering matched pockets across the ensemble, and
-ranking sites by persistence (fraction of conformers in which the pocket
-appears) and druggability. Sites present in fewer than 90% of conformers are
-flagged `cryptic: true`. Output includes ranked JSON reports, visualization
-PDB files, and ready-to-use docking input files for AutoDock Vina/Gnina and
-Boltz-2.
+ranking sites by their peak open-state druggability. Each site additionally
+receives a continuous *crypticity* score capturing how much it opens relative to
+the apo state and how druggable it is once open, and is flagged `cryptic: true`
+if it is present in fewer than 90% of conformers. Output includes ranked JSON
+reports, visualization PDB files, and ready-to-use docking input files for
+AutoDock Vina/Gnina and Boltz-2.
 
 # Statement of Need
 
@@ -101,10 +102,15 @@ compute pocket volume, surface enclosure, and residue lining.
 Each pocket cluster is scored by a composite druggability metric adapted from
 Halgren's SiteMap [@halgren2009] and extended with enclosure [@schmidtke2011]:
 a Gaussian volume reward centered at 300 Å³, enclosure fraction (buriedness),
-hydrophobic residue fraction, and aromatic residue count. Pockets are ranked by
-this composite score. A pocket is marked `cryptic: true` if it appears in fewer
-than 90% of ensemble conformers, indicating that it is absent in the ground
-state and transiently accessible.
+hydrophobic residue fraction, and aromatic residue count. By default pockets are
+ranked by their peak open-state composite score — the druggability evaluated in
+the most-open conformer, which is the relevant figure for a transiently-open
+cryptic site (alternative rankings by persistence, a balanced combination, or
+crypticity are available). A pocket is marked `cryptic: true` if it appears in
+fewer than 90% of ensemble conformers, and is assigned a continuous crypticity
+score in [0, 1], `((max_volume − apo_volume) / max_volume) × max_druggability`,
+which is ≈ 0 for a constitutive site already formed in the apo structure and near
+1 for a site that is absent in the apo state but opens into a druggable cavity.
 
 ## Dimer Interface Pockets
 
@@ -118,13 +124,17 @@ IDH1 R132H.
 ## Benchmark
 
 On a 20-protein benchmark drawn from the CryptoSite dataset [@cimermancic2016],
-Lacuna detects 14/20 cryptic pockets (70%) using the NMA backend with 20
-conformers, matching the published CryptoSite benchmark rate. The six misses
-divide into near-misses that improve to passing with the Boltz backend (IL-2:
-21% → 71%) and dimer-interface pockets addressable with `--homodimer`. Across
-27 diverse proteins including conformational and orthosteric controls, the
-overall detection rate is 19/27 (70%). Runtime on the NMA backend is 0.6–8 s
-per protein on a laptop CPU.
+Lacuna detects 17/20 cryptic pockets (85%) using the NMA backend with 20
+conformers, exceeding the published CryptoSite benchmark rate. A pocket counts as
+detected if, among the top five ranked clusters, one has a centroid within 4 Å of
+the binding-site centroid or shares at least 30% of the known binding residues;
+the residue-overlap criterion (as used by CryptoSite) is the primary metric, and
+`cryptic_benchmark.py` reports the per-metric breakdown. The three remaining
+misses are all oligomeric-interface pockets (Caspase-1, IDH1 R132H, PKM2) that
+form between subunits and are addressable with the `--homodimer` flag, which
+builds the biological assembly before analysis. Across 27 diverse proteins
+including conformational and orthosteric controls, the overall detection rate is
+23/27 (85%). Runtime on the NMA backend is 0.6–8 s per protein on a laptop CPU.
 
 # Acknowledgements
 

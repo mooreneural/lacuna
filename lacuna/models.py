@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Clayton Moore
 """Core data models for Lacuna pocket discovery."""
 
 from __future__ import annotations
@@ -69,6 +71,18 @@ class PocketCluster:
     cryptic: bool               # True if persistence < 0.9
     lining_residues: list[str]
     appears_in_conformers: list[int]
+    # Ensemble volume dynamics — how the pocket breathes across conformers.
+    volume_min_a3: float = 0.0
+    volume_max_a3: float = 0.0
+    # Peak druggability over the ensemble (the pocket scored in its most-open
+    # state, which is the relevant value for a transiently-open cryptic site).
+    max_druggability: float = 0.0
+    # Volume in the input/apo structure (conformer 0); 0.0 if absent there.
+    apo_volume_a3: float = 0.0
+    # Continuous crypticity score [0,1]: how strongly this pocket exhibits the
+    # conformational-selection signature of a cryptic site (opens up relative to
+    # the apo state and is druggable when open). See clusterer.compute_crypticity.
+    crypticity: float = 0.0
     member_pockets: list[Pocket] = field(default_factory=list, repr=False)
 
     def to_dict(self) -> dict:
@@ -76,9 +90,13 @@ class PocketCluster:
             "rank": self.rank,
             "centroid": list(self.centroid),
             "volume_A3": round(self.volume_a3, 1),
+            "volume_range_A3": [round(self.volume_min_a3, 1), round(self.volume_max_a3, 1)],
+            "apo_volume_A3": round(self.apo_volume_a3, 1),
             "druggability": round(self.druggability, 3),
+            "max_druggability": round(self.max_druggability, 3),
             "persistence": round(self.persistence, 3),
             "cryptic": self.cryptic,
+            "crypticity": round(self.crypticity, 3),
             "lining_residues": self.lining_residues,
             "appears_in_conformers": self.appears_in_conformers,
         }

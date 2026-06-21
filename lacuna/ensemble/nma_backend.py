@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Clayton Moore
 """Elastic network model ensemble backend using anisotropic normal mode analysis.
 
 Generates physically meaningful conformational diversity by displacing along
