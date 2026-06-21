@@ -10,7 +10,7 @@ date-released: 2026-06-21
 url: "https://github.com/mooreneural/lacuna"
 repository-code: "https://github.com/mooreneural/lacuna"
 license: "AGPL-3.0-or-later"
-doi: "10.5281/zenodo.20533639"
+doi: "10.5281/zenodo.20533638"
 abstract: >
   Lacuna discovers cryptic binding pockets in proteins by generating a
   conformational ensemble, detecting pockets per conformer, clustering
