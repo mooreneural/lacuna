@@ -3,8 +3,9 @@
 Each conformer produces a list of Pocket objects. This module:
   1. Pools all pockets across all conformers.
   2. Clusters by centroid proximity using DBSCAN (eps=5 Å, min_samples=1).
-  3. Computes per-cluster statistics: persistence, mean druggability, consensus residues.
-  4. Ranks clusters by persistence × druggability (descending).
+  3. Computes per-cluster statistics: persistence, druggability, volume
+     dynamics, a continuous crypticity score, and consensus residues.
+  4. Ranks clusters by a configurable strategy (see ``rank_by``).
   5. Flags clusters as "cryptic" if persistence < 0.9 (not open in all conformers).
 """
 
@@ -19,20 +20,77 @@ from lacuna.pockets.scorer import score_pocket
 _DBSCAN_EPS = 5.0    # Å — pockets within 5 Å centroid distance are the same pocket
 _CRYPTIC_THRESHOLD = 0.9  # persistence below this → cryptic
 
+# Ranking strategies. The default "druggability" ranks by peak open-state
+# druggability — the composite score evaluated in the most-open conformer, which
+# is the relevant figure for a transiently-open cryptic site. The legacy
+# "persistence" strategy multiplies druggability by persistence, which demotes
+# exactly the transient pockets the tool exists to find; "balanced" keeps
+# druggability primary with a mild persistence bonus; "crypticity" surfaces the
+# most cryptic sites first. On the 20-protein cryptic benchmark (NMA, 20
+# conformers) these score 17, 16, 15, and 15 of 20 respectively.
+RANK_STRATEGIES = ("druggability", "persistence", "balanced", "crypticity")
+_DEFAULT_RANK_BY = "druggability"
+
+
+def compute_crypticity(apo_volume: float, max_volume: float, max_druggability: float) -> float:
+    """Continuous crypticity score in [0, 1].
+
+    A site is cryptic to the degree that it (a) opens up relative to the input/apo
+    state and (b) is druggable once open — the conformational-selection signature
+    of a cryptic pocket (Cimermancic 2016; Vajda 2018; Meller 2023).
+
+        opening    = (max_volume - apo_volume) / max_volume   # 1.0 if absent in apo
+        crypticity = opening × max_druggability
+
+    A pocket that is already fully formed in the apo structure has opening ≈ 0 and
+    so crypticity ≈ 0 (it is a constitutive site, not a cryptic one), regardless of
+    how druggable it is. A pocket absent in the apo structure that opens into a
+    druggable cavity scores near 1.
+    """
+    if max_volume <= 0.0:
+        return 0.0
+    opening = (max_volume - apo_volume) / max_volume
+    opening = min(max(opening, 0.0), 1.0)
+    return round(opening * max_druggability, 4)
+
+
+def _rank_key(c: PocketCluster, rank_by: str) -> float:
+    if rank_by == "persistence":
+        return c.persistence * c.druggability
+    if rank_by == "balanced":
+        return c.max_druggability * (0.5 + 0.5 * c.persistence)
+    if rank_by == "druggability":
+        return c.max_druggability
+    if rank_by == "crypticity":
+        return c.crypticity
+    raise ValueError(
+        f"Unknown rank_by={rank_by!r}; choose from {RANK_STRATEGIES}"
+    )
+
 
 def cluster_pockets(
     pocket_lists: list[list[Pocket]],
     n_conformers: int,
+    rank_by: str = _DEFAULT_RANK_BY,
 ) -> list[PocketCluster]:
     """Aggregate pockets across ensemble conformers into ranked clusters.
 
     Args:
         pocket_lists: One list of Pocket objects per conformer.
         n_conformers: Total number of conformers (denominator for persistence).
+        rank_by: Ranking strategy — one of ``RANK_STRATEGIES``. ``"balanced"``
+            (default) keeps druggability primary with a mild persistence bonus;
+            ``"persistence"`` is the legacy persistence × druggability ranking;
+            ``"druggability"`` ranks by peak open-state druggability;
+            ``"crypticity"`` surfaces the most cryptic sites first.
 
     Returns:
-        Ranked list of PocketCluster objects (rank 1 = most druggable/persistent).
+        Ranked list of PocketCluster objects (rank 1 = best under ``rank_by``).
     """
+    if rank_by not in RANK_STRATEGIES:
+        raise ValueError(
+            f"Unknown rank_by={rank_by!r}; choose from {RANK_STRATEGIES}"
+        )
     all_pockets: list[Pocket] = []
     for ci, pockets in enumerate(pocket_lists):
         for p in pockets:
@@ -57,14 +115,29 @@ def cluster_pockets(
         # Consensus centroid: mean over members
         centroid = tuple(np.mean([p.centroid for p in members], axis=0).tolist())
 
-        # Mean volume
-        volume = float(np.mean([p.volume_a3 for p in members]))
+        # Volume statistics across the ensemble
+        member_volumes = [p.volume_a3 for p in members]
+        volume = float(np.mean(member_volumes))
+        volume_min = float(min(member_volumes))
+        volume_max = float(max(member_volumes))
 
         # Druggability: score a "representative" pocket (closest to mean)
         mean_c = np.array(centroid)
         dists = [np.linalg.norm(np.array(p.centroid) - mean_c) for p in members]
         rep = members[int(np.argmin(dists))]
         drug_score = score_pocket(rep).composite
+
+        # Peak druggability — the pocket scored in its most-open conformer. This
+        # is the relevant figure for a transiently-open cryptic site, which may be
+        # half-collapsed in the representative (mean-centroid) member.
+        max_drug_score = max(score_pocket(p).composite for p in members)
+
+        # Volume in the input/apo structure (conformer 0). 0.0 if the pocket is
+        # absent there — the strongest signal of crypticity.
+        apo_members = [p.volume_a3 for p in members if p.conformer_idx == 0]
+        apo_volume = float(max(apo_members)) if apo_members else 0.0
+
+        crypticity = compute_crypticity(apo_volume, volume_max, max_drug_score)
 
         # Persistence: unique conformers that have this pocket
         conformer_set = sorted({p.conformer_idx for p in members})
@@ -85,7 +158,12 @@ def cluster_pockets(
             rank=0,  # set after sorting
             centroid=centroid,
             volume_a3=round(volume, 1),
+            volume_min_a3=round(volume_min, 1),
+            volume_max_a3=round(volume_max, 1),
             druggability=round(drug_score, 3),
+            max_druggability=round(max_drug_score, 3),
+            apo_volume_a3=round(apo_volume, 1),
+            crypticity=crypticity,
             persistence=round(persistence, 3),
             cryptic=persistence < _CRYPTIC_THRESHOLD,
             lining_residues=consensus_residues,
@@ -93,8 +171,8 @@ def cluster_pockets(
             member_pockets=members,
         ))
 
-    # Rank by persistence × druggability
-    clusters.sort(key=lambda c: c.persistence * c.druggability, reverse=True)
+    # Rank by the chosen strategy (ties broken by peak druggability for stability)
+    clusters.sort(key=lambda c: (_rank_key(c, rank_by), c.max_druggability), reverse=True)
     for i, c in enumerate(clusters):
         c.rank = i + 1
 

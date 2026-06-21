@@ -57,13 +57,12 @@ def main(pdb_path: str):
     print(f"\nFound {len(clusters)} pocket clusters.\n")
 
     # Print top 5
-    print(f"{'Rank':<6}{'Druggability':<14}{'Persistence':<13}{'Volume(Å³)':<12}{'Cryptic':<10}Key Residues")
+    print(f"{'Rank':<6}{'Druggability':<14}{'Crypticity':<12}{'Persistence':<13}{'Volume(Å³)':<12}Key Residues")
     print("-" * 75)
     for c in clusters[:5]:
         res_str = ", ".join(c.lining_residues[:4])
-        crypt = "YES" if c.cryptic else "no"
-        print(f"{c.rank:<6}{c.druggability:<14.3f}{c.persistence:<13.0%}"
-              f"{c.volume_a3:<12.0f}{crypt:<10}{res_str}")
+        print(f"{c.rank:<6}{max(c.druggability, c.max_druggability):<14.3f}"
+              f"{c.crypticity:<12.2f}{c.persistence:<13.0%}{c.volume_a3:<12.0f}{res_str}")
 
     # Check if switch-II region appears in top 3
     switch_ii = {"25", "26", "27", "28", "29", "30", "31", "32",

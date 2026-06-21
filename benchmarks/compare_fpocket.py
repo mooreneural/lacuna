@@ -156,12 +156,12 @@ def run_fpocket(pdb_path: Path, chain: str) -> list[dict]:
 
 def run_lacuna(pdb_path: Path) -> tuple[list, float]:
     from lacuna.io.structure import load_structure, coords_array
-    from lacuna.ensemble.random_backend import RandomBackend
+    from lacuna.ensemble.nma_backend import NMABackend
     from lacuna.pockets.detector import detect_pockets
     from lacuna.pockets.clusterer import cluster_pockets
 
     structure = load_structure(pdb_path)
-    backend = RandomBackend(seed=42)
+    backend = NMABackend(seed=42)
 
     t0 = time.perf_counter()
     coord_sets = backend.generate(pdb_path, n_conformers=DEFAULT_CONFORMERS)

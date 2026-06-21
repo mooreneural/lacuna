@@ -13,12 +13,15 @@ def write_report(
     structure: Structure,
     n_conformers: int,
     output_dir: Path,
+    rank_by: str = "druggability",
 ) -> Path:
     """Write pocket_report.json with ranked cluster metadata."""
     report = {
         "protein": structure.path,
         "n_conformers": n_conformers,
+        "ranked_by": rank_by,
         "n_pockets_found": len(clusters),
+        "n_cryptic_pockets": sum(1 for c in clusters if c.crypticity >= 0.3),
         "pockets": [c.to_dict() for c in clusters],
     }
     out = output_dir / "pocket_report.json"
@@ -42,7 +45,10 @@ def write_pocket_pdb(
     lines = [
         "REMARK  Lacuna pocket pseudoatoms",
         f"REMARK  Rank {cluster.rank}, druggability={cluster.druggability:.3f}, "
-        f"persistence={cluster.persistence:.3f}, cryptic={cluster.cryptic}",
+        f"persistence={cluster.persistence:.3f}, cryptic={cluster.cryptic}, "
+        f"crypticity={cluster.crypticity:.3f}",
+        f"REMARK  Volume {cluster.apo_volume_a3:.0f}->{cluster.volume_max_a3:.0f} A^3 "
+        f"(apo->open)",
         f"REMARK  Lining residues: {', '.join(cluster.lining_residues[:10])}",
     ]
 
@@ -99,7 +105,7 @@ def write_boltz_constraint(
     lines = [
         "# Lacuna-generated Boltz constraint file",
         f"# Pocket rank {cluster.rank}: druggability={cluster.druggability:.3f}, "
-        f"persistence={cluster.persistence:.3f}",
+        f"persistence={cluster.persistence:.3f}, crypticity={cluster.crypticity:.3f}",
         "#",
         "# Replace <SMILES_HERE> with your ligand SMILES string",
         "# Replace <CHAIN_ID> with your protein chain identifier",
@@ -178,7 +184,8 @@ def write_vina_box(
 
     lines = [
         f"# Lacuna pocket {index} — AutoDock Vina box",
-        f"# Rank {cluster.rank}, druggability={cluster.druggability:.3f}",
+        f"# Rank {cluster.rank}, druggability={cluster.druggability:.3f}, "
+        f"crypticity={cluster.crypticity:.3f}",
         f"center_x = {cx:.3f}",
         f"center_y = {cy:.3f}",
         f"center_z = {cz:.3f}",

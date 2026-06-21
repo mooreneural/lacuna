@@ -232,6 +232,39 @@ class TestDiscoverCommand:
         assert result.exit_code == 0, result.output
         assert "2 chains" in result.output
 
+    def test_rank_by_crypticity(self, runner, pocket_pdb, tmp_path):
+        out = tmp_path / "out"
+        result = runner.invoke(main, [
+            "discover", str(pocket_pdb),
+            "--backend", "random", "--conformers", "3",
+            "--rank-by", "crypticity", "--output", str(out),
+        ])
+        assert result.exit_code == 0, result.output
+        data = json.loads((out / "pocket_report.json").read_text())
+        assert data["ranked_by"] == "crypticity"
+        for p in data["pockets"]:
+            assert "crypticity" in p
+            assert 0.0 <= p["crypticity"] <= 1.0
+
+    def test_min_crypticity_filter(self, runner, pocket_pdb, tmp_path):
+        out = tmp_path / "out"
+        runner.invoke(main, [
+            "discover", str(pocket_pdb),
+            "--backend", "random", "--conformers", "3",
+            "--min-crypticity", "0.99", "--output", str(out),
+        ])
+        report = json.loads((out / "pocket_report.json").read_text())
+        for p in report["pockets"]:
+            assert p["crypticity"] >= 0.99
+
+    def test_invalid_rank_by_exits_nonzero(self, runner, mini_pdb, tmp_path):
+        result = runner.invoke(main, [
+            "discover", str(mini_pdb),
+            "--rank-by", "notastrategy",
+            "--output", str(tmp_path / "out"),
+        ])
+        assert result.exit_code != 0
+
     def test_invalid_backend_exits_nonzero(self, runner, mini_pdb, tmp_path):
         result = runner.invoke(main, [
             "discover", str(mini_pdb),

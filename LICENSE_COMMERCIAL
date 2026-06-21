@@ -3,15 +3,23 @@ Lacuna Commercial License Agreement
 Copyright (c) 2026 Clayton Moore. All rights reserved.
 
 This Commercial License Agreement ("Agreement") governs use of the Lacuna
-software ("Software") by for-profit entities and organizations requiring terms
-beyond those provided by the MIT license.
+software ("Software") by entities and organizations requiring terms beyond those
+provided by the GNU Affero General Public License, version 3 or later ("AGPL").
 
-Lacuna is available at no cost under the MIT License for any use. This
-Commercial License provides additional terms — warranties, indemnification,
-support SLAs, and custom integration rights — for organizations that require
-them.
+Lacuna is available at no cost under the AGPL for any use. The AGPL is a strong
+copyleft license: anyone who distributes a modified version of the Software, or
+makes a modified version available to users over a network (e.g. as a hosted or
+SaaS service), must release the complete corresponding source code of that
+version under the AGPL. This Commercial License provides a proprietary-use
+exception to those obligations, together with warranties, indemnification,
+support, and custom development, for organizations that require them.
 
 COMMERCIAL LICENSE PROVIDES:
+
+0. PROPRIETARY-USE EXCEPTION. Licensee may incorporate, link, modify, and deploy
+   the Software in closed-source products and in hosted/network services without
+   the source-disclosure obligations of AGPL sections 5, 6, and 13, subject to
+   the terms of a separately executed agreement.
 
 1. INDEMNIFICATION. Licensor will defend and indemnify Licensee against third-
    party intellectual property claims arising from Licensee's authorized use of
@@ -37,6 +45,6 @@ Contact: claytonwaynemoore@gmail.com
 
 Subject line: "Lacuna Commercial License Inquiry"
 
-The MIT License remains the operative license for all use not covered by a
-separately executed commercial agreement. Nothing in this document restricts
-any rights granted by the MIT License.
+The GNU AGPL-3.0-or-later remains the operative license for all use not covered
+by a separately executed commercial agreement. Nothing in this document
+restricts any rights granted by the AGPL.
