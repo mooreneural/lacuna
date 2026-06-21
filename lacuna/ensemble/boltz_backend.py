@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Clayton Moore
 """Boltz-2 ensemble backend.
 
 Generates a conformational ensemble by running a single `boltz predict` call

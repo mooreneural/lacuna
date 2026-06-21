@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Clayton Moore
 """Grid-based binding pocket detection using alpha-sphere-inspired segmentation.
 
 Algorithm:

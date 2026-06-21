@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Clayton Moore
 """Cluster pockets across the conformational ensemble.
 
 Each conformer produces a list of Pocket objects. This module:
@@ -78,11 +80,11 @@ def cluster_pockets(
     Args:
         pocket_lists: One list of Pocket objects per conformer.
         n_conformers: Total number of conformers (denominator for persistence).
-        rank_by: Ranking strategy — one of ``RANK_STRATEGIES``. ``"balanced"``
-            (default) keeps druggability primary with a mild persistence bonus;
-            ``"persistence"`` is the legacy persistence × druggability ranking;
-            ``"druggability"`` ranks by peak open-state druggability;
-            ``"crypticity"`` surfaces the most cryptic sites first.
+        rank_by: Ranking strategy — one of ``RANK_STRATEGIES``. ``"druggability"``
+            (default) ranks by peak open-state druggability; ``"persistence"`` is
+            the legacy persistence × druggability ranking; ``"balanced"`` keeps
+            druggability primary with a mild persistence bonus; ``"crypticity"``
+            surfaces the most cryptic sites first.
 
     Returns:
         Ranked list of PocketCluster objects (rank 1 = best under ``rank_by``).
