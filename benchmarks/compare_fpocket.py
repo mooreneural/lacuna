@@ -237,7 +237,7 @@ def main():
             print(f"  fpocket: {marker} overlap={best_ov:.0%}  rank={best_rank}")
 
         # ── Lacuna ───────────────────────────────────────────────────────────
-        print(f"  Running Lacuna (RandomBackend, {DEFAULT_CONFORMERS} conformers)...", end=" ", flush=True)
+        print(f"  Running Lacuna (NMA backend, {DEFAULT_CONFORMERS} conformers)...", end=" ", flush=True)
         clusters, lac_elapsed = run_lacuna(pdb_path)
         print(f"{len(clusters)} pocket clusters in {lac_elapsed:.1f}s")
 

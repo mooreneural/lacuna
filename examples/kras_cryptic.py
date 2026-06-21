@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 from lacuna import load_structure, detect_pockets, cluster_pockets
-from lacuna.ensemble.random_backend import RandomBackend
+from lacuna.ensemble.nma_backend import NMABackend
 from lacuna.io.writers import write_report, write_boltz_constraint, write_vina_box
 
 
@@ -31,9 +31,9 @@ def main(pdb_path: str):
     structure = load_structure(path)
     print(f"  {len(structure.residues)} residues, chains: {list(structure.sequence.keys())}")
 
-    # Generate conformational ensemble
-    print("\nGenerating ensemble (30 conformers, RandomBackend)...")
-    backend = RandomBackend(noise_levels=None, seed=42)
+    # Generate conformational ensemble (NMA is the zero-dependency default backend)
+    print("\nGenerating ensemble (30 conformers, NMA backend)...")
+    backend = NMABackend(seed=42)
     coord_sets = backend.generate(path, n_conformers=30)
 
     # Detect pockets in each conformer
