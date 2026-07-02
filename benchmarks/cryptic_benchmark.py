@@ -557,7 +557,8 @@ def residue_overlap(cluster_residues: list[str], known: set[int]) -> float:
 
 # ── Lacuna runner ──────────────────────────────────────────────────────────────
 
-def _make_backend(name: str, nma_rmsd: float = 2.0, nma_modes: int = 10):
+def _make_backend(name: str, nma_rmsd: float = 2.0, nma_modes: int = 10,
+                  boltz_msa: bool = False):
     if name == "nma":
         from lacuna.ensemble.nma_backend import NMABackend
         return NMABackend(seed=42, max_rmsd=nma_rmsd, n_modes=nma_modes)
@@ -569,7 +570,7 @@ def _make_backend(name: str, nma_rmsd: float = 2.0, nma_modes: int = 10):
         return OpenMMBackend()
     if name == "boltz":
         from lacuna.ensemble.boltz_backend import BoltzBackend
-        return BoltzBackend()
+        return BoltzBackend(use_msa_server=boltz_msa)
     raise ValueError(f"Unknown backend {name!r}")
 
 
@@ -582,13 +583,15 @@ def run_lacuna(
     homodimer: bool = False,
     nma_rmsd: float = 2.0,
     nma_modes: int = 10,
+    boltz_msa: bool = False,
 ) -> tuple[list, float]:
     from lacuna.io.structure import load_structure, coords_array, make_biological_assembly
     from lacuna.io.writers import write_structure_pdb
     from lacuna.pockets.detector import detect_pockets
     from lacuna.pockets.clusterer import cluster_pockets
 
-    backend = _make_backend(backend_name, nma_rmsd=nma_rmsd, nma_modes=nma_modes)
+    backend = _make_backend(backend_name, nma_rmsd=nma_rmsd, nma_modes=nma_modes,
+                            boltz_msa=boltz_msa)
     t0 = time.perf_counter()
 
     if homodimer:
@@ -650,6 +653,9 @@ def main():
                         help="NMA max Cα RMSD amplitude in Å (default: 2.0)")
     parser.add_argument("--nma-modes", dest="nma_modes", type=int, default=10,
                         help="NMA number of low-frequency modes (default: 10)")
+    parser.add_argument("--boltz-msa", dest="boltz_msa", action="store_true",
+                        help="Boltz backend: fetch an MSA from the ColabFold server "
+                             "(native-like structures) instead of msa:empty PLM-only mode")
     args = parser.parse_args()
 
     n_conf = 10 if args.quick else args.conformers
@@ -737,6 +743,7 @@ def main():
                 backend_name=args.backend, rank_by=args.rank_by,
                 homodimer=entry.get("homodimer", False),
                 nma_rmsd=args.nma_rmsd, nma_modes=args.nma_modes,
+                boltz_msa=args.boltz_msa,
             )
         except Exception as e:
             print(f"  [ERROR] Lacuna failed: {e}")
