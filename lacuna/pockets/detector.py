@@ -27,6 +27,7 @@ from scipy.ndimage import (
     binary_dilation,
     uniform_filter,
 )
+from scipy.spatial import cKDTree
 
 from lacuna.models import Atom, Pocket, Residue, Structure
 from lacuna.io.structure import is_aromatic, is_hydrophobic
@@ -44,8 +45,11 @@ ALPHA_DIST_MAX = 6.0     # Å  — too large: bulk solvent alpha sphere
 # Cluster radius: alpha points within this distance are merged into one pocket
 CLUSTER_RADIUS_A = 4.0   # Å
 
-# Pocket volume growth: expand each alpha-point cluster by this much
-GROW_RADIUS_A = 3.0      # Å from any alpha point
+# Lining residues: a residue lines the pocket if any of its atoms is within this
+# distance of the detected cavity (the alpha-cluster void voxels). This is a true
+# atomic-contact definition — replaces the earlier centroid+9 Å sphere, which
+# swept in a large shell of non-lining residues and inflated residue overlap.
+LINING_CONTACT_A = 5.0   # Å from any cavity voxel
 
 
 def detect_pockets(
@@ -96,11 +100,11 @@ def detect_pockets(
     if n_labels == 0:
         return []
 
-    # 5. For each cluster, grow into the nearby interaction zone and compute props
-    grow_vox = max(1, int(np.ceil(GROW_RADIUS_A / grid_spacing)))
-    interaction_zone = (~protein_mask) & (dist >= 0.5) & (dist <= ALPHA_DIST_MAX + 1.0)
+    # 5. For each cluster, compute volume, lining residues, and druggability props.
     # Pre-compute once — used per-pocket for enclosure scoring
     local_density = uniform_filter(protein_mask.astype(np.float32), size=9)
+    # Atom KDTree for fast contact-based lining-residue lookup.
+    atom_tree = cKDTree(coords)
 
     voxel_vol = grid_spacing ** 3
     pockets: list[Pocket] = []
@@ -120,19 +124,19 @@ def detect_pockets(
         centroid_vox = vox_indices.mean(axis=0)
         centroid = tuple((centroid_vox * grid_spacing + lo).tolist())
 
-        # Grow for lining residue search only
-        grown = binary_dilation(alpha_cluster, structure=struct_el, iterations=grow_vox)
-        pocket_region = grown & interaction_zone
-
-        pocket_radius = (volume * 3 / (4 * 3.14159)) ** (1 / 3)
-        search_dist = pocket_radius + 9.0  # +9 Å captures full TM-helix span
-        centroid_arr = np.array(centroid)
-        dists_to_center = np.linalg.norm(coords - centroid_arr, axis=1)
-        nearby = np.where(dists_to_center < search_dist)[0]
+        # Lining residues: any residue with an atom within LINING_CONTACT_A of the
+        # detected cavity (the alpha-cluster void voxels). True atomic contact —
+        # not a centroid sphere — so the set reflects the residues that actually
+        # wall the pocket and feed accurate druggability + docking outputs.
+        cavity_world = vox_indices * grid_spacing + lo  # (K, 3) cavity voxel centers
+        neighbor_lists = atom_tree.query_ball_point(cavity_world, r=LINING_CONTACT_A)
+        nearby: set[int] = set()
+        for nl in neighbor_lists:
+            nearby.update(nl)
 
         lining_res_set: set[int] = set()
         for ai in nearby:
-            ri = atom_res_idx.get(ai)
+            ri = atom_res_idx.get(int(ai))
             if ri is not None:
                 lining_res_set.add(ri)
 
