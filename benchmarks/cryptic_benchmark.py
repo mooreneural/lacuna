@@ -376,6 +376,31 @@ DATASET = [
         "extra_exclude": frozenset({"GG1", "HAE", "ZN", "CA"}),
         "citation": "Engel 2005 J Med Chem; Becker 2010 Nat Chem Biol; Moore 2026 Lacuna",
     },
+
+    # ── ADDITIONAL VERIFIED CRYPTIC PAIRS (RCSB-confirmed apo/holo) ───────────
+    {
+        "id": "TEM1_allosteric",
+        "name": "TEM-1 β-lactamase cryptic allosteric site (CBT)",
+        "category": "cryptic",
+        # 1JWP = TEM-1 (M182T) apo; the H11/H12 allosteric cryptic pocket is closed.
+        # 1PZO = TEM-1 with CBT core-disrupting allosteric inhibitor at that site
+        # (RCSB title: "…in Complex with a Novel, Core-Disrupting, Allosteric…").
+        "apo_pdb": "1JWP", "apo_chain": "A",
+        "holo_pdb": "1PZO", "holo_chain": "A",
+        "extra_exclude": frozenset(),
+        "citation": "Horn 2004 J Mol Biol; Bowman 2012 J Am Chem Soc; Moore 2026 Lacuna",
+    },
+    {
+        "id": "RICIN_pterin",
+        "name": "Ricin A-chain cryptic specificity pocket (pteroic acid)",
+        "category": "cryptic",
+        # 1RTC = ricin A-chain apo; the secondary pterin pocket beside the active
+        # site is unformed. 1BR6 = ricin A-chain complexed with pteroic acid (PT1).
+        "apo_pdb": "1RTC", "apo_chain": "A",
+        "holo_pdb": "1BR6", "holo_chain": "A",
+        "extra_exclude": frozenset(),
+        "citation": "Mlsna 1993 Protein Sci; Yan 1997 J Mol Biol; Moore 2026 Lacuna",
+    },
 ]
 
 
@@ -532,10 +557,11 @@ def residue_overlap(cluster_residues: list[str], known: set[int]) -> float:
 
 # ── Lacuna runner ──────────────────────────────────────────────────────────────
 
-def _make_backend(name: str):
+def _make_backend(name: str, nma_rmsd: float = 2.0, nma_modes: int = 10,
+                  boltz_msa: bool = False):
     if name == "nma":
         from lacuna.ensemble.nma_backend import NMABackend
-        return NMABackend(seed=42)
+        return NMABackend(seed=42, max_rmsd=nma_rmsd, n_modes=nma_modes)
     if name == "random":
         from lacuna.ensemble.random_backend import RandomBackend
         return RandomBackend(seed=42)
@@ -544,7 +570,7 @@ def _make_backend(name: str):
         return OpenMMBackend()
     if name == "boltz":
         from lacuna.ensemble.boltz_backend import BoltzBackend
-        return BoltzBackend()
+        return BoltzBackend(use_msa_server=boltz_msa)
     raise ValueError(f"Unknown backend {name!r}")
 
 
@@ -554,16 +580,37 @@ def run_lacuna(
     chain: str | None = None,
     backend_name: str = "nma",
     rank_by: str = "druggability",
+    homodimer: bool = False,
+    nma_rmsd: float = 2.0,
+    nma_modes: int = 10,
+    boltz_msa: bool = False,
 ) -> tuple[list, float]:
-    from lacuna.io.structure import load_structure, coords_array
+    from lacuna.io.structure import load_structure, coords_array, make_biological_assembly
+    from lacuna.io.writers import write_structure_pdb
     from lacuna.pockets.detector import detect_pockets
     from lacuna.pockets.clusterer import cluster_pockets
 
-    structure = load_structure(pdb_path, chain=chain)
-    backend = _make_backend(backend_name)
-
+    backend = _make_backend(backend_name, nma_rmsd=nma_rmsd, nma_modes=nma_modes,
+                            boltz_msa=boltz_msa)
     t0 = time.perf_counter()
-    coord_sets = backend.generate(pdb_path, n_conformers=n_conformers, chain=chain)
+
+    if homodimer:
+        # Dimer-interface pockets form between protomers and cannot be detected in a
+        # single chain. Build the biological assembly (BIOMT) and analyze all chains.
+        mono = load_structure(pdb_path, chain=None)
+        assembly = make_biological_assembly(pdb_path, mono)
+        if len(assembly.atoms) > len(mono.atoms):
+            eff_path = pdb_path.with_name(pdb_path.stem + "_assembly.pdb")
+            write_structure_pdb(assembly, eff_path)
+            structure = assembly
+        else:
+            eff_path, structure = pdb_path, mono  # AU already multi-chain
+        gen_chain = None
+    else:
+        structure = load_structure(pdb_path, chain=chain)
+        eff_path, gen_chain = pdb_path, chain
+
+    coord_sets = backend.generate(eff_path, n_conformers=n_conformers, chain=gen_chain)
     base = coords_array(structure)
     all_coords = [base] + coord_sets
 
@@ -593,9 +640,22 @@ def main():
                         default="nma",
                         help="Ensemble backend (default: nma — the package default)")
     parser.add_argument("--rank-by", dest="rank_by",
-                        choices=["druggability", "persistence", "balanced", "crypticity"],
-                        default="druggability",
-                        help="Pocket ranking strategy (default: druggability)")
+                        choices=["crypticity", "druggability", "persistence", "balanced"],
+                        default="crypticity",
+                        help="Pocket ranking strategy (default: crypticity)")
+    parser.add_argument("--only", default=None,
+                        help="Comma-separated entry IDs to run a subset "
+                             "(e.g. --only p38_DFGout,SHP2_allosteric)")
+    parser.add_argument("--top-n", dest="top_n", type=int, default=5,
+                        help="Rank cutoff for a success (default: top-5). Use a "
+                             "larger value to diagnose ranking vs detection.")
+    parser.add_argument("--nma-rmsd", dest="nma_rmsd", type=float, default=2.0,
+                        help="NMA max Cα RMSD amplitude in Å (default: 2.0)")
+    parser.add_argument("--nma-modes", dest="nma_modes", type=int, default=10,
+                        help="NMA number of low-frequency modes (default: 10)")
+    parser.add_argument("--boltz-msa", dest="boltz_msa", action="store_true",
+                        help="Boltz backend: fetch an MSA from the ColabFold server "
+                             "(native-like structures) instead of msa:empty PLM-only mode")
     args = parser.parse_args()
 
     n_conf = 10 if args.quick else args.conformers
@@ -606,10 +666,14 @@ def main():
     entries = DATASET if args.category == "all" else [
         e for e in DATASET if e["category"] == args.category
     ]
+    if args.only:
+        wanted = {s.strip() for s in args.only.split(",")}
+        entries = [e for e in entries if e["id"] in wanted]
 
     print("=" * 70)
     print(f"  LACUNA — CRYPTIC POCKET BENCHMARK  ({len(entries)} proteins, {n_conf} conformers)")
-    print(f"  backend={args.backend}  rank_by={args.rank_by}")
+    print(f"  backend={args.backend}  rank_by={args.rank_by}  top_n={args.top_n}"
+          f"  nma_rmsd={args.nma_rmsd}  nma_modes={args.nma_modes}")
     print("=" * 70)
 
     results = []
@@ -677,6 +741,9 @@ def main():
             clusters, elapsed = run_lacuna(
                 apo_path, n_conf, chain=apo_chain,
                 backend_name=args.backend, rank_by=args.rank_by,
+                homodimer=entry.get("homodimer", False),
+                nma_rmsd=args.nma_rmsd, nma_modes=args.nma_modes,
+                boltz_msa=args.boltz_msa,
             )
         except Exception as e:
             print(f"  [ERROR] Lacuna failed: {e}")
@@ -687,12 +754,12 @@ def main():
         # Centroid distance: field-standard, robust to residue-numbering offsets.
         # Computed in the APO coordinate frame (ref centroid = Cα centroid of binding
         # site residues in the apo structure, not from the holo — see above).
-        best_dist, best_dist_rank = pocket_min_centroid_dist(clusters, ref_centroid)
+        best_dist, best_dist_rank = pocket_min_centroid_dist(clusters, ref_centroid, top_n=args.top_n)
 
         # Residue overlap: robust for cryptic pockets where residues move significantly
         # between states (the numbering is stable even when positions shift 5-15 Å).
         best_ov, best_rank = 0.0, None
-        for c in clusters[:5]:
+        for c in clusters[:args.top_n]:
             ov = residue_overlap(c.lining_residues, known)
             if ov > best_ov:
                 best_ov, best_rank = ov, c.rank

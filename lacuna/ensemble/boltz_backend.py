@@ -54,6 +54,7 @@ class BoltzBackend(EnsembleBackend):
         self,
         structure_path: Path,
         n_conformers: int,
+        chain: str | None = None,
         **kwargs,
     ) -> list[np.ndarray]:
         try:
@@ -64,9 +65,11 @@ class BoltzBackend(EnsembleBackend):
                 "Run: pip install lacuna[boltz]"
             ) from e
 
-        return self._run_diffusion_samples(Path(structure_path), n_conformers)
+        return self._run_diffusion_samples(Path(structure_path), n_conformers, chain=chain)
 
-    def _run_diffusion_samples(self, structure_path: Path, n_conformers: int) -> list[np.ndarray]:
+    def _run_diffusion_samples(
+        self, structure_path: Path, n_conformers: int, chain: str | None = None
+    ) -> list[np.ndarray]:
         """Run boltz predict once with --diffusion_samples N to get all conformers."""
         from lacuna.io.structure import load_structure, coords_array
 
@@ -74,7 +77,7 @@ class BoltzBackend(EnsembleBackend):
             tmp = Path(tmpdir)
 
             # Build Boltz YAML input from the structure's sequence
-            yaml_path = self._write_input_yaml(structure_path, tmp)
+            yaml_path = self._write_input_yaml(structure_path, tmp, chain=chain)
 
             out_dir = tmp / "boltz_out"
             cmd = [
@@ -118,7 +121,7 @@ class BoltzBackend(EnsembleBackend):
                 )
 
             conformers: list[np.ndarray] = []
-            input_structure = load_structure(structure_path)
+            input_structure = load_structure(structure_path, chain=chain)
             n_atoms = len(input_structure.atoms)
 
             for pdb_file in pdb_files:
@@ -139,11 +142,13 @@ class BoltzBackend(EnsembleBackend):
 
             return conformers
 
-    def _write_input_yaml(self, structure_path: Path, out_dir: Path) -> Path:
+    def _write_input_yaml(
+        self, structure_path: Path, out_dir: Path, chain: str | None = None
+    ) -> Path:
         """Create a Boltz YAML from the protein sequence in the structure."""
         from lacuna.io.structure import load_structure
 
-        structure = load_structure(structure_path)
+        structure = load_structure(structure_path, chain=chain)
         yaml_path = out_dir / f"{structure_path.stem}.yaml"
 
         lines = ["sequences:"]
