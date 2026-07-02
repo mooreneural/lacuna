@@ -84,13 +84,13 @@ def main():
               help="Maximum number of pockets to report.")
 @click.option(
     "--rank-by", "rank_by",
-    type=click.Choice(["druggability", "persistence", "balanced", "crypticity"]),
-    default="druggability", show_default=True,
+    type=click.Choice(["crypticity", "druggability", "persistence", "balanced"]),
+    default="crypticity", show_default=True,
     help=(
-        "Pocket ranking strategy. 'druggability' ranks by peak open-state "
-        "druggability; 'crypticity' surfaces transiently-open cryptic sites "
-        "first; 'balanced' adds a mild persistence bonus; 'persistence' is the "
-        "legacy persistence x druggability rule."
+        "Pocket ranking strategy. 'crypticity' (default) surfaces transiently-open "
+        "cryptic sites first; 'druggability' ranks by peak open-state druggability "
+        "(better for always-open/orthosteric sites); 'balanced' adds a mild "
+        "persistence bonus; 'persistence' is the legacy persistence x druggability rule."
     ),
 )
 @click.option("--min-crypticity", default=0.0, show_default=True,

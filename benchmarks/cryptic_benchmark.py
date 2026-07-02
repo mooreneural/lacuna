@@ -532,10 +532,10 @@ def residue_overlap(cluster_residues: list[str], known: set[int]) -> float:
 
 # ── Lacuna runner ──────────────────────────────────────────────────────────────
 
-def _make_backend(name: str):
+def _make_backend(name: str, nma_rmsd: float = 2.0, nma_modes: int = 10):
     if name == "nma":
         from lacuna.ensemble.nma_backend import NMABackend
-        return NMABackend(seed=42)
+        return NMABackend(seed=42, max_rmsd=nma_rmsd, n_modes=nma_modes)
     if name == "random":
         from lacuna.ensemble.random_backend import RandomBackend
         return RandomBackend(seed=42)
@@ -555,13 +555,15 @@ def run_lacuna(
     backend_name: str = "nma",
     rank_by: str = "druggability",
     homodimer: bool = False,
+    nma_rmsd: float = 2.0,
+    nma_modes: int = 10,
 ) -> tuple[list, float]:
     from lacuna.io.structure import load_structure, coords_array, make_biological_assembly
     from lacuna.io.writers import write_structure_pdb
     from lacuna.pockets.detector import detect_pockets
     from lacuna.pockets.clusterer import cluster_pockets
 
-    backend = _make_backend(backend_name)
+    backend = _make_backend(backend_name, nma_rmsd=nma_rmsd, nma_modes=nma_modes)
     t0 = time.perf_counter()
 
     if homodimer:
@@ -610,12 +612,19 @@ def main():
                         default="nma",
                         help="Ensemble backend (default: nma — the package default)")
     parser.add_argument("--rank-by", dest="rank_by",
-                        choices=["druggability", "persistence", "balanced", "crypticity"],
-                        default="druggability",
-                        help="Pocket ranking strategy (default: druggability)")
+                        choices=["crypticity", "druggability", "persistence", "balanced"],
+                        default="crypticity",
+                        help="Pocket ranking strategy (default: crypticity)")
     parser.add_argument("--only", default=None,
                         help="Comma-separated entry IDs to run a subset "
                              "(e.g. --only p38_DFGout,SHP2_allosteric)")
+    parser.add_argument("--top-n", dest="top_n", type=int, default=5,
+                        help="Rank cutoff for a success (default: top-5). Use a "
+                             "larger value to diagnose ranking vs detection.")
+    parser.add_argument("--nma-rmsd", dest="nma_rmsd", type=float, default=2.0,
+                        help="NMA max Cα RMSD amplitude in Å (default: 2.0)")
+    parser.add_argument("--nma-modes", dest="nma_modes", type=int, default=10,
+                        help="NMA number of low-frequency modes (default: 10)")
     args = parser.parse_args()
 
     n_conf = 10 if args.quick else args.conformers
@@ -632,7 +641,8 @@ def main():
 
     print("=" * 70)
     print(f"  LACUNA — CRYPTIC POCKET BENCHMARK  ({len(entries)} proteins, {n_conf} conformers)")
-    print(f"  backend={args.backend}  rank_by={args.rank_by}")
+    print(f"  backend={args.backend}  rank_by={args.rank_by}  top_n={args.top_n}"
+          f"  nma_rmsd={args.nma_rmsd}  nma_modes={args.nma_modes}")
     print("=" * 70)
 
     results = []
@@ -701,6 +711,7 @@ def main():
                 apo_path, n_conf, chain=apo_chain,
                 backend_name=args.backend, rank_by=args.rank_by,
                 homodimer=entry.get("homodimer", False),
+                nma_rmsd=args.nma_rmsd, nma_modes=args.nma_modes,
             )
         except Exception as e:
             print(f"  [ERROR] Lacuna failed: {e}")
@@ -711,12 +722,12 @@ def main():
         # Centroid distance: field-standard, robust to residue-numbering offsets.
         # Computed in the APO coordinate frame (ref centroid = Cα centroid of binding
         # site residues in the apo structure, not from the holo — see above).
-        best_dist, best_dist_rank = pocket_min_centroid_dist(clusters, ref_centroid)
+        best_dist, best_dist_rank = pocket_min_centroid_dist(clusters, ref_centroid, top_n=args.top_n)
 
         # Residue overlap: robust for cryptic pockets where residues move significantly
         # between states (the numbering is stable even when positions shift 5-15 Å).
         best_ov, best_rank = 0.0, None
-        for c in clusters[:5]:
+        for c in clusters[:args.top_n]:
             ov = residue_overlap(c.lining_residues, known)
             if ov > best_ov:
                 best_ov, best_rank = ov, c.rank

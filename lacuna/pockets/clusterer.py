@@ -22,16 +22,16 @@ from lacuna.pockets.scorer import score_pocket
 _DBSCAN_EPS = 5.0    # Å — pockets within 5 Å centroid distance are the same pocket
 _CRYPTIC_THRESHOLD = 0.9  # persistence below this → cryptic
 
-# Ranking strategies. The default "druggability" ranks by peak open-state
-# druggability — the composite score evaluated in the most-open conformer, which
-# is the relevant figure for a transiently-open cryptic site. The legacy
-# "persistence" strategy multiplies druggability by persistence, which demotes
-# exactly the transient pockets the tool exists to find; "balanced" keeps
-# druggability primary with a mild persistence bonus; "crypticity" surfaces the
-# most cryptic sites first. On the 20-protein cryptic benchmark (NMA, 20
-# conformers) these score 17, 16, 15, and 15 of 20 respectively.
-RANK_STRATEGIES = ("druggability", "persistence", "balanced", "crypticity")
-_DEFAULT_RANK_BY = "druggability"
+# Ranking strategies. The default "crypticity" surfaces transiently-open cryptic
+# sites first — the tool's purpose — and scores best on the cryptic benchmark.
+# "druggability" ranks by peak open-state druggability (preferable for always-open
+# / orthosteric sites); the legacy "persistence" strategy multiplies druggability
+# by persistence, demoting the very transient pockets the tool targets; "balanced"
+# keeps druggability primary with a mild persistence bonus. On the 20-protein
+# cryptic benchmark (NMA, 20 conformers, contact-based lining, top-5) these score
+# 12, 10, 7, and 8 of 20 respectively.
+RANK_STRATEGIES = ("crypticity", "druggability", "persistence", "balanced")
+_DEFAULT_RANK_BY = "crypticity"
 
 
 def compute_crypticity(apo_volume: float, max_volume: float, max_druggability: float) -> float:
@@ -80,11 +80,12 @@ def cluster_pockets(
     Args:
         pocket_lists: One list of Pocket objects per conformer.
         n_conformers: Total number of conformers (denominator for persistence).
-        rank_by: Ranking strategy — one of ``RANK_STRATEGIES``. ``"druggability"``
-            (default) ranks by peak open-state druggability; ``"persistence"`` is
-            the legacy persistence × druggability ranking; ``"balanced"`` keeps
-            druggability primary with a mild persistence bonus; ``"crypticity"``
-            surfaces the most cryptic sites first.
+        rank_by: Ranking strategy — one of ``RANK_STRATEGIES``. ``"crypticity"``
+            (default) surfaces transiently-open cryptic sites first;
+            ``"druggability"`` ranks by peak open-state druggability (better for
+            always-open/orthosteric sites); ``"persistence"`` is the legacy
+            persistence × druggability ranking; ``"balanced"`` keeps druggability
+            primary with a mild persistence bonus.
 
     Returns:
         Ranked list of PocketCluster objects (rank 1 = best under ``rank_by``).
