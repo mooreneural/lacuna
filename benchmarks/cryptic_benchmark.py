@@ -554,16 +554,33 @@ def run_lacuna(
     chain: str | None = None,
     backend_name: str = "nma",
     rank_by: str = "druggability",
+    homodimer: bool = False,
 ) -> tuple[list, float]:
-    from lacuna.io.structure import load_structure, coords_array
+    from lacuna.io.structure import load_structure, coords_array, make_biological_assembly
+    from lacuna.io.writers import write_structure_pdb
     from lacuna.pockets.detector import detect_pockets
     from lacuna.pockets.clusterer import cluster_pockets
 
-    structure = load_structure(pdb_path, chain=chain)
     backend = _make_backend(backend_name)
-
     t0 = time.perf_counter()
-    coord_sets = backend.generate(pdb_path, n_conformers=n_conformers, chain=chain)
+
+    if homodimer:
+        # Dimer-interface pockets form between protomers and cannot be detected in a
+        # single chain. Build the biological assembly (BIOMT) and analyze all chains.
+        mono = load_structure(pdb_path, chain=None)
+        assembly = make_biological_assembly(pdb_path, mono)
+        if len(assembly.atoms) > len(mono.atoms):
+            eff_path = pdb_path.with_name(pdb_path.stem + "_assembly.pdb")
+            write_structure_pdb(assembly, eff_path)
+            structure = assembly
+        else:
+            eff_path, structure = pdb_path, mono  # AU already multi-chain
+        gen_chain = None
+    else:
+        structure = load_structure(pdb_path, chain=chain)
+        eff_path, gen_chain = pdb_path, chain
+
+    coord_sets = backend.generate(eff_path, n_conformers=n_conformers, chain=gen_chain)
     base = coords_array(structure)
     all_coords = [base] + coord_sets
 
@@ -596,6 +613,9 @@ def main():
                         choices=["druggability", "persistence", "balanced", "crypticity"],
                         default="druggability",
                         help="Pocket ranking strategy (default: druggability)")
+    parser.add_argument("--only", default=None,
+                        help="Comma-separated entry IDs to run a subset "
+                             "(e.g. --only p38_DFGout,SHP2_allosteric)")
     args = parser.parse_args()
 
     n_conf = 10 if args.quick else args.conformers
@@ -606,6 +626,9 @@ def main():
     entries = DATASET if args.category == "all" else [
         e for e in DATASET if e["category"] == args.category
     ]
+    if args.only:
+        wanted = {s.strip() for s in args.only.split(",")}
+        entries = [e for e in entries if e["id"] in wanted]
 
     print("=" * 70)
     print(f"  LACUNA — CRYPTIC POCKET BENCHMARK  ({len(entries)} proteins, {n_conf} conformers)")
@@ -677,6 +700,7 @@ def main():
             clusters, elapsed = run_lacuna(
                 apo_path, n_conf, chain=apo_chain,
                 backend_name=args.backend, rank_by=args.rank_by,
+                homodimer=entry.get("homodimer", False),
             )
         except Exception as e:
             print(f"  [ERROR] Lacuna failed: {e}")
