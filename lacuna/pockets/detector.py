@@ -119,9 +119,18 @@ def detect_pockets(
         if volume < min_volume_a3 or volume > MAX_VOLUME_A3:
             continue
 
-        # Centroid from the core region
+        # Hotspot-centered localization: weight cavity voxels by buriedness (local
+        # protein density) so the reported center sits at the most enclosed,
+        # ligandable sub-pocket rather than the geometric mean. For elongated or
+        # partially-open cryptic pockets the geometric centroid drifts toward the
+        # open mouth; the buriedness-weighted center tracks where a ligand's core
+        # actually binds, tightening docking-box placement and localization.
         vox_indices = np.argwhere(alpha_void) if alpha_void.any() else np.argwhere(alpha_cluster)
-        centroid_vox = vox_indices.mean(axis=0)
+        vox_weights = local_density[vox_indices[:, 0], vox_indices[:, 1], vox_indices[:, 2]]
+        if float(vox_weights.sum()) > 1e-6:
+            centroid_vox = np.average(vox_indices, axis=0, weights=vox_weights)
+        else:
+            centroid_vox = vox_indices.mean(axis=0)
         centroid = tuple((centroid_vox * grid_spacing + lo).tolist())
 
         # Lining residues: any residue with an atom within LINING_CONTACT_A of the
