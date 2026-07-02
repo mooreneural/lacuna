@@ -376,6 +376,31 @@ DATASET = [
         "extra_exclude": frozenset({"GG1", "HAE", "ZN", "CA"}),
         "citation": "Engel 2005 J Med Chem; Becker 2010 Nat Chem Biol; Moore 2026 Lacuna",
     },
+
+    # ── ADDITIONAL VERIFIED CRYPTIC PAIRS (RCSB-confirmed apo/holo) ───────────
+    {
+        "id": "TEM1_allosteric",
+        "name": "TEM-1 β-lactamase cryptic allosteric site (CBT)",
+        "category": "cryptic",
+        # 1JWP = TEM-1 (M182T) apo; the H11/H12 allosteric cryptic pocket is closed.
+        # 1PZO = TEM-1 with CBT core-disrupting allosteric inhibitor at that site
+        # (RCSB title: "…in Complex with a Novel, Core-Disrupting, Allosteric…").
+        "apo_pdb": "1JWP", "apo_chain": "A",
+        "holo_pdb": "1PZO", "holo_chain": "A",
+        "extra_exclude": frozenset(),
+        "citation": "Horn 2004 J Mol Biol; Bowman 2012 J Am Chem Soc; Moore 2026 Lacuna",
+    },
+    {
+        "id": "RICIN_pterin",
+        "name": "Ricin A-chain cryptic specificity pocket (pteroic acid)",
+        "category": "cryptic",
+        # 1RTC = ricin A-chain apo; the secondary pterin pocket beside the active
+        # site is unformed. 1BR6 = ricin A-chain complexed with pteroic acid (PT1).
+        "apo_pdb": "1RTC", "apo_chain": "A",
+        "holo_pdb": "1BR6", "holo_chain": "A",
+        "extra_exclude": frozenset(),
+        "citation": "Mlsna 1993 Protein Sci; Yan 1997 J Mol Biol; Moore 2026 Lacuna",
+    },
 ]
 
 
