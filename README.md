@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/lacuna_banner.png" alt="Lacuna — cryptic binding pocket discovery via conformational ensemble analysis" width="100%">
+</p>
+
 # Lacuna
 
 **Cryptic binding pocket discovery via conformational ensemble analysis.**
