@@ -12,5 +12,7 @@ venv/
 *.npy
 *.log
 benchmarks/pdb_cache/
+benchmarks/pm_data/
+benchmarks/cb_data/
 .joss_review_venv/
 .joss_review_out/
