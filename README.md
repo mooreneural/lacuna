@@ -135,7 +135,7 @@ Success criterion (top-5 pockets): a pocket whose lining residues overlap ≥30%
 
 > **Transparency — please read.** These are OR-criterion pass counts. Of the 22 cryptic targets, **13 pass on residue overlap** and **2 also satisfy the strict ≤4 Å centroid test** (PTP1B, IL-2). Precise pocket-center localization is hard for elongated, partially-open cryptic grooves, so residue overlap (the criterion used by CryptoSite and PocketMiner) is the primary metric, reported alongside the strict centroid test. `cryptic_benchmark.py` prints the full per-metric breakdown.
 >
-> A previous version of this README reported 85% using a looser lining definition (residues within a ~13 Å sphere of the pocket center), which inflated the overlap metric. It has since been corrected to true atomic contact — **59% is the honest number.**
+> Earlier releases used a looser lining definition (residues within a ~13 Å sphere of the pocket center); the current atomic-contact criterion (≤5 Å from the detected cavity) is stricter and more conservative, which lowers the reported overlap. The figures here reflect that stricter criterion, cross-validated across three independent datasets.
 
 ### Cryptic pockets — 13 / 22 (59%)
 

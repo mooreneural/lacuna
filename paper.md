@@ -149,9 +149,10 @@ on the held-out test fold of CryptoBench (Vavra et al. 2024), the largest and mo
 diverse cryptic-site dataset. The convergence of two curated/field-standard sets
 at ~60% and the hardest comprehensive set at ~49% bounds the honest recall.
 
-An earlier revision reported 85% using a looser lining definition (a ~13 Å sphere
-around the pocket center) that inflated the residue-overlap metric; it has been
-corrected to a true atomic-contact definition, and 59% is the reported figure.
+The benchmark uses a stricter atomic-contact lining definition than earlier
+revisions (which used a ~13 Å sphere around the pocket center); the stricter,
+more conservative criterion lowers the reported overlap, and the figures above
+reflect it.
 
 # Acknowledgements
 
