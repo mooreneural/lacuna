@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/lacuna_banner.png" alt="Lacuna — cryptic binding pocket discovery via conformational ensemble analysis" width="100%">
+  <img src="docs/lacuna_banner.png" alt="Lacuna - cryptic binding pocket discovery via conformational ensemble analysis" width="100%">
 </p>
 
 # Introduction
@@ -48,7 +48,7 @@ lacuna discover protein.pdb --min-druggability 0.5 --min-persistence 0.3 --top 5
 # Reads BIOMT records from PDB; for best results use the biological assembly download from RCSB
 lacuna discover protein.pdb --homodimer --conformers 20
 
-# Optional Boltz-2 backend (experimental — see the Backends note)
+# Optional Boltz-2 backend (experimental - see the Backends note)
 lacuna discover protein.pdb --backend boltz --conformers 30
 
 # Emit all docking file formats
@@ -90,7 +90,7 @@ for c in clusters[:5]:
 ## How it works
 
 1. **Ensemble generation** - Generate N conformers via elastic network model normal mode analysis (built-in, default), OpenMM implicit-solvent MD, or experimental Boltz-2 diffusion sampling
-2. **Pocket detection** - Grid-based alpha-point analysis per conformer: compute distance transform, find local maxima within the 1.4–5.5 Å interaction zone, cluster nearby alpha-points into pocket candidates
+2. **Pocket detection** - Grid-based alpha-point analysis per conformer: compute distance transform, find local maxima within the 1.4-5.5 Å interaction zone, cluster nearby alpha-points into pocket candidates
 3. **Cross-ensemble clustering** - Greedy centroid merging clusters corresponding pockets across all conformers
 4. **Druggability scoring** - Gaussian volume reward centered at 300 Å³ + enclosure + hydrophobicity + aromaticity (Halgren 2009), scored in each conformer
 5. **Crypticity scoring & ranking** - Each site gets a continuous crypticity score (how much it opens relative to the apo state × druggability when open) and is flagged `cryptic: true` if present in <90% of conformers. Pockets are ranked by crypticity by default; `--rank-by druggability` is available for always-open / orthosteric sites
@@ -119,9 +119,9 @@ for c in clusters[:5]:
 
 **Auto-selection order:** `boltz` → `openmm` → `nma` → `random`. On a plain `pip install lacuna`, the NMA backend runs automatically.
 
-The `nma` backend samples physically meaningful collective motions — the same hinge-bending and breathing modes that open cryptic pockets in nature — without requiring a GPU or force field. It is the zero-dependency default.
+The `nma` backend samples physically meaningful collective motions - the same hinge-bending and breathing modes that open cryptic pockets in nature - without requiring a GPU or force field. It is the zero-dependency default.
 
-> **Boltz backend status (honest note).** The `boltz` backend runs Boltz-2 diffusion sampling on a GPU, but it currently predicts each conformer *de novo from sequence* (not partial diffusion from the input structure), which yields structurally divergent, noisy ensembles (150–300+ pocket clusters vs NMA's ~35). In GPU benchmarking it did **not** reliably improve cryptic detection over NMA. A proper apo-templated integration with sequence-based residue mapping is planned; until then, NMA is the recommended backend.
+> **Boltz backend status (honest note).** The `boltz` backend runs Boltz-2 diffusion sampling on a GPU, but it currently predicts each conformer *de novo from sequence* (not partial diffusion from the input structure), which yields structurally divergent, noisy ensembles (150-300+ pocket clusters vs NMA's ~35). In GPU benchmarking it did **not** reliably improve cryptic detection over NMA. A proper apo-templated integration with sequence-based residue mapping is planned; until then, NMA is the recommended backend.
 
 ---
 
@@ -129,46 +129,46 @@ The `nma` backend samples physically meaningful collective motions — the same 
 
 **13 / 22 cryptic pockets detected (59%, NMA backend, crypticity ranking, 20 conformers).**
 
-This curated result is cross-validated on two further independent datasets — **PocketMiner 62%** and **CryptoBench 49%** (the largest and hardest) — see [Independent validation](#independent-validation--three-benchmarks) below.
+This curated result is cross-validated on two further independent datasets - **PocketMiner 62%** and **CryptoBench 49%** (the largest and hardest) - see [Independent validation](#independent-validation--three-benchmarks) below.
 
 Success criterion (top-5 pockets): a pocket whose lining residues overlap ≥30% with the known ligand-contact site, **or** whose center is within 4 Å of the site centroid. Lining residues use a true atomic-contact definition (any residue with an atom within 5 Å of the detected cavity). Reproduce with `python benchmarks/cryptic_benchmark.py --category cryptic`.
 
-> **Transparency — please read.** These are OR-criterion pass counts. Of the 22 cryptic targets, **13 pass on residue overlap** and **2 also satisfy the strict ≤4 Å centroid test** (PTP1B, IL-2). Precise pocket-center localization is hard for elongated, partially-open cryptic grooves, so residue overlap (the criterion used by CryptoSite and PocketMiner) is the primary metric, reported alongside the strict centroid test. `cryptic_benchmark.py` prints the full per-metric breakdown.
+> **Transparency - please read.** These are OR-criterion pass counts. Of the 22 cryptic targets, **13 pass on residue overlap** and **2 also satisfy the strict ≤4 Å centroid test** (PTP1B, IL-2). Precise pocket-center localization is hard for elongated, partially-open cryptic grooves, so residue overlap (the criterion used by CryptoSite and PocketMiner) is the primary metric, reported alongside the strict centroid test. `cryptic_benchmark.py` prints the full per-metric breakdown.
 >
 > Earlier releases used a looser lining definition (residues within a ~13 Å sphere of the pocket center); the current atomic-contact criterion (≤5 Å from the detected cavity) is stricter and more conservative, which lowers the reported overlap. The figures here reflect that stricter criterion, cross-validated across three independent datasets.
 
-### Cryptic pockets — 13 / 22 (59%)
+### Cryptic pockets - 13 / 22 (59%)
 
 | Protein | Apo PDB | Drug target | Overlap | Rank |
 |---------|---------|-------------|--------:|:----:|
-| ✅ T4 Lysozyme L99A cavity | 1L90 | – | 100% | 1 |
+| ✅ T4 Lysozyme L99A cavity | 1L90 | - | 100% | 1 |
 | ✅ Glucokinase allosteric site | 1V4S | activators | 100% | 2 |
 | ✅ PTP1B allosteric helix site | 1A5Y | benzofurans | 94% | 5 |
-| ✅ IL-2 helix-α1 site | 1M47 | – | 93% | 1 |
+| ✅ IL-2 helix-α1 site | 1M47 | - | 93% | 1 |
 | ✅ K-Ras switch-II pocket | 4OBE | sotorasib/adagrasib | 79% | 3 |
 | ✅ BCL-XL BH3 groove | 1LXL | navitoclax | 68% | 1 |
 | ✅ HIV-1 RT NNRTI pocket | 1HMV | nevirapine | 62% | 4 |
 | ✅ BCL-2 BH3 groove | 1G5M | venetoclax | 59% | 2 |
-| ✅ Ricin A pterin pocket | 1RTC | – | 50% | 4 |
+| ✅ Ricin A pterin pocket | 1RTC | - | 50% | 4 |
 | ✅ MDM2 p53-binding cleft | 1Z1M | nutlin-3 | 47% | 1 |
 | ✅ HCV NS5B thumb-site I | 1NB4 | VXR class | 47% | 4 |
-| ✅ Src myristate pocket | 2SRC | – | 36% | 4 |
+| ✅ Src myristate pocket | 2SRC | - | 36% | 4 |
 | ✅ PPARγ allosteric site | 2PRG | metaglidasen | 35% | 2 |
-| ❌ Caspase-1 dimer interface | 2HBQ | – | 25% | – |
-| ❌ p38α DFG-out pocket | 1P38 | BIRB 796 | 24% | – |
-| ❌ ERK2 allosteric site | 2ERK | – | 19% | – |
-| ❌ c-ABL myristate pocket | 3CS9 | asciminib | 19% | – |
-| ❌ PKM2 subunit interface | 1ZJH | TEPP-46 | 17% | – |
-| ❌ IDH1 R132H dimer interface | 3MAP | ivosidenib | 7% | – |
-| ❌ MMP-13 S1′ tunnel | 2OZR | non-zinc | 6% | – |
-| ❌ SHP-2 allosteric tunnel | 2SHP | SHP099 | 0% | – |
-| ❌ TEM-1 allosteric site | 1JWP | CBT | 0% | – |
+| ❌ Caspase-1 dimer interface | 2HBQ | - | 25% | - |
+| ❌ p38α DFG-out pocket | 1P38 | BIRB 796 | 24% | - |
+| ❌ ERK2 allosteric site | 2ERK | - | 19% | - |
+| ❌ c-ABL myristate pocket | 3CS9 | asciminib | 19% | - |
+| ❌ PKM2 subunit interface | 1ZJH | TEPP-46 | 17% | - |
+| ❌ IDH1 R132H dimer interface | 3MAP | ivosidenib | 7% | - |
+| ❌ MMP-13 S1′ tunnel | 2OZR | non-zinc | 6% | - |
+| ❌ SHP-2 allosteric tunnel | 2SHP | SHP099 | 0% | - |
+| ❌ TEM-1 allosteric site | 1JWP | CBT | 0% | - |
 
-**The gap is ranking, not detection.** At a top-20 cutoff the ensemble already contains **16/22 (73%)** of the true pockets — several misses are detected but ranked below 5. The remaining hard cases split into two classes: **oligomeric-interface pockets** (Caspase-1, IDH1, PKM2) that form *between* subunits and are invisible to single-chain analysis, and **large-rearrangement sites** (p38 DFG-out, c-ABL myristate) that need sampling beyond elastic-network modes.
+**The gap is ranking, not detection.** At a top-20 cutoff the ensemble already contains **16/22 (73%)** of the true pockets - several misses are detected but ranked below 5. The remaining hard cases split into two classes: **oligomeric-interface pockets** (Caspase-1, IDH1, PKM2) that form *between* subunits and are invisible to single-chain analysis, and **large-rearrangement sites** (p38 DFG-out, c-ABL myristate) that need sampling beyond elastic-network modes.
 
-Dimer-interface pockets are partly addressable with `--homodimer` (reads BIOMT records and builds the biological assembly), though this benchmark's single-chain-referenced scoring does not credit them. For large-rearrangement sites the optional Boltz-2 backend samples more broadly, but its current sequence-based integration is noisy — see [Backends](#backends).
+Dimer-interface pockets are partly addressable with `--homodimer` (reads BIOMT records and builds the biological assembly), though this benchmark's single-chain-referenced scoring does not credit them. For large-rearrangement sites the optional Boltz-2 backend samples more broadly, but its current sequence-based integration is noisy - see [Backends](#backends).
 
-### Independent validation — three benchmarks
+### Independent validation - three benchmarks
 
 Cryptic-pocket recall measured on three independent datasets (NMA + crypticity, top-5, ≥30% residue overlap **or** ≤4 Å centroid):
 
@@ -178,7 +178,7 @@ Cryptic-pocket recall measured on three independent datasets (NMA + crypticity, 
 | PocketMiner (Meller 2023, *Nat. Commun.*) | 45 | **62%** | per-residue cryptic labels |
 | CryptoBench test fold (Vavra 2024, *Bioinformatics*) | 180 | **49%** | largest & most diverse; harder |
 
-The curated and PocketMiner sets agree at ~60%; **CryptoBench** — the field's largest cryptic set (1107 structures; 180 of its 222-structure held-out test fold evaluated here) — is harder at **49%**, with a further ~18% of structures landing in the 20–29% overlap band just below the pass line (median overlap 29%). Two curated/field-standard sets converging at ~60% and the hardest comprehensive set at ~49% bound the honest recall. Reproduce:
+The curated and PocketMiner sets agree at ~60%; **CryptoBench** - the field's largest cryptic set (1107 structures; 180 of its 222-structure held-out test fold evaluated here) - is harder at **49%**, with a further ~18% of structures landing in the 20-29% overlap band just below the pass line (median overlap 29%). Two curated/field-standard sets converging at ~60% and the hardest comprehensive set at ~49% bound the honest recall. Reproduce:
 
 ```bash
 python benchmarks/pocketminer_benchmark.py    # PocketMiner (auto-downloads)
@@ -194,7 +194,7 @@ Crypticity ranking (the default) intentionally de-prioritizes always-open sites,
 | Orthosteric | 3 / 6 | hen lysozyme 100%, HIF-2α 96% (1.1 Å centroid), DHFR 50%; misses HIV protease, thrombin, trypsin (1S0Q numbering) |
 | Conformational | 1 / 1 | adenylate kinase open→closed |
 
-Orthosteric detection is a known relative weakness of the tight-contact pipeline — the tool is tuned for transient cryptic sites, not always-open active-site grooves.
+Orthosteric detection is a known relative weakness of the tight-contact pipeline - the tool is tuned for transient cryptic sites, not always-open active-site grooves.
 
 ### Crypticity score
 
@@ -303,16 +303,16 @@ If you use Lacuna in published research, please cite:
 
 **Methodology papers Lacuna builds on:**
 
-- Atilgan et al. (2001) *Biophys. J.* 80(1):505–515 - Anisotropic Network Model (NMA backend)
-- Halgren (2009) *J. Chem. Inf. Model.* 49(2):377–389 - SiteMap druggability scoring
+- Atilgan et al. (2001) *Biophys. J.* 80(1):505-515 - Anisotropic Network Model (NMA backend)
+- Halgren (2009) *J. Chem. Inf. Model.* 49(2):377-389 - SiteMap druggability scoring
 - Le Guilloux et al. (2009) *BMC Bioinformatics* 10:168 - fpocket alpha-sphere approach
-- Schmidtke & Barril (2010) *J. Med. Chem.* 53(15):5858–5867 - enclosure scoring
+- Schmidtke & Barril (2010) *J. Med. Chem.* 53(15):5858-5867 - enclosure scoring
 
 ---
 
 ## License
 
-**[GNU AGPL-3.0-or-later](LICENSE)** — free to use, study, modify, and share.
+**[GNU AGPL-3.0-or-later](LICENSE)** - free to use, study, modify, and share.
 The AGPL's copyleft requires that if you distribute a modified version, **or run
 a modified version as a network/hosted service**, you make the complete
 corresponding source available under the same license.
