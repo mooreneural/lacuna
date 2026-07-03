@@ -143,6 +143,12 @@ PKM2) that form between subunits and large-rearrangement sites (p38 DFG-out, c-A
 myristate) beyond elastic-network sampling. Runtime on the NMA backend is 0.6–8 s
 per protein on a laptop CPU.
 
+Independent validation on two further datasets gives consistent recall: 28/45
+(62%) on the PocketMiner cryptic-pocket set (Meller et al. 2023) and 88/180 (49%)
+on the held-out test fold of CryptoBench (Vavra et al. 2024), the largest and most
+diverse cryptic-site dataset. The convergence of two curated/field-standard sets
+at ~60% and the hardest comprehensive set at ~49% bounds the honest recall.
+
 An earlier revision reported 85% using a looser lining definition (a ~13 Å sphere
 around the pocket center) that inflated the residue-overlap metric; it has been
 corrected to a true atomic-contact definition, and 59% is the reported figure.

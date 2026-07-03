@@ -129,6 +129,8 @@ The `nma` backend samples physically meaningful collective motions — the same 
 
 **13 / 22 cryptic pockets detected (59%, NMA backend, crypticity ranking, 20 conformers).**
 
+This curated result is cross-validated on two further independent datasets — **PocketMiner 62%** and **CryptoBench 49%** (the largest and hardest) — see [Independent validation](#independent-validation--three-benchmarks) below.
+
 Success criterion (top-5 pockets): a pocket whose lining residues overlap ≥30% with the known ligand-contact site, **or** whose center is within 4 Å of the site centroid. Lining residues use a true atomic-contact definition (any residue with an atom within 5 Å of the detected cavity). Reproduce with `python benchmarks/cryptic_benchmark.py --category cryptic`.
 
 > **Transparency — please read.** These are OR-criterion pass counts. Of the 22 cryptic targets, **13 pass on residue overlap** and **2 also satisfy the strict ≤4 Å centroid test** (PTP1B, IL-2). Precise pocket-center localization is hard for elongated, partially-open cryptic grooves, so residue overlap (the criterion used by CryptoSite and PocketMiner) is the primary metric, reported alongside the strict centroid test. `cryptic_benchmark.py` prints the full per-metric breakdown.
@@ -166,9 +168,22 @@ Success criterion (top-5 pockets): a pocket whose lining residues overlap ≥30%
 
 Dimer-interface pockets are partly addressable with `--homodimer` (reads BIOMT records and builds the biological assembly), though this benchmark's single-chain-referenced scoring does not credit them. For large-rearrangement sites the optional Boltz-2 backend samples more broadly, but its current sequence-based integration is noisy — see [Backends](#backends).
 
-### Independent validation — PocketMiner set
+### Independent validation — three benchmarks
 
-Run on the **PocketMiner** cryptic-pocket dataset (Meller et al. 2023, *Nat. Commun.*; 61 apo structures with per-residue cryptic labels), Lacuna recovers **28 / 45 (62%)** of the label-positive structures (top-5, ≥30% residue overlap or ≤4 Å centroid) — **consistent with the 59% above, on an independent set 2× larger.** That two curated and field-standard benchmarks agree at ~60% is the strongest evidence the number is real. Reproduce with `python benchmarks/pocketminer_benchmark.py` (auto-downloads the dataset).
+Cryptic-pocket recall measured on three independent datasets (NMA + crypticity, top-5, ≥30% residue overlap **or** ≤4 Å centroid):
+
+| Benchmark | N | Recall | Notes |
+|-----------|--:|:------:|-------|
+| Curated apo/holo set (this repo) | 22 | **59%** | literature cryptic pairs |
+| PocketMiner (Meller 2023, *Nat. Commun.*) | 45 | **62%** | per-residue cryptic labels |
+| CryptoBench test fold (Vavra 2024, *Bioinformatics*) | 180 | **49%** | largest & most diverse; harder |
+
+The curated and PocketMiner sets agree at ~60%; **CryptoBench** — the field's largest cryptic set (1107 structures; 180 of its 222-structure held-out test fold evaluated here) — is harder at **49%**, with a further ~18% of structures landing in the 20–29% overlap band just below the pass line (median overlap 29%). Two curated/field-standard sets converging at ~60% and the hardest comprehensive set at ~49% bound the honest recall. Reproduce:
+
+```bash
+python benchmarks/pocketminer_benchmark.py    # PocketMiner (auto-downloads)
+python benchmarks/cryptobench_benchmark.py    # CryptoBench test fold (auto-downloads, ~10 min)
+```
 
 ### Orthosteric / conformational controls
 
