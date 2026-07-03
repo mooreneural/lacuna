@@ -8,7 +8,7 @@
 
 Most protein structure predictors (AlphaFold, Boltz, Chai) give you one static structure. But ~70% of disease-relevant proteins are considered "undruggable" not because they're biologically intractable - it's because no pocket is visible in their ground state. K-Ras was "undruggable" for 30 years until a transient cryptic pocket was found in its switch-II region. That pocket now backs sotorasib and adagrasib.
 
-Lacuna finds those pockets. It generates a conformational ensemble from any input structure, detects pockets per conformer, and clusters them across the ensemble to surface sites that only appear transiently - ranked by druggability and persistence.
+Lacuna finds those pockets. It generates a conformational ensemble from any input structure, detects pockets per conformer, and clusters them across the ensemble to surface sites that only appear transiently - ranked by a continuous crypticity score.
 
 ```
 lacuna discover kras.pdb --conformers 20 --emit-boltz-constraints --emit-vina-boxes
@@ -25,7 +25,7 @@ pip install lacuna-pockets
 **Optional backends** (better conformational sampling):
 ```bash
 pip install "lacuna-pockets[openmm]"   # 100ps implicit-solvent MD
-pip install "lacuna-pockets[boltz]"    # Boltz-2 partial diffusion (best quality, GPU recommended)
+pip install "lacuna-pockets[boltz]"    # Boltz-2 diffusion sampling (experimental, GPU)
 pip install "lacuna-pockets[all]"      # everything
 ```
 
@@ -48,7 +48,7 @@ lacuna discover protein.pdb --min-druggability 0.5 --min-persistence 0.3 --top 5
 # Reads BIOMT records from PDB; for best results use the biological assembly download from RCSB
 lacuna discover protein.pdb --homodimer --conformers 20
 
-# Use Boltz-2 partial diffusion for highest-quality sampling
+# Optional Boltz-2 backend (experimental — see the Backends note)
 lacuna discover protein.pdb --backend boltz --conformers 30
 
 # Emit all docking file formats
@@ -89,11 +89,11 @@ for c in clusters[:5]:
 
 ## How it works
 
-1. **Ensemble generation** - Generate N conformers via elastic network model normal mode analysis (built-in), OpenMM implicit-solvent MD, or Boltz-2 partial diffusion at varying noise levels
+1. **Ensemble generation** - Generate N conformers via elastic network model normal mode analysis (built-in, default), OpenMM implicit-solvent MD, or experimental Boltz-2 diffusion sampling
 2. **Pocket detection** - Grid-based alpha-point analysis per conformer: compute distance transform, find local maxima within the 1.4–5.5 Å interaction zone, cluster nearby alpha-points into pocket candidates
 3. **Cross-ensemble clustering** - Greedy centroid merging clusters corresponding pockets across all conformers
 4. **Druggability scoring** - Gaussian volume reward centered at 300 Å³ + enclosure + hydrophobicity + aromaticity (Halgren 2009), scored in each conformer
-5. **Crypticity scoring & ranking** - Each site gets a continuous crypticity score (how much it opens relative to the apo state × druggability when open) and is flagged `cryptic: true` if present in <90% of conformers. Pockets are ranked by peak open-state druggability by default; `--rank-by crypticity` surfaces the most cryptic sites first
+5. **Crypticity scoring & ranking** - Each site gets a continuous crypticity score (how much it opens relative to the apo state × druggability when open) and is flagged `cryptic: true` if present in <90% of conformers. Pockets are ranked by crypticity by default; `--rank-by druggability` is available for always-open / orthosteric sites
 
 ---
 
@@ -114,79 +114,72 @@ for c in clusters[:5]:
 |---------|---------|---------|-------|-------|
 | `nma` | built-in | good | ~0.1s/conf | Anisotropic Network Model normal mode analysis - hinge bending, breathing, twist motions |
 | `openmm` | `lacuna[openmm]` | good | ~2s/conf | 100ps Langevin MD, GBn2 implicit solvent |
-| `boltz` | `lacuna[boltz]` | best | ~30s/conf (GPU) | Boltz-2 partial diffusion at varying noise fractions |
+| `boltz` | `lacuna[boltz]` | experimental | ~100s/protein (GPU) | Boltz-2 diffusion sampling from sequence; high diversity but noisy (see note) |
 | `random` | built-in | baseline | ~0.04s/conf | Correlated Gaussian backbone perturbation |
 
 **Auto-selection order:** `boltz` → `openmm` → `nma` → `random`. On a plain `pip install lacuna`, the NMA backend runs automatically.
 
-The `nma` backend samples physically meaningful collective motions — the same hinge-bending and breathing modes that open cryptic pockets in nature — without requiring a GPU or force field. It replaces `random` as the zero-dependency default. For large-scale loop rearrangements or very deep cryptic sites, `boltz` remains the best option.
+The `nma` backend samples physically meaningful collective motions — the same hinge-bending and breathing modes that open cryptic pockets in nature — without requiring a GPU or force field. It is the zero-dependency default.
+
+> **Boltz backend status (honest note).** The `boltz` backend runs Boltz-2 diffusion sampling on a GPU, but it currently predicts each conformer *de novo from sequence* (not partial diffusion from the input structure), which yields structurally divergent, noisy ensembles (150–300+ pocket clusters vs NMA's ~35). In GPU benchmarking it did **not** reliably improve cryptic detection over NMA. A proper apo-templated integration with sequence-based residue mapping is planned; until then, NMA is the recommended backend.
 
 ---
 
 ## Benchmarks
 
-**17 / 20 cryptic pockets detected (85%, NMA backend, 20 conformers)** - exceeding the CryptoSite published benchmark rate on a statistically defensible N=20 set.
+**13 / 22 cryptic pockets detected (59%, NMA backend, crypticity ranking, 20 conformers).**
 
-Success criterion (field standard, top-5 pockets): pocket centroid within 4 Å of the known binding-site centroid **or** ≥30% residue overlap. The numbers below are reproduced by the default configuration (`--backend nma --rank-by druggability`).
+Success criterion (top-5 pockets): a pocket whose lining residues overlap ≥30% with the known ligand-contact site, **or** whose center is within 4 Å of the site centroid. Lining residues use a true atomic-contact definition (any residue with an atom within 5 Å of the detected cavity). Reproduce with `python benchmarks/cryptic_benchmark.py --category cryptic`.
 
-> **Transparency:** these are the OR-criterion pass counts. Reported per-metric: of the 20 cryptic targets, **17 pass on residue overlap** and **2 also satisfy the stricter centroid-distance test**. The centroid-of-binding-residues is an intentionally strict and somewhat ill-posed reference for elongated grooves, so the residue-overlap criterion (used by CryptoSite and PocketMiner) is the primary metric. `cryptic_benchmark.py` now prints the full per-metric breakdown.
+> **Transparency — please read.** These are OR-criterion pass counts. Of the 22 cryptic targets, **13 pass on residue overlap** and **2 also satisfy the strict ≤4 Å centroid test** (PTP1B, IL-2). Precise pocket-center localization is hard for elongated, partially-open cryptic grooves, so residue overlap (the criterion used by CryptoSite and PocketMiner) is the primary metric, reported alongside the strict centroid test. `cryptic_benchmark.py` prints the full per-metric breakdown.
+>
+> A previous version of this README reported 85% using a looser lining definition (residues within a ~13 Å sphere of the pocket center), which inflated the overlap metric. It has since been corrected to true atomic contact — **59% is the honest number.**
 
-### Cryptic pockets - 17 / 20 (85%)
+### Cryptic pockets — 13 / 22 (59%)
 
-| Protein | Apo PDB | Drug target | Overlap | Rank | Time |
-|---------|---------|-------------|---------|------|------|
-| ✅ T4L L99A hydrophobic cavity | 1L90 | - | 100% | 1 | 0.9s |
-| ✅ K-Ras switch-II pocket | 4OBE | sotorasib / adagrasib | 93% | 3 | 0.9s |
-| ✅ IL-2 helix-α1 site | 1M47 | - | 100% | 4 | 0.7s |
-| ✅ MDM2 p53-binding cleft | 1Z1M | nutlin-3 | 47% | 4 | 1.1s |
-| ✅ BCL-XL BH3 groove | 1LXL | navitoclax | 91% | 2 | 2.9s |
-| ✅ BCL-2 BH3 groove | 1G5M | venetoclax | 96% | 5 | 1.2s |
-| ✅ c-ABL myristate pocket | 3CS9 | asciminib | 44% | 1 | 1.7s |
-| ✅ PTP1B allosteric helix site | 1A5Y | benzofuran inhibitors | 59% | 3 | 2.2s |
-| ✅ p38α DFG-out pocket | 1P38 | BIRB 796 | 38% | 1 | 3.0s |
-| ✅ HIV-1 RT NNRTI pocket | 1HMV | nevirapine | 94% | 2 | 8.4s |
-| ✅ HCV NS5B thumb-site I | 1NB4 | VXR class | 60% | 5 | 4.7s |
-| ✅ PPARγ allosteric AF-2 site | 2PRG | metaglidasen | 65% | 4 | 1.7s |
-| ✅ Glucokinase allosteric site | 1V4S | B84 activator | 100% | 3 | 3.8s |
-| ✅ MMP-13 S1′ allosteric tunnel | 2OZR | non-zinc inhibitors | 56% | 3 | 1.1s |
-| ✅ Src myristate pocket | 2SRC | - | 48% | 5 | 4.0s |
-| ✅ SHP-2 allosteric tunnel | 2SHP | SHP099 class | 47% | 1 | 6.1s |
-| ✅ ERK2 allosteric site | 2ERK | - | 31% | 1 | 2.9s |
-| ❌ Caspase-1 dimer interface | 2HBQ | - | 8% | - | 1.7s |
-| ❌ IDH1 R132H dimer interface | 3MAP | ivosidenib | 21% | - | 3.7s |
-| ❌ PKM2 subunit-interface activator | 1ZJH | TEPP-46 class | 25% | - | 4.3s |
+| Protein | Apo PDB | Drug target | Overlap | Rank |
+|---------|---------|-------------|--------:|:----:|
+| ✅ T4 Lysozyme L99A cavity | 1L90 | – | 100% | 1 |
+| ✅ Glucokinase allosteric site | 1V4S | activators | 100% | 2 |
+| ✅ PTP1B allosteric helix site | 1A5Y | benzofurans | 94% | 5 |
+| ✅ IL-2 helix-α1 site | 1M47 | – | 93% | 1 |
+| ✅ K-Ras switch-II pocket | 4OBE | sotorasib/adagrasib | 79% | 3 |
+| ✅ BCL-XL BH3 groove | 1LXL | navitoclax | 68% | 1 |
+| ✅ HIV-1 RT NNRTI pocket | 1HMV | nevirapine | 62% | 4 |
+| ✅ BCL-2 BH3 groove | 1G5M | venetoclax | 59% | 2 |
+| ✅ Ricin A pterin pocket | 1RTC | – | 50% | 4 |
+| ✅ MDM2 p53-binding cleft | 1Z1M | nutlin-3 | 47% | 1 |
+| ✅ HCV NS5B thumb-site I | 1NB4 | VXR class | 47% | 4 |
+| ✅ Src myristate pocket | 2SRC | – | 36% | 4 |
+| ✅ PPARγ allosteric site | 2PRG | metaglidasen | 35% | 2 |
+| ❌ Caspase-1 dimer interface | 2HBQ | – | 25% | – |
+| ❌ p38α DFG-out pocket | 1P38 | BIRB 796 | 24% | – |
+| ❌ ERK2 allosteric site | 2ERK | – | 19% | – |
+| ❌ c-ABL myristate pocket | 3CS9 | asciminib | 19% | – |
+| ❌ PKM2 subunit interface | 1ZJH | TEPP-46 | 17% | – |
+| ❌ IDH1 R132H dimer interface | 3MAP | ivosidenib | 7% | – |
+| ❌ MMP-13 S1′ tunnel | 2OZR | non-zinc | 6% | – |
+| ❌ SHP-2 allosteric tunnel | 2SHP | SHP099 | 0% | – |
+| ❌ TEM-1 allosteric site | 1JWP | CBT | 0% | – |
 
-Switching from the zero-dependency `random` backend to the physics-based `nma` backend recovers the former near-misses (IL-2 21%→100%, Src 28%→48%, SHP-2 and ERK2 now pass), and ranking by peak open-state druggability surfaces the right pocket into the top 5.
+**The gap is ranking, not detection.** At a top-20 cutoff the ensemble already contains **16/22 (73%)** of the true pockets — several misses are detected but ranked below 5. The remaining hard cases split into two classes: **oligomeric-interface pockets** (Caspase-1, IDH1, PKM2) that form *between* subunits and are invisible to single-chain analysis, and **large-rearrangement sites** (p38 DFG-out, c-ABL myristate) that need sampling beyond elastic-network modes.
 
-**All three remaining misses are oligomeric-interface pockets** - they form between subunits and cannot be seen in a single-chain analysis. They are addressable with the `--homodimer` flag, which reads BIOMT symmetry records and constructs the full biological assembly before analysis:
+Dimer-interface pockets are partly addressable with `--homodimer` (reads BIOMT records and builds the biological assembly), though this benchmark's single-chain-referenced scoring does not credit them. For large-rearrangement sites the optional Boltz-2 backend samples more broadly, but its current sequence-based integration is noisy — see [Backends](#backends).
 
-```bash
-lacuna discover 2HBQ.pdb --homodimer --conformers 20   # Caspase-1 dimer interface
-lacuna discover 3MAP.pdb --homodimer --conformers 20   # IDH1 R132H dimer interface
-```
+### Orthosteric / conformational controls
 
-For the very hardest sites requiring large loop rearrangement, the optional Boltz-2 backend (`--backend boltz`) samples states unreachable by NMA.
-
-### Conformational and orthosteric controls
-
-| Category | Result | Notable entries |
-|----------|--------|-----------------|
-| Conformational | 1 / 1 (100%) | Adenylate kinase open→closed (rank 1) |
-| Orthosteric | 5 / 6 (83%) | HIF-2α 100% (1.1 Å centroid), lysozyme 100%, thrombin, DHFR 72% |
-| Orthosteric miss | - | Trypsin (1S0Q non-standard residue numbering - documented limitation) |
-
-**Overall across all 27 proteins: 23 / 27 (85%).**
+Crypticity ranking (the default) intentionally de-prioritizes always-open sites, so for orthosteric / general pocket finding use `--rank-by druggability`. Control-set numbers under the corrected contact-lining pipeline are being re-measured; the earlier figures were produced with the inflated lining definition and have been withdrawn rather than reported stale.
 
 ### Crypticity score
 
-Every reported pocket now carries a continuous **crypticity score** in [0, 1] - the conformational-selection signature of a cryptic site, defined as how much the pocket opens relative to the apo/input structure × how druggable it is once open:
+Every reported pocket carries a continuous **crypticity score** in [0, 1] - the conformational-selection signature of a cryptic site, defined as how much the pocket opens relative to the apo/input structure × how druggable it is once open:
 
 ```
 opening    = (max_volume − apo_volume) / max_volume        # 1.0 if absent in the apo state
 crypticity = opening × peak_open_state_druggability
 ```
 
-A constitutive pocket already formed in the input structure scores ≈ 0; a pocket absent in the apo structure that opens into a druggable cavity scores near 1. As an independent validation, ranking the benchmark **purely by crypticity** (`--rank-by crypticity`) still recovers 15/20 known cryptic pockets - the score discriminates true cryptic sites with no druggability tie-breaking. The JSON report also includes per-pocket volume dynamics (`apo_volume_A3`, `volume_range_A3`) and `max_druggability`.
+A constitutive pocket already formed in the input structure scores ≈ 0; a pocket absent in the apo structure that opens into a druggable cavity scores near 1. Ranking by crypticity is the **default** and recovers the most cryptic targets. The JSON report also includes per-pocket volume dynamics (`apo_volume_A3`, `volume_range_A3`) and `max_druggability`.
 
 ### Ranking strategies
 
@@ -194,10 +187,10 @@ A constitutive pocket already formed in the input structure scores ≈ 0; a pock
 
 | Strategy | Description | Cryptic pass |
 |----------|-------------|--------------|
-| `druggability` (default) | peak open-state composite druggability | **17 / 20** |
-| `persistence` | legacy persistence × druggability | 16 / 20 |
-| `balanced` | druggability with a mild persistence bonus | 15 / 20 |
-| `crypticity` | most cryptic sites first | 15 / 20 |
+| `crypticity` (default) | most cryptic sites first | **12 / 20** |
+| `druggability` | peak open-state composite druggability | 10 / 20 |
+| `balanced` | druggability with a mild persistence bonus | 8 / 20 |
+| `persistence` | legacy persistence × druggability | 7 / 20 |
 
 ### Speed (NMA backend, no GPU)
 
@@ -216,7 +209,7 @@ fpocket detects pockets on a single static structure. Lacuna generates a conform
 |--------|------------|----------------------|
 | 1HEL hen lysozyme (orthosteric) | ✅ rank 1 | ✅ 100% |
 | 1L90 T4L L99A **(cryptic)** | ❌ not in top 5 | ✅ 100%, rank 1 |
-| 4OBE K-Ras switch-II **(cryptic)** | ❌ not in top 5 | ✅ 93%, rank 3 |
+| 4OBE K-Ras switch-II **(cryptic)** | ❌ not in top 5 | ✅ 79%, rank 3 |
 | 1HPV HIV-1 protease (orthosteric) | ✅ rank 1 | ✅ rank 1 |
 | **Score** | **2 / 4** | **4 / 4** |
 
@@ -224,11 +217,11 @@ T4L L99A and K-Ras switch-II are the canonical single-structure benchmark failur
 
 > **Reproduce:**
 > ```bash
-> python benchmarks/cryptic_benchmark.py          # full 27-protein run, NMA backend (~5 min)
-> python benchmarks/cryptic_benchmark.py --quick  # 10 conformers (~2 min)
-> python benchmarks/cryptic_benchmark.py --category cryptic            # cryptic only
-> python benchmarks/cryptic_benchmark.py --backend random --rank-by persistence  # ablations
-> python benchmarks/compare_fpocket.py            # fpocket head-to-head
+> python benchmarks/cryptic_benchmark.py --category cryptic   # 22 cryptic targets, NMA (~4 min)
+> python benchmarks/cryptic_benchmark.py --quick              # 10 conformers, faster
+> python benchmarks/cryptic_benchmark.py --category cryptic --rank-by druggability  # ablation
+> python benchmarks/cryptic_benchmark.py --category cryptic --top-n 20              # detection ceiling
+> python benchmarks/compare_fpocket.py                        # fpocket head-to-head
 > ```
 
 ---
@@ -236,11 +229,9 @@ T4L L99A and K-Ras switch-II are the canonical single-structure benchmark failur
 ## Example: K-Ras switch-II
 
 ```bash
-# Download K-Ras apo (from RCSB)
-# Run with Boltz backend for highest-quality switch-II sampling
+# Download K-Ras apo (from RCSB); NMA backend (default) recovers switch-II at rank 3
 lacuna discover 4OBE.pdb \
-    --backend boltz \
-    --conformers 30 \
+    --conformers 20 \
     --emit-boltz-constraints \
     --output kras_pockets/
 

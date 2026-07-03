@@ -65,8 +65,9 @@ ranked cryptic pocket report in seconds to minutes on commodity hardware. The
 default ensemble backend is an Anisotropic Network Model (ANM)
 [@atilgan2001], which generates physically meaningful collective motions
 (hinge bending, domain breathing, loop rearrangements) without a force field.
-For users with GPU access, an optional Boltz-2 partial diffusion backend
-provides higher-quality sampling of large-scale conformational changes.
+An optional, experimental Boltz-2 backend (GPU) samples structures via diffusion;
+in current benchmarking it does not yet reliably improve cryptic detection over
+the NMA backend (see Method).
 
 # Method
 
@@ -80,10 +81,13 @@ non-trivial normal modes, and samples conformers by displacing Cα atoms along
 Boltzmann-weighted random linear combinations of these modes. All-atom
 coordinates are recovered by Gaussian-weighted interpolation from Cα
 displacements with a 5 Å correlation length. The optional **OpenMM backend**
-runs 100 ps of Langevin dynamics with GBn2 implicit solvent. The optional
-**Boltz backend** uses Boltz-2 partial diffusion at linearly increasing noise
-levels, producing large-scale conformational changes unreachable by NMA. All
-backends share the same interface: `backend.generate(structure_path, n_conformers)`
+runs 100 ps of Langevin dynamics with GBn2 implicit solvent. The optional,
+experimental **Boltz backend** runs Boltz-2 diffusion sampling; it currently
+predicts each conformer de novo from sequence rather than diffusing from the
+input structure, which yields high but noisy structural diversity and does not
+yet reliably improve cryptic detection over NMA (a structure-templated
+integration is future work). All backends share the same interface:
+`backend.generate(structure_path, n_conformers)`
 returns a list of coordinate arrays in the original atom order.
 
 ## Pocket Detection
@@ -123,18 +127,25 @@ IDH1 R132H.
 
 ## Benchmark
 
-On a 20-protein benchmark drawn from the CryptoSite dataset [@cimermancic2016],
-Lacuna detects 17/20 cryptic pockets (85%) using the NMA backend with 20
-conformers, exceeding the published CryptoSite benchmark rate. A pocket counts as
-detected if, among the top five ranked clusters, one has a centroid within 4 Å of
-the binding-site centroid or shares at least 30% of the known binding residues;
-the residue-overlap criterion (as used by CryptoSite) is the primary metric, and
-`cryptic_benchmark.py` reports the per-metric breakdown. The three remaining
-misses are all oligomeric-interface pockets (Caspase-1, IDH1 R132H, PKM2) that
-form between subunits and are addressable with the `--homodimer` flag, which
-builds the biological assembly before analysis. Across 27 diverse proteins
-including conformational and orthosteric controls, the overall detection rate is
-23/27 (85%). Runtime on the NMA backend is 0.6–8 s per protein on a laptop CPU.
+On a 22-protein benchmark of apo/holo cryptic-pocket pairs (targets drawn from
+the cryptic-pocket literature, including CryptoSite examples [@cimermancic2016]),
+Lacuna detects 13/22 cryptic pockets (59%) using the NMA backend with 20
+conformers and crypticity ranking. A pocket counts as detected if, among the top
+five ranked clusters, one's lining residues (true atomic contact, ≤5 Å from the
+detected cavity) overlap at least 30% of the known ligand-contact residues, or its
+center lies within 4 Å of the binding-site centroid; residue overlap (as used by
+CryptoSite and PocketMiner) is the primary metric, and `cryptic_benchmark.py`
+reports the per-metric breakdown (2/22 also satisfy the strict centroid test). A
+diagnostic at a top-20 cutoff shows the ensemble contains 16/22 (73%) of the true
+pockets, so the residual gap is dominated by ranking rather than detection. The
+remaining misses fall into oligomeric-interface pockets (Caspase-1, IDH1 R132H,
+PKM2) that form between subunits and large-rearrangement sites (p38 DFG-out, c-ABL
+myristate) beyond elastic-network sampling. Runtime on the NMA backend is 0.6–8 s
+per protein on a laptop CPU.
+
+An earlier revision reported 85% using a looser lining definition (a ~13 Å sphere
+around the pocket center) that inflated the residue-overlap metric; it has been
+corrected to a true atomic-contact definition, and 59% is the reported figure.
 
 # Acknowledgements
 
