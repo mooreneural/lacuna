@@ -36,7 +36,10 @@ from lacuna.io.structure import is_aromatic, is_hydrophobic
 GRID_SPACING = 1.0       # Å per voxel
 PADDING = 5.0            # Å padding around bounding box
 MIN_VOLUME_A3 = 80.0     # minimum pocket volume to report
-MAX_VOLUME_A3 = 5000.0
+# Real druggable pockets are ~200-1000 Å³; cap well below the over-merged-blob
+# regime (2500-5000 Å³). Blobs above this both hurt real output and trivially
+# game residue-overlap metrics (a 140-residue "pocket" overlaps any small site).
+MAX_VOLUME_A3 = 1500.0
 
 # Interaction zone
 ALPHA_DIST_MIN = 1.6     # Å  — too small: inside VDW sphere
