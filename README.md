@@ -166,9 +166,20 @@ Success criterion (top-5 pockets): a pocket whose lining residues overlap ≥30%
 
 Dimer-interface pockets are partly addressable with `--homodimer` (reads BIOMT records and builds the biological assembly), though this benchmark's single-chain-referenced scoring does not credit them. For large-rearrangement sites the optional Boltz-2 backend samples more broadly, but its current sequence-based integration is noisy — see [Backends](#backends).
 
+### Independent validation — PocketMiner set
+
+Run on the **PocketMiner** cryptic-pocket dataset (Meller et al. 2023, *Nat. Commun.*; 61 apo structures with per-residue cryptic labels), Lacuna recovers **28 / 45 (62%)** of the label-positive structures (top-5, ≥30% residue overlap or ≤4 Å centroid) — **consistent with the 59% above, on an independent set 2× larger.** That two curated and field-standard benchmarks agree at ~60% is the strongest evidence the number is real. Reproduce with `python benchmarks/pocketminer_benchmark.py` (auto-downloads the dataset).
+
 ### Orthosteric / conformational controls
 
-Crypticity ranking (the default) intentionally de-prioritizes always-open sites, so for orthosteric / general pocket finding use `--rank-by druggability`. Control-set numbers under the corrected contact-lining pipeline are being re-measured; the earlier figures were produced with the inflated lining definition and have been withdrawn rather than reported stale.
+Crypticity ranking (the default) intentionally de-prioritizes always-open sites, so for orthosteric / general pocket finding use `--rank-by druggability`. Under the corrected contact-lining pipeline (NMA, `--rank-by druggability`):
+
+| Category | Result | Notes |
+|----------|--------|-------|
+| Orthosteric | 3 / 6 | hen lysozyme 100%, HIF-2α 96% (1.1 Å centroid), DHFR 50%; misses HIV protease, thrombin, trypsin (1S0Q numbering) |
+| Conformational | 1 / 1 | adenylate kinase open→closed |
+
+Orthosteric detection is a known relative weakness of the tight-contact pipeline — the tool is tuned for transient cryptic sites, not always-open active-site grooves.
 
 ### Crypticity score
 
