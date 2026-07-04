@@ -15,9 +15,10 @@ abstract: >
   Lacuna discovers cryptic binding pockets in proteins by generating a
   conformational ensemble, detecting pockets per conformer, clustering
   across the ensemble, and ranking by a continuous crypticity score.
-  Evaluated on 22 cryptic-pocket apo/holo pairs (13/22, 59%; residue
-  overlap as the primary metric, matching CryptoSite/PocketMiner). Uses
-  an Anisotropic Network Model backend on CPU (~1-8 s/protein).
+  Evaluated on 22 cryptic-pocket apo/holo pairs (7/22, 32% under a
+  size-robust Jaccard-or-centroid criterion; 59% under the legacy
+  size-gameable recall metric). Uses an Anisotropic Network Model
+  backend on CPU (~1-8 s/protein).
 keywords:
   - drug-discovery
   - cryptic-pockets

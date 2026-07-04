@@ -42,7 +42,8 @@ TOOL_CITATION = "Moore 2026 Lacuna (github.com/mooreneural/lacuna)"
 CONFORMERS = 20
 HOLO_CUTOFF = 4.5          # Å — residue within this of any ligand atom → binding site
 CENTROID_THRESHOLD = 4.0   # Å — primary: pocket centroid within this of site centroid
-OVERLAP_THRESHOLD = 0.30   # secondary: residue overlap (kept for comparison)
+OVERLAP_THRESHOLD = 0.30   # legacy recall = |found∩known|/|known| (size-gameable)
+JACCARD_THRESHOLD = 0.25   # size-robust IoU = |found∩known|/|found∪known|
 
 # HETATM residue names to ignore when selecting the "principal ligand"
 SOLVENT_CODES = frozenset({
@@ -543,16 +544,45 @@ def pocket_min_centroid_dist(
     return best_dist, best_rank
 
 
-# ── overlap metric ─────────────────────────────────────────────────────────────
+# ── residue metrics ────────────────────────────────────────────────────────────
 
-def residue_overlap(cluster_residues: list[str], known: set[int]) -> float:
+def _found_resnums(cluster_residues: list[str]) -> set[int]:
+    """Parse residue sequence numbers out of Lacuna lining-residue labels.
+
+    Labels are formatted ``NAME+seq:chain`` (e.g. ``ALA123:A``); we take the part
+    before ``:`` and keep its digits.
+    """
     found: set[int] = set()
     for label in cluster_residues:
         try:
             found.add(int("".join(c for c in label.split(":")[0] if c.isdigit())))
         except (ValueError, IndexError):
             pass
+    return found
+
+
+def residue_overlap(cluster_residues: list[str], known: set[int]) -> float:
+    """Recall of the known site: |found ∩ known| / |known|.
+
+    NOTE: size-gameable — a pocket with many lining residues trivially overlaps a
+    small known site, so a model can inflate this by simply returning larger
+    pockets.  Reported for backward comparison; prefer ``residue_jaccard`` (below)
+    or the centroid criterion for a size-robust judgement.
+    """
+    found = _found_resnums(cluster_residues)
     return len(found & known) / len(known) if known else 0.0
+
+
+def residue_jaccard(cluster_residues: list[str], known: set[int]) -> float:
+    """Size-robust overlap (intersection-over-union): |found ∩ known| / |found ∪ known|.
+
+    Unlike ``residue_overlap`` this penalises oversized pockets: adding spurious
+    lining residues grows the union and lowers the score, so it cannot be gamed by
+    ranking on raw pocket volume.
+    """
+    found = _found_resnums(cluster_residues)
+    union = found | known
+    return len(found & known) / len(union) if union else 0.0
 
 
 # ── Lacuna runner ──────────────────────────────────────────────────────────────
@@ -756,27 +786,40 @@ def main():
         # site residues in the apo structure, not from the holo — see above).
         best_dist, best_dist_rank = pocket_min_centroid_dist(clusters, ref_centroid, top_n=args.top_n)
 
-        # Residue overlap: robust for cryptic pockets where residues move significantly
-        # between states (the numbering is stable even when positions shift 5-15 Å).
-        best_ov, best_rank = 0.0, None
+        # Residue metrics: recall (legacy, size-gameable) and Jaccard (size-robust).
+        # Tracked independently so the best-overlap and best-Jaccard pockets may be
+        # different clusters; best_ov_size is the lining-residue count of the
+        # best-recall pocket, exposing size-gaming (a large found set inflates recall
+        # while depressing Jaccard).
+        best_ov, best_rank, best_ov_size = 0.0, None, 0
+        best_jac, best_jac_rank = 0.0, None
         for c in clusters[:args.top_n]:
             ov = residue_overlap(c.lining_residues, known)
             if ov > best_ov:
                 best_ov, best_rank = ov, c.rank
+                best_ov_size = len(_found_resnums(c.lining_residues))
+            jac = residue_jaccard(c.lining_residues, known)
+            if jac > best_jac:
+                best_jac, best_jac_rank = jac, c.rank
 
-        # Dual success criterion (OR): pass by centroid proximity OR by residue overlap.
-        # This is more conservative than using only centroid (which can produce
-        # false-positives for surface pockets near allosteric sites), while still
-        # rescuing cases where residue-numbering offsets break the overlap metric.
         dist_ok = best_dist <= CENTROID_THRESHOLD
         ov_ok = best_ov >= OVERLAP_THRESHOLD
+        jac_ok = best_jac >= JACCARD_THRESHOLD
+
+        # Legacy criterion (kept for backward comparison): centroid OR recall.
         found = dist_ok or ov_ok
         status = "PASS" if found else "MISS"
-        marker = "✅" if found else "❌"
+        # Size-robust criterion: centroid proximity OR Jaccard ≥ threshold. This is
+        # the honest headline — it cannot be gamed by returning larger pockets.
+        found_robust = dist_ok or jac_ok
+        status_robust = "PASS" if found_robust else "MISS"
+
+        marker = "✅" if found_robust else "❌"
         dist_str = f"{best_dist:.1f}Å" if best_dist < float("inf") else "n/a"
-        pass_by = ("dist" if dist_ok else "") + ("+" if (dist_ok and ov_ok) else "") + ("ov" if ov_ok else "")
-        print(f"  {marker} {status}({pass_by or 'none'})  "
-              f"dist={dist_str}@r{best_dist_rank}  overlap={best_ov:.0%}@r{best_rank}  "
+        pass_by = ("dist" if dist_ok else "") + ("+" if (dist_ok and jac_ok) else "") + ("jac" if jac_ok else "")
+        print(f"  {marker} robust:{status_robust}({pass_by or 'none'})  legacy:{status}  "
+              f"dist={dist_str}@r{best_dist_rank}  jac={best_jac:.0%}@r{best_jac_rank}  "
+              f"recall={best_ov:.0%}@r{best_rank}(n={best_ov_size})  "
               f"clusters={len(clusters)}  {elapsed:.1f}s")
 
         results.append({
@@ -784,11 +827,15 @@ def main():
             "name": entry["name"],
             "category": entry["category"],
             "apo_pdb": entry["apo_pdb"],
-            "status": status,
-            "pass_by": pass_by if found else None,
+            "status": status_robust,
+            "status_legacy": status,
+            "pass_by": pass_by if found_robust else None,
             "centroid_dist_A": round(best_dist, 2) if best_dist < float("inf") else None,
             "centroid_rank": best_dist_rank,
             "overlap": round(best_ov, 3),
+            "overlap_found_size": best_ov_size,
+            "jaccard": round(best_jac, 3),
+            "jaccard_rank": best_jac_rank,
             "rank": best_rank,
             "n_clusters": len(clusters),
             "elapsed_s": round(elapsed, 2),
@@ -816,38 +863,51 @@ def main():
             m = "✅" if r["status"] == "PASS" else "❌"
             d = r.get("centroid_dist_A")
             dist_s = f"{d:.1f}Å" if d is not None else "n/a "
+            jac = f"{r['jaccard']:.0%}" if r.get("jaccard") is not None else "—"
             ov = f"{r['overlap']:.0%}" if r.get("overlap") is not None else "—"
             t = f"{r['elapsed_s']:.1f}s" if r.get("elapsed_s") is not None else ""
-            print(f"    {m} {r['apo_pdb']}  {dist_s:6s} {ov:5s}  {t:6s}  {r['name']}")
+            print(f"    {m} {r['apo_pdb']}  {dist_s:6s} jac={jac:4s} recall={ov:5s}  {t:6s}  {r['name']}")
         grand_pass += n_pass
         grand_total += len(cat_rows)
 
     cryptic_rows = [r for r in ran if r.get("category") == "cryptic"]
     cr_pass = sum(1 for r in cryptic_rows if r["status"] == "PASS")
+    cr_pass_legacy = sum(1 for r in cryptic_rows if r.get("status_legacy") == "PASS")
 
-    # Per-metric transparency: how many pass by the strict centroid criterion vs
-    # the (more permissive) residue-overlap criterion vs either. Reported so the
-    # headline OR-number cannot be mistaken for a strict-centroid result.
+    # Per-metric transparency. The headline is the size-robust "either" (centroid OR
+    # Jaccard). We also report the legacy recall criterion and a Jaccard threshold
+    # sweep so the reader can see exactly how much the old number was inflated by
+    # size-gaming and how sensitive the honest number is to the Jaccard cutoff.
     def _metric_counts(rows):
         dist = sum(1 for r in rows if (r.get("centroid_dist_A") or 1e9) <= CENTROID_THRESHOLD)
-        ov = sum(1 for r in rows if (r.get("overlap") or 0.0) >= OVERLAP_THRESHOLD)
-        either = sum(1 for r in rows if r["status"] == "PASS")
-        return dist, ov, either
+        recall = sum(1 for r in rows if (r.get("overlap") or 0.0) >= OVERLAP_THRESHOLD)
+        jac = {t: sum(1 for r in rows if (r.get("jaccard") or 0.0) >= t)
+               for t in (0.20, 0.25, 0.30)}
+        robust = sum(1 for r in rows if r["status"] == "PASS")           # dist OR jac≥0.25
+        legacy = sum(1 for r in rows if r.get("status_legacy") == "PASS")  # dist OR recall
+        return dist, recall, jac, robust, legacy
 
     print(f"\n{'─'*70}")
-    print(f"  CRYPTIC ONLY (primary headline): {cr_pass}/{len(cryptic_rows)}")
-    print(f"  TOTAL (all categories): {grand_pass}/{grand_total}")
-    print(f"  Success criterion (top-5, OR): centroid ≤ {CENTROID_THRESHOLD} Å from "
-          f"site centroid  OR  residue overlap ≥ {OVERLAP_THRESHOLD:.0%}")
+    print(f"  CRYPTIC ONLY — size-robust headline: {cr_pass}/{len(cryptic_rows)}"
+          f"   (legacy recall-based: {cr_pass_legacy}/{len(cryptic_rows)})")
+    print(f"  TOTAL (all categories, size-robust): {grand_pass}/{grand_total}")
+    print(f"  Size-robust criterion (top-{args.top_n}, OR): centroid ≤ {CENTROID_THRESHOLD} Å "
+          f"OR Jaccard ≥ {JACCARD_THRESHOLD:.0%}")
+    print(f"  Legacy criterion (size-gameable): centroid ≤ {CENTROID_THRESHOLD} Å "
+          f"OR recall ≥ {OVERLAP_THRESHOLD:.0%}")
     print(f"\n  Per-metric breakdown (transparency):")
-    print(f"    {'category':16s}  centroid≤{CENTROID_THRESHOLD:.0f}Å  overlap≥{OVERLAP_THRESHOLD:.0%}   either")
+    hdr = (f"    {'category':16s}  cen≤{CENTROID_THRESHOLD:.0f}Å  "
+           f"jac≥.20  jac≥.25  jac≥.30  recall≥{OVERLAP_THRESHOLD:.0%}  "
+           f"ROBUST  legacy")
+    print(hdr)
     for cat in categories + ["__all__"]:
         rows = ran if cat == "__all__" else [r for r in ran if r.get("category") == cat]
         if not rows:
             continue
-        dist, ov, either = _metric_counts(rows)
+        dist, recall, jac, robust, legacy = _metric_counts(rows)
         label = "ALL" if cat == "__all__" else cat
-        print(f"    {label:16s}  {dist:8d}    {ov:7d}   {either:5d}   (n={len(rows)})")
+        print(f"    {label:16s}  {dist:5d}  {jac[0.20]:6d}  {jac[0.25]:6d}  "
+              f"{jac[0.30]:6d}  {recall:8d}  {robust:5d}  {legacy:5d}   (n={len(rows)})")
     if skipped:
         print(f"  Skipped: {len(skipped)} "
               f"({', '.join(s['id'] for s in skipped)})")

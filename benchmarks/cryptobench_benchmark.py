@@ -34,8 +34,8 @@ if hasattr(sys.stdout, "reconfigure"):
 
 sys.path.insert(0, str(Path(__file__).parent))
 from cryptic_benchmark import (  # noqa: E402
-    run_lacuna, residue_overlap, pocket_min_centroid_dist,
-    CENTROID_THRESHOLD, OVERLAP_THRESHOLD,
+    run_lacuna, residue_overlap, residue_jaccard, pocket_min_centroid_dist,
+    CENTROID_THRESHOLD, OVERLAP_THRESHOLD, JACCARD_THRESHOLD,
 )
 from lacuna.io.structure import load_structure  # noqa: E402
 
@@ -99,7 +99,7 @@ def main():
     print(f"  CRYPTOBENCH TEST FOLD  ({len(test_ids)} apo structures, NMA + crypticity)")
     print("=" * 70, flush=True)
 
-    n_pass = n_run = n_skip = 0
+    n_pass = n_run = n_skip = n_pass_legacy = 0
     t_start = time.perf_counter()
     for i, apo in enumerate(test_ids, 1):
         assocs = dataset.get(apo)
@@ -128,21 +128,30 @@ def main():
 
         best_ov = max((residue_overlap(c.lining_residues, known) for c in clusters[:5]),
                       default=0.0)
+        best_jac = max((residue_jaccard(c.lining_residues, known) for c in clusters[:5]),
+                       default=0.0)
         best_dist, _ = pocket_min_centroid_dist(clusters, ref, top_n=5)
-        found = best_ov >= OVERLAP_THRESHOLD or best_dist <= CENTROID_THRESHOLD
+        # Size-robust headline: centroid OR Jaccard. Legacy (recall) tracked alongside.
+        found = best_dist <= CENTROID_THRESHOLD or best_jac >= JACCARD_THRESHOLD
+        found_legacy = best_dist <= CENTROID_THRESHOLD or best_ov >= OVERLAP_THRESHOLD
         n_run += 1
         n_pass += int(found)
+        n_pass_legacy += int(found_legacy)
         mark = "PASS" if found else "miss"
         dist_s = f"{best_dist:.1f}A" if best_dist < float("inf") else "n/a"
         rate = n_pass / max(n_run, 1)
-        print(f"  [{i}/{len(test_ids)}] {mark} {tag}  ov={best_ov:.0%} dist={dist_s} "
-              f"({len(known)} res, {elapsed:.1f}s)  running={n_pass}/{n_run} ({rate:.0%})",
+        print(f"  [{i}/{len(test_ids)}] {mark} {tag}  jac={best_jac:.0%} recall={best_ov:.0%} "
+              f"dist={dist_s} ({len(known)} res, {elapsed:.1f}s)  "
+              f"running={n_pass}/{n_run} ({rate:.0%})",
               flush=True)
 
     dt = time.perf_counter() - t_start
     print("-" * 70)
-    print(f"  CRYPTOBENCH TEST: {n_pass}/{n_run} ({n_pass / max(n_run, 1):.0%})  "
-          f"[{n_skip} skipped, {dt/60:.1f} min]")
+    print(f"  CRYPTOBENCH TEST (size-robust, cen≤{CENTROID_THRESHOLD:.0f}Å OR jac≥{JACCARD_THRESHOLD:.0%}): "
+          f"{n_pass}/{n_run} ({n_pass / max(n_run, 1):.0%})")
+    print(f"  CRYPTOBENCH TEST (legacy recall-based): "
+          f"{n_pass_legacy}/{n_run} ({n_pass_legacy / max(n_run, 1):.0%})")
+    print(f"  [{n_skip} skipped, {dt/60:.1f} min]")
 
 
 if __name__ == "__main__":

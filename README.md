@@ -127,58 +127,60 @@ The `nma` backend samples physically meaningful collective motions - the same hi
 
 ## Benchmarks
 
-**13 / 22 cryptic pockets detected (59%, NMA backend, crypticity ranking, 20 conformers).**
+**7 / 22 cryptic pockets localized (32%, size-robust criterion; NMA backend, crypticity ranking, 20 conformers).**
 
-This curated result is cross-validated on two further independent datasets - **PocketMiner 62%** and **CryptoBench 49%** (the largest and hardest) - see [Independent validation](#independent-validation--three-benchmarks) below.
+This curated result is cross-validated on two further independent datasets - **PocketMiner 31%** and **CryptoBench 18%** (the largest and hardest) - see [Independent validation](#independent-validation--three-benchmarks) below.
 
-Success criterion (top-5 pockets): a pocket whose lining residues overlap ≥30% with the known ligand-contact site, **or** whose center is within 4 Å of the site centroid. Lining residues use a true atomic-contact definition (any residue with an atom within 5 Å of the detected cavity). Reproduce with `python benchmarks/cryptic_benchmark.py --category cryptic`.
+**Size-robust success criterion (top-5 pockets):** a pocket whose lining residues reach a **Jaccard overlap ≥ 0.25** with the known ligand-contact site (Jaccard = |found ∩ known| / |found ∪ known|), **or** whose center is within 4 Å of the site centroid. Lining residues use a true atomic-contact definition (any residue with an atom within 5 Å of the detected cavity). Reproduce with `python benchmarks/cryptic_benchmark.py --category cryptic`.
 
-> **Transparency - please read.** These are OR-criterion pass counts. Of the 22 cryptic targets, **13 pass on residue overlap** and **2 also satisfy the strict ≤4 Å centroid test** (PTP1B, IL-2). Precise pocket-center localization is hard for elongated, partially-open cryptic grooves, so residue overlap (the criterion used by CryptoSite and PocketMiner) is the primary metric, reported alongside the strict centroid test. `cryptic_benchmark.py` prints the full per-metric breakdown.
+> **Why the number is lower than you may have seen before - please read.** Earlier releases reported this benchmark using plain **recall** (|found ∩ known| / |known| ≥ 30%), which gave **13/22 (59%)**. That metric is *size-gameable*: a large pocket engulfs most of a small known site and scores high recall while sitting nowhere near it. We verified this directly - a learned re-ranker reached 84% on the recall metric purely by ranking pockets on raw volume. We therefore switched the headline to a **size-robust** criterion (Jaccard, which penalizes oversized pockets, OR a ≤4 Å centroid hit). Under it the honest numbers roughly halve. Both criteria are printed side by side by every benchmark script; we lead with the robust one because it is the number we can defend on held-out data.
 >
-> Earlier releases used a looser lining definition (residues within a ~13 Å sphere of the pocket center); the current atomic-contact criterion (≤5 Å from the detected cavity) is stricter and more conservative, which lowers the reported overlap. The figures here reflect that stricter criterion, cross-validated across three independent datasets.
+> Of the 22 cryptic targets, **2 pass the strict ≤4 Å centroid test** (IL-2, PTP1B) and 5 more clear Jaccard ≥ 0.25. Precise pocket-center localization is genuinely hard for elongated, partially-open cryptic grooves, which is why the centroid-only pass rate is low. `cryptic_benchmark.py` prints the full per-metric breakdown (centroid, Jaccard at 0.20/0.25/0.30, and legacy recall).
 
-### Cryptic pockets - 13 / 22 (59%)
+### Cryptic pockets - 7 / 22 (32%)
 
-| Protein | Apo PDB | Drug target | Overlap | Rank |
-|---------|---------|-------------|--------:|:----:|
-| ✅ T4 Lysozyme L99A cavity | 1L90 | - | 100% | 1 |
-| ✅ Glucokinase allosteric site | 1V4S | activators | 100% | 2 |
-| ✅ PTP1B allosteric helix site | 1A5Y | benzofurans | 94% | 5 |
-| ✅ IL-2 helix-α1 site | 1M47 | - | 93% | 1 |
-| ✅ K-Ras switch-II pocket | 4OBE | sotorasib/adagrasib | 79% | 3 |
-| ✅ BCL-XL BH3 groove | 1LXL | navitoclax | 68% | 1 |
-| ✅ HIV-1 RT NNRTI pocket | 1HMV | nevirapine | 62% | 4 |
-| ✅ BCL-2 BH3 groove | 1G5M | venetoclax | 59% | 2 |
-| ✅ Ricin A pterin pocket | 1RTC | - | 50% | 4 |
-| ✅ MDM2 p53-binding cleft | 1Z1M | nutlin-3 | 47% | 1 |
-| ✅ HCV NS5B thumb-site I | 1NB4 | VXR class | 47% | 4 |
-| ✅ Src myristate pocket | 2SRC | - | 36% | 4 |
-| ✅ PPARγ allosteric site | 2PRG | metaglidasen | 35% | 2 |
-| ❌ Caspase-1 dimer interface | 2HBQ | - | 25% | - |
-| ❌ p38α DFG-out pocket | 1P38 | BIRB 796 | 24% | - |
-| ❌ ERK2 allosteric site | 2ERK | - | 19% | - |
-| ❌ c-ABL myristate pocket | 3CS9 | asciminib | 19% | - |
-| ❌ PKM2 subunit interface | 1ZJH | TEPP-46 | 17% | - |
-| ❌ IDH1 R132H dimer interface | 3MAP | ivosidenib | 7% | - |
-| ❌ MMP-13 S1′ tunnel | 2OZR | non-zinc | 6% | - |
-| ❌ SHP-2 allosteric tunnel | 2SHP | SHP099 | 0% | - |
-| ❌ TEM-1 allosteric site | 1JWP | CBT | 0% | - |
+Sorted by Jaccard (size-robust overlap). ✅ = passes the size-robust criterion (Jaccard ≥ 0.25 **or** centroid ≤ 4 Å); recall is the legacy size-gameable metric, shown for contrast. "Rank" is the position of the best-matching top-5 pocket.
 
-**The gap is ranking, not detection.** At a top-20 cutoff the ensemble already contains **16/22 (73%)** of the true pockets - several misses are detected but ranked below 5. The remaining hard cases split into two classes: **oligomeric-interface pockets** (Caspase-1, IDH1, PKM2) that form *between* subunits and are invisible to single-chain analysis, and **large-rearrangement sites** (p38 DFG-out, c-ABL myristate) that need sampling beyond elastic-network modes.
+| Protein | Apo PDB | Drug target | Jaccard | Recall | Rank |
+|---------|---------|-------------|--------:|-------:|:----:|
+| ✅ BCL-XL BH3 groove | 1LXL | navitoclax | 56% | 68% | 1 |
+| ✅ BCL-2 BH3 groove | 1G5M | venetoclax | 48% | 59% | 1 |
+| ✅ MDM2 p53-binding cleft | 1Z1M | nutlin-3 | 39% | 47% | 1 |
+| ✅ PTP1B allosteric helix site | 1A5Y | benzofurans | 36% | 94% | 5 |
+| ✅ IL-2 helix-α1 site | 1M47 | - | 36% | 93% | 1 |
+| ✅ HIV-1 RT NNRTI pocket | 1HMV | nevirapine | 33% | 62% | 4 |
+| ✅ K-Ras switch-II pocket | 4OBE | sotorasib/adagrasib | 26% | 79% | 3 |
+| ❌ Ricin A pterin pocket | 1RTC | - | 18% | 50% | - |
+| ❌ T4 Lysozyme L99A cavity | 1L90 | - | 17% | 62% | - |
+| ❌ HCV NS5B thumb-site I | 1NB4 | VXR class | 16% | 47% | - |
+| ❌ Glucokinase allosteric site | 1V4S | activators | 15% | 39% | - |
+| ❌ Src myristate pocket | 2SRC | - | 14% | 36% | - |
+| ❌ PPARγ allosteric site | 2PRG | metaglidasen | 11% | 35% | - |
+| ❌ c-ABL myristate pocket | 3CS9 | asciminib | 7% | 19% | - |
+| ❌ p38α DFG-out pocket | 1P38 | BIRB 796 | 7% | 24% | - |
+| ❌ ERK2 allosteric site | 2ERK | - | 6% | 19% | - |
+| ❌ Caspase-1 dimer interface | 2HBQ | - | 5% | 25% | - |
+| ❌ PKM2 subunit interface | 1ZJH | TEPP-46 | 4% | 17% | - |
+| ❌ MMP-13 S1′ tunnel | 2OZR | non-zinc | 4% | 6% | - |
+| ❌ TEM-1 allosteric site | 1JWP | CBT | 2% | 17% | - |
+| ❌ IDH1 R132H dimer interface | 3MAP | ivosidenib | 2% | 7% | - |
+| ❌ SHP-2 allosteric tunnel | 2SHP | SHP099 | 0% | 0% | - |
+
+**The remaining gap is mostly sampling, not ranking.** Raising the cutoff from top-5 to top-20 lifts the size-robust score only from **7/22 to 10/22** - just 3 pockets are detected-but-mis-ranked. The other 12 misses are not localized at all even at top-20, so they are a sampling/localization ceiling (the NMA ensemble never opens or the detector never localizes the site tightly enough) rather than a ranking failure. This is the honest picture: under the older recall metric the top-20 ceiling looked like 73%, which made the problem appear to be ranking - it was largely the metric. The hard cases split into **oligomeric-interface pockets** (Caspase-1, IDH1, PKM2) that form *between* subunits and are invisible to single-chain analysis, and **large-rearrangement sites** (p38 DFG-out, c-ABL myristate) that need sampling beyond elastic-network modes.
 
 Dimer-interface pockets are partly addressable with `--homodimer` (reads BIOMT records and builds the biological assembly), though this benchmark's single-chain-referenced scoring does not credit them. For large-rearrangement sites the optional Boltz-2 backend samples more broadly, but its current sequence-based integration is noisy - see [Backends](#backends).
 
 ### Independent validation - three benchmarks
 
-Cryptic-pocket recall measured on three independent datasets (NMA + crypticity, top-5, ≥30% residue overlap **or** ≤4 Å centroid):
+Measured on three independent datasets (NMA + crypticity, top-5). Both criteria are reported: the **size-robust** headline (Jaccard ≥ 0.25 **or** ≤ 4 Å centroid) and the **legacy recall** number (≥ 30% recall **or** ≤ 4 Å centroid) that earlier releases led with.
 
-| Benchmark | N | Recall | Notes |
-|-----------|--:|:------:|-------|
-| Curated apo/holo set (this repo) | 22 | **59%** | literature cryptic pairs |
-| PocketMiner (Meller 2023, *Nat. Commun.*) | 45 | **62%** | per-residue cryptic labels |
-| CryptoBench test fold (Vavra 2024, *Bioinformatics*) | 180 | **49%** | largest & most diverse; harder |
+| Benchmark | N | Size-robust | Legacy recall | Notes |
+|-----------|--:|:-----------:|:-------------:|-------|
+| Curated apo/holo set (this repo) | 22 | **32%** | 59% | literature cryptic pairs |
+| PocketMiner (Meller 2023, *Nat. Commun.*) | 45 | **31%** | 60% | per-residue cryptic labels |
+| CryptoBench test fold (Vavra 2024, *Bioinformatics*) | 180 | **18%** | 49% | largest & most diverse; harder |
 
-The curated and PocketMiner sets agree at ~60%; **CryptoBench** - the field's largest cryptic set (1107 structures; 180 of its 222-structure held-out test fold evaluated here) - is harder at **49%**, with a further ~18% of structures landing in the 20-29% overlap band just below the pass line (median overlap 29%). Two curated/field-standard sets converging at ~60% and the hardest comprehensive set at ~49% bound the honest recall. Reproduce:
+The two curated/field-standard sets converge at ~31-32% under the size-robust metric; **CryptoBench** - the field's largest cryptic set (1107 structures; 180 of its 222-structure held-out test fold evaluated here) - is harder at **18%**. The legacy recall column roughly doubles every number: that gap is the size-gaming headroom the recall metric leaves open (a large pocket covers a small known site without being localized on it), which is exactly why the size-robust number is the one we lead with. Reproduce (each script prints both criteria):
 
 ```bash
 python benchmarks/pocketminer_benchmark.py    # PocketMiner (auto-downloads)

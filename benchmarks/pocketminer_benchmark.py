@@ -30,9 +30,9 @@ if hasattr(sys.stdout, "reconfigure"):
 
 sys.path.insert(0, str(Path(__file__).parent))
 from cryptic_benchmark import (  # noqa: E402
-    download_pdb, run_lacuna, residue_overlap,
+    download_pdb, run_lacuna, residue_overlap, residue_jaccard,
     compute_known_site_centroid, pocket_min_centroid_dist,
-    CENTROID_THRESHOLD, OVERLAP_THRESHOLD,
+    CENTROID_THRESHOLD, OVERLAP_THRESHOLD, JACCARD_THRESHOLD,
 )
 from lacuna.io.structure import load_structure  # noqa: E402
 
@@ -88,7 +88,7 @@ def main():
     print(f"  POCKETMINER BENCHMARK  ({len(entries)} apo structures, NMA + crypticity)")
     print("=" * 70)
 
-    n_pass = n_run = 0
+    n_pass = n_run = n_pass_legacy = 0
     rows = []
     for pdb, chain, label_arr in entries:
         tag = f"{pdb}{chain}"
@@ -120,18 +120,26 @@ def main():
 
         best_ov = max((residue_overlap(c.lining_residues, cryptic) for c in clusters[:5]),
                       default=0.0)
+        best_jac = max((residue_jaccard(c.lining_residues, cryptic) for c in clusters[:5]),
+                       default=0.0)
         best_dist, _ = pocket_min_centroid_dist(clusters, ref, top_n=5)
-        found = best_ov >= OVERLAP_THRESHOLD or best_dist <= CENTROID_THRESHOLD
+        # Size-robust headline: centroid OR Jaccard. Legacy (recall) tracked alongside.
+        found = best_dist <= CENTROID_THRESHOLD or best_jac >= JACCARD_THRESHOLD
+        found_legacy = best_dist <= CENTROID_THRESHOLD or best_ov >= OVERLAP_THRESHOLD
         n_run += 1
         n_pass += int(found)
-        rows.append((tag, found, best_ov, best_dist, len(cryptic)))
+        n_pass_legacy += int(found_legacy)
+        rows.append((tag, found, best_ov, best_jac, best_dist, len(cryptic)))
         mark = "PASS" if found else "miss"
         dist_s = f"{best_dist:.1f}A" if best_dist < float("inf") else "n/a"
-        print(f"  {mark} {tag}  ov={best_ov:.0%}  dist={dist_s}  "
+        print(f"  {mark} {tag}  jac={best_jac:.0%}  recall={best_ov:.0%}  dist={dist_s}  "
               f"({len(cryptic)} cryptic res, {elapsed:.1f}s){mism}")
 
     print("-" * 70)
-    print(f"  POCKETMINER: {n_pass}/{n_run} ({n_pass / max(n_run, 1):.0%})")
+    print(f"  POCKETMINER (size-robust, cen≤{CENTROID_THRESHOLD:.0f}Å OR jac≥{JACCARD_THRESHOLD:.0%}): "
+          f"{n_pass}/{n_run} ({n_pass / max(n_run, 1):.0%})")
+    print(f"  POCKETMINER (legacy recall-based): "
+          f"{n_pass_legacy}/{n_run} ({n_pass_legacy / max(n_run, 1):.0%})")
 
 
 if __name__ == "__main__":

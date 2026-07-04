@@ -129,27 +129,34 @@ IDH1 R132H.
 
 On a 22-protein benchmark of apo/holo cryptic-pocket pairs (targets drawn from
 the cryptic-pocket literature, including CryptoSite examples [@cimermancic2016]),
-Lacuna detects 13/22 cryptic pockets (59%) using the NMA backend with 20
-conformers and crypticity ranking. A pocket counts as detected if, among the top
-five ranked clusters, one's lining residues (true atomic contact, ≤5 Å from the
-detected cavity) overlap at least 30% of the known ligand-contact residues, or its
-center lies within 4 Å of the binding-site centroid; residue overlap (as used by
-CryptoSite and PocketMiner) is the primary metric, and `cryptic_benchmark.py`
-reports the per-metric breakdown (2/22 also satisfy the strict centroid test). A
-diagnostic at a top-20 cutoff shows the ensemble contains 16/22 (73%) of the true
-pockets, so the residual gap is dominated by ranking rather than detection. The
-remaining misses fall into oligomeric-interface pockets (Caspase-1, IDH1 R132H,
-PKM2) that form between subunits and large-rearrangement sites (p38 DFG-out, c-ABL
-myristate) beyond elastic-network sampling. Runtime on the NMA backend is 0.6–8 s
-per protein on a laptop CPU.
+Lacuna localizes 7/22 cryptic pockets (32%) using the NMA backend with 20
+conformers and crypticity ranking, under a size-robust success criterion. A pocket
+counts as detected if, among the top five ranked clusters, one's lining residues
+(true atomic contact, ≤5 Å from the detected cavity) reach a Jaccard overlap
+(intersection over union) of at least 0.25 with the known ligand-contact residues,
+or its center lies within 4 Å of the binding-site centroid. We use Jaccard rather
+than plain recall (|found ∩ known| / |known|) because recall is size-gameable: a
+large pocket engulfs most of a small known site without being localized on it, and
+we verified that a learned re-ranker can reach 84% on the recall metric purely by
+ranking pockets on volume. Under the legacy recall criterion (≥30% recall or ≤4 Å
+centroid) this benchmark scores 13/22 (59%); the size-robust number is roughly half
+that, and `cryptic_benchmark.py` prints both alongside a Jaccard threshold sweep
+(2/22 satisfy the strict centroid test alone). A diagnostic at a top-20 cutoff
+lifts the size-robust score only from 7/22 to 10/22, so the residual gap is
+dominated by sampling and localization rather than ranking. The remaining misses
+fall into oligomeric-interface pockets (Caspase-1, IDH1 R132H, PKM2) that form
+between subunits and large-rearrangement sites (p38 DFG-out, c-ABL myristate)
+beyond elastic-network sampling. Runtime on the NMA backend is 0.6–8 s per protein
+on a laptop CPU.
 
-Independent validation on two further datasets gives consistent recall: 28/45
-(62%) on the PocketMiner cryptic-pocket set (Meller et al. 2023) and 88/180 (49%)
-on the held-out test fold of CryptoBench (Vavra et al. 2024), the largest and most
-diverse cryptic-site dataset. The convergence of two curated/field-standard sets
-at ~60% and the hardest comprehensive set at ~49% bounds the honest recall.
+Independent validation on two further datasets is consistent: under the size-robust
+criterion Lacuna scores 14/45 (31%) on the PocketMiner cryptic-pocket set (Meller
+et al. 2023) and 32/180 (18%) on the held-out test fold of CryptoBench (Vavra et
+al. 2024), the largest and most diverse cryptic-site dataset (legacy recall: 60%
+and 49% respectively). The two curated/field-standard sets converge at ~31-32% and
+the hardest comprehensive set floors at 18%.
 
-The benchmark uses a stricter atomic-contact lining definition than earlier
+The benchmark also uses a stricter atomic-contact lining definition than earlier
 revisions (which used a ~13 Å sphere around the pocket center); the stricter,
 more conservative criterion lowers the reported overlap, and the figures above
 reflect it.
