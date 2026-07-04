@@ -89,7 +89,7 @@ class NMABackend(EnsembleBackend):
         return conformers
 
     def _compute_modes(
-        self, ca_coords: np.ndarray
+        self, ca_coords: np.ndarray, gamma: np.ndarray | None = None
     ) -> tuple[np.ndarray, np.ndarray]:
         """Build ANM Hessian and return low-frequency eigenmodes.
 
@@ -97,6 +97,16 @@ class NMABackend(EnsembleBackend):
         z-displacement modes in flat structures) can be filtered before
         returning. Only modes with eigenvalue above a relative threshold are
         treated as non-trivial.
+
+        Parameters
+        ----------
+        gamma : np.ndarray | None
+            Optional (N, N) per-pair spring-constant multiplier. ``None`` (the
+            default) means a uniform network (all springs = 1.0), which
+            reproduces the standard ANM exactly. Values < 1 soften specific
+            contacts — a hook for spring-perturbation experiments (e.g. releasing
+            the local "cage" of contacts that hold a candidate cryptic pocket
+            shut) that recompute the modes of a locally softened network.
         """
         n = len(ca_coords)
         # Extra headroom handles degenerate test structures (planar, linear)
@@ -109,10 +119,11 @@ class NMABackend(EnsembleBackend):
         contact = (r > 1e-6) & (r <= self.cutoff)
         r_safe = np.where(r > 1e-6, r, 1.0)
 
-        # ANM off-diagonal super-element: M[i,j] = -1/r² * (r_vec ⊗ r_vec)
+        # ANM off-diagonal super-element: M[i,j] = -γ_ij / r² * (r_vec ⊗ r_vec)
+        strength = 1.0 if gamma is None else gamma[:, :, None, None]
         M = np.where(
             contact[:, :, None, None],
-            -1.0 / r_safe[:, :, None, None] ** 2
+            -strength / r_safe[:, :, None, None] ** 2
             * (diff[:, :, :, None] * diff[:, :, None, :]),
             0.0,
         )  # (N, N, 3, 3)

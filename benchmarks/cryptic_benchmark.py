@@ -44,6 +44,8 @@ HOLO_CUTOFF = 4.5          # Å — residue within this of any ligand atom → b
 CENTROID_THRESHOLD = 4.0   # Å — primary: pocket centroid within this of site centroid
 OVERLAP_THRESHOLD = 0.30   # legacy recall = |found∩known|/|known| (size-gameable)
 JACCARD_THRESHOLD = 0.25   # size-robust IoU = |found∩known|/|found∪known|
+CORE_RADIUS = 8.0          # Å — hotspot-core: known Cα within this of pocket hotspot
+HOTSPOT_CORE_THRESHOLD = 0.50  # size-robust: fraction of site wrapping the hotspot
 
 # HETATM residue names to ignore when selecting the "principal ligand"
 SOLVENT_CODES = frozenset({
@@ -504,26 +506,61 @@ def extract_binding_site(
     return binding, centroid
 
 
+def known_site_ca_coords(
+    apo_path: Path,
+    apo_chain: str,
+    known_residues: set[int],
+) -> list[tuple[float, float, float]]:
+    """Return the Cα positions of the known binding-site residues in the apo frame."""
+    atoms = _parse_atoms(apo_path)
+    return [
+        (a["x"], a["y"], a["z"])
+        for a in atoms
+        if a["record"] == "ATOM" and a["name"] == "CA"
+        and a["chain"] == apo_chain and a["resseq"] in known_residues
+    ]
+
+
 def compute_known_site_centroid(
     apo_path: Path,
     apo_chain: str,
     known_residues: set[int],
 ) -> tuple[float, float, float] | None:
     """Return the mean Cα position of the known binding-site residues."""
-    atoms = _parse_atoms(apo_path)
-    ca = [
-        a for a in atoms
-        if a["record"] == "ATOM" and a["name"] == "CA"
-        and a["chain"] == apo_chain and a["resseq"] in known_residues
-    ]
+    ca = known_site_ca_coords(apo_path, apo_chain, known_residues)
     if not ca:
         return None
     n = len(ca)
     return (
-        sum(a["x"] for a in ca) / n,
-        sum(a["y"] for a in ca) / n,
-        sum(a["z"] for a in ca) / n,
+        sum(c[0] for c in ca) / n,
+        sum(c[1] for c in ca) / n,
+        sum(c[2] for c in ca) / n,
     )
+
+
+def hotspot_core_overlap(
+    pocket_centroid: tuple[float, float, float],
+    known_ca: list[tuple[float, float, float]],
+) -> float:
+    """Size-robust, hotspot-anchored overlap.
+
+    Fraction of the known-site residues whose Cα lies within ``CORE_RADIUS`` of
+    the pocket's buriedness-weighted hotspot centroid. Because it depends only on
+    the single hotspot point (not on how many residues the pocket lines) it cannot
+    be inflated by returning a larger pocket, and because it is anchored at the
+    buried core rather than the site centroid it tolerates elongated sites whose
+    geometric centre falls in solvent. Complements Jaccard (set overlap) and the
+    strict site-centroid distance.
+    """
+    if not known_ca:
+        return 0.0
+    cx, cy, cz = pocket_centroid
+    r2 = CORE_RADIUS ** 2
+    hits = sum(
+        1 for (x, y, z) in known_ca
+        if (x - cx) ** 2 + (y - cy) ** 2 + (z - cz) ** 2 <= r2
+    )
+    return hits / len(known_ca)
 
 
 def pocket_min_centroid_dist(
@@ -751,6 +788,7 @@ def main():
         ref_centroid = compute_known_site_centroid(
             apo_path, entry.get("apo_chain", "A"), known
         )
+        known_ca = known_site_ca_coords(apo_path, entry.get("apo_chain", "A"), known)
 
         # Guard against very large multi-chain complexes that would take minutes
         apo_chain = entry.get("apo_chain")
@@ -793,6 +831,7 @@ def main():
         # while depressing Jaccard).
         best_ov, best_rank, best_ov_size = 0.0, None, 0
         best_jac, best_jac_rank = 0.0, None
+        best_core = 0.0
         for c in clusters[:args.top_n]:
             ov = residue_overlap(c.lining_residues, known)
             if ov > best_ov:
@@ -801,10 +840,12 @@ def main():
             jac = residue_jaccard(c.lining_residues, known)
             if jac > best_jac:
                 best_jac, best_jac_rank = jac, c.rank
+            best_core = max(best_core, hotspot_core_overlap(c.centroid, known_ca))
 
         dist_ok = best_dist <= CENTROID_THRESHOLD
         ov_ok = best_ov >= OVERLAP_THRESHOLD
         jac_ok = best_jac >= JACCARD_THRESHOLD
+        core_ok = best_core >= HOTSPOT_CORE_THRESHOLD
 
         # Legacy criterion (kept for backward comparison): centroid OR recall.
         found = dist_ok or ov_ok
@@ -819,7 +860,7 @@ def main():
         pass_by = ("dist" if dist_ok else "") + ("+" if (dist_ok and jac_ok) else "") + ("jac" if jac_ok else "")
         print(f"  {marker} robust:{status_robust}({pass_by or 'none'})  legacy:{status}  "
               f"dist={dist_str}@r{best_dist_rank}  jac={best_jac:.0%}@r{best_jac_rank}  "
-              f"recall={best_ov:.0%}@r{best_rank}(n={best_ov_size})  "
+              f"core={best_core:.0%}  recall={best_ov:.0%}@r{best_rank}(n={best_ov_size})  "
               f"clusters={len(clusters)}  {elapsed:.1f}s")
 
         results.append({
@@ -836,6 +877,7 @@ def main():
             "overlap_found_size": best_ov_size,
             "jaccard": round(best_jac, 3),
             "jaccard_rank": best_jac_rank,
+            "hotspot_core": round(best_core, 3),
             "rank": best_rank,
             "n_clusters": len(clusters),
             "elapsed_s": round(elapsed, 2),
@@ -883,9 +925,10 @@ def main():
         recall = sum(1 for r in rows if (r.get("overlap") or 0.0) >= OVERLAP_THRESHOLD)
         jac = {t: sum(1 for r in rows if (r.get("jaccard") or 0.0) >= t)
                for t in (0.20, 0.25, 0.30)}
+        core = sum(1 for r in rows if (r.get("hotspot_core") or 0.0) >= HOTSPOT_CORE_THRESHOLD)
         robust = sum(1 for r in rows if r["status"] == "PASS")           # dist OR jac≥0.25
         legacy = sum(1 for r in rows if r.get("status_legacy") == "PASS")  # dist OR recall
-        return dist, recall, jac, robust, legacy
+        return dist, recall, jac, core, robust, legacy
 
     print(f"\n{'─'*70}")
     print(f"  CRYPTIC ONLY — size-robust headline: {cr_pass}/{len(cryptic_rows)}"
@@ -897,17 +940,17 @@ def main():
           f"OR recall ≥ {OVERLAP_THRESHOLD:.0%}")
     print(f"\n  Per-metric breakdown (transparency):")
     hdr = (f"    {'category':16s}  cen≤{CENTROID_THRESHOLD:.0f}Å  "
-           f"jac≥.20  jac≥.25  jac≥.30  recall≥{OVERLAP_THRESHOLD:.0%}  "
-           f"ROBUST  legacy")
+           f"jac≥.20  jac≥.25  jac≥.30  core≥{HOTSPOT_CORE_THRESHOLD:.0%}  "
+           f"recall≥{OVERLAP_THRESHOLD:.0%}  ROBUST  legacy")
     print(hdr)
     for cat in categories + ["__all__"]:
         rows = ran if cat == "__all__" else [r for r in ran if r.get("category") == cat]
         if not rows:
             continue
-        dist, recall, jac, robust, legacy = _metric_counts(rows)
+        dist, recall, jac, core, robust, legacy = _metric_counts(rows)
         label = "ALL" if cat == "__all__" else cat
         print(f"    {label:16s}  {dist:5d}  {jac[0.20]:6d}  {jac[0.25]:6d}  "
-              f"{jac[0.30]:6d}  {recall:8d}  {robust:5d}  {legacy:5d}   (n={len(rows)})")
+              f"{jac[0.30]:6d}  {core:7d}  {recall:8d}  {robust:5d}  {legacy:5d}   (n={len(rows)})")
     if skipped:
         print(f"  Skipped: {len(skipped)} "
               f"({', '.join(s['id'] for s in skipped)})")

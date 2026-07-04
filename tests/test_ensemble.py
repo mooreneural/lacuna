@@ -184,3 +184,31 @@ class TestNMABackend:
         backend = NMABackend()
         conformers = backend.generate(mini_pdb, n_conformers=4)
         assert len(conformers) == 4
+
+    def test_uniform_gamma_matches_default(self, large_pdb):
+        """gamma=None (default) must be numerically identical to an all-ones gamma."""
+        from lacuna.io.structure import load_structure, coords_array
+        base = coords_array(load_structure(large_pdb))
+        backend = NMABackend()
+        ca = base[[a.serial for a in load_structure(large_pdb).atoms if a.name == "CA"]]
+
+        # An all-ones spring matrix must reproduce the uniform network. (Tolerance
+        # is float32-scale: the default gamma=None path keeps strength as a Python
+        # float, while an explicit ndarray promotes the Hessian dtype.)
+        modes0, freqs0 = backend._compute_modes(ca)
+        modes1, freqs1 = backend._compute_modes(ca, gamma=np.ones((len(ca), len(ca))))
+        np.testing.assert_allclose(freqs0, freqs1, rtol=1e-4, atol=1e-6)
+        np.testing.assert_allclose(np.abs(modes0), np.abs(modes1), rtol=1e-3, atol=1e-3)
+
+    def test_softening_springs_changes_modes(self, large_pdb):
+        """Per-pair gamma < 1 (the spring-perturbation hook) must change the modes."""
+        from lacuna.io.structure import load_structure, coords_array
+        structure = load_structure(large_pdb)
+        ca = coords_array(structure)[[a.serial for a in structure.atoms if a.name == "CA"]]
+
+        backend = NMABackend()
+        gamma = np.ones((len(ca), len(ca)))
+        gamma[0, 1] = gamma[1, 0] = 0.05  # soften one (symmetric) contact
+        _, freqs_uniform = backend._compute_modes(ca)
+        _, freqs_soft = backend._compute_modes(ca, gamma=gamma)
+        assert not np.allclose(freqs_uniform, freqs_soft)
