@@ -882,6 +882,15 @@ def main():
                 best_jac, best_jac_rank = jac, c.rank
             best_core = max(best_core, hotspot_core_overlap(c.centroid, known_ca))
 
+        # Top-k detection curve: size-robust headline hit within the top-k clusters,
+        # for a range of k. A flat curve means ranking is fine and the ceiling is
+        # detection/sampling; a rising curve means the pocket is found but mis-ranked.
+        topk_hit: dict[int, bool] = {}
+        for k in (1, 3, 5, 10, 20):
+            jk = max((residue_jaccard(c.lining_residues, known) for c in clusters[:k]), default=0.0)
+            dk, _ = pocket_min_centroid_dist(clusters, ref_centroid, top_n=k)
+            topk_hit[k] = (dk <= CENTROID_THRESHOLD) or (jk >= JACCARD_THRESHOLD)
+
         dist_ok = best_dist <= CENTROID_THRESHOLD
         ov_ok = best_ov >= OVERLAP_THRESHOLD
         jac_ok = best_jac >= JACCARD_THRESHOLD
@@ -919,6 +928,7 @@ def main():
             "jaccard": round(best_jac, 3),
             "jaccard_rank": best_jac_rank,
             "hotspot_core": round(best_core, 3),
+            "topk_hit": topk_hit,
             "rank": best_rank,
             "n_clusters": len(clusters),
             "elapsed_s": round(elapsed, 2),
@@ -1008,6 +1018,27 @@ def main():
         ids = ", ".join(r["apo_pdb"] for r in mrows if r["status"] != "PASS")
         miss_s = f"  misses: {ids}" if ids else ""
         print(f"    {mech:10s}  {npass}/{len(mrows)}{miss_s}")
+
+    # Top-k detection curve + bootstrap CI on the headline (top-5). A flat curve
+    # (top-5 ≈ top-20) means the ceiling is detection/sampling, not ranking. The CI
+    # is over targets (resampled), the unit an honest claim is made over — reporting
+    # a range instead of a single number is the guard against over-claiming.
+    try:
+        from metrics import paired_bootstrap_ci
+    except ImportError:
+        paired_bootstrap_ci = None
+    ks = (1, 3, 5, 10, 20)
+    with_curve = [r for r in ran if isinstance(r.get("topk_hit"), dict)]
+    if with_curve:
+        print(f"\n  Size-robust top-k detection curve (all {len(with_curve)} run):")
+        for k in ks:
+            hits = [bool(r["topk_hit"].get(str(k), r["topk_hit"].get(k))) for r in with_curve]
+            rate = sum(hits) / len(hits)
+            ci = ""
+            if paired_bootstrap_ci is not None:
+                _, lo, hi = paired_bootstrap_ci(hits)
+                ci = f"   95% CI [{lo:.0%}, {hi:.0%}]"
+            print(f"    top-{k:<2d}: {sum(hits):2d}/{len(hits)} ({rate:.0%}){ci}")
 
     if skipped:
         print(f"  Skipped: {len(skipped)} "
