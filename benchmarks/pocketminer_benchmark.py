@@ -39,7 +39,7 @@ from lacuna.io.structure import load_structure  # noqa: E402
 PM_DIR = Path(__file__).parent / "pm_data"
 MAX_RESIDUES = 700
 
-# PocketMiner dataset (Meller et al. 2023) — labels + apo ids, fetched on demand.
+# PocketMiner dataset (Meller et al. 2023) - labels + apo ids, fetched on demand.
 _PM_RAW = "https://raw.githubusercontent.com/Mickdub/gvp/pocket_pred/data/pm-dataset/"
 _PM_FILES = (
     "test_apo_ids_with_chainids.npy", "test_label_dictionary.npy",

@@ -19,11 +19,11 @@ from scipy.spatial.distance import cdist
 from lacuna.models import Pocket, PocketCluster
 from lacuna.pockets.scorer import score_pocket
 
-_DBSCAN_EPS = 5.0    # Å — pockets within 5 Å centroid distance are the same pocket
+_DBSCAN_EPS = 5.0    # Å - pockets within 5 Å centroid distance are the same pocket
 _CRYPTIC_THRESHOLD = 0.9  # persistence below this → cryptic
 
 # Ranking strategies. The default "crypticity" surfaces transiently-open cryptic
-# sites first — the tool's purpose — and scores best on the cryptic benchmark.
+# sites first - the tool's purpose - and scores best on the cryptic benchmark.
 # "druggability" ranks by peak open-state druggability (preferable for always-open
 # / orthosteric sites); the legacy "persistence" strategy multiplies druggability
 # by persistence, demoting the very transient pockets the tool targets; "balanced"
@@ -38,7 +38,7 @@ def compute_crypticity(apo_volume: float, max_volume: float, max_druggability: f
     """Continuous crypticity score in [0, 1].
 
     A site is cryptic to the degree that it (a) opens up relative to the input/apo
-    state and (b) is druggable once open — the conformational-selection signature
+    state and (b) is druggable once open - the conformational-selection signature
     of a cryptic pocket (Cimermancic 2016; Vajda 2018; Meller 2023).
 
         opening    = (max_volume - apo_volume) / max_volume   # 1.0 if absent in apo
@@ -80,7 +80,7 @@ def cluster_pockets(
     Args:
         pocket_lists: One list of Pocket objects per conformer.
         n_conformers: Total number of conformers (denominator for persistence).
-        rank_by: Ranking strategy — one of ``RANK_STRATEGIES``. ``"crypticity"``
+        rank_by: Ranking strategy - one of ``RANK_STRATEGIES``. ``"crypticity"``
             (default) surfaces transiently-open cryptic sites first;
             ``"druggability"`` ranks by peak open-state druggability (better for
             always-open/orthosteric sites); ``"persistence"`` is the legacy
@@ -130,13 +130,13 @@ def cluster_pockets(
         rep = members[int(np.argmin(dists))]
         drug_score = score_pocket(rep).composite
 
-        # Peak druggability — the pocket scored in its most-open conformer. This
+        # Peak druggability - the pocket scored in its most-open conformer. This
         # is the relevant figure for a transiently-open cryptic site, which may be
         # half-collapsed in the representative (mean-centroid) member.
         max_drug_score = max(score_pocket(p).composite for p in members)
 
         # Volume in the input/apo structure (conformer 0). 0.0 if the pocket is
-        # absent there — the strongest signal of crypticity.
+        # absent there - the strongest signal of crypticity.
         apo_members = [p.volume_a3 for p in members if p.conformer_idx == 0]
         apo_volume = float(max(apo_members)) if apo_members else 0.0
 

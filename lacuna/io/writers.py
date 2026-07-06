@@ -161,7 +161,7 @@ def write_structure_pdb(structure: "Structure", path: Path) -> None:
         chain = (atom.chain_id[0] if atom.chain_id else "A")
         elem = atom.element[:2].rjust(2) if atom.element else " C"
         # Column layout (PDB spec): name cols 13-16, altLoc col 17 (blank),
-        # resName cols 18-20. The space before res_name is the altLoc placeholder —
+        # resName cols 18-20. The space before res_name is the altLoc placeholder -
         # without it the residue name shifts one column left and strict parsers
         # (e.g. OpenMM) reject the file.
         lines.append(
@@ -189,7 +189,7 @@ def write_vina_box(
     box_size = (radius + box_padding) * 2
 
     lines = [
-        f"# Lacuna pocket {index} — AutoDock Vina box",
+        f"# Lacuna pocket {index} - AutoDock Vina box",
         f"# Rank {cluster.rank}, druggability={cluster.druggability:.3f}, "
         f"crypticity={cluster.crypticity:.3f}",
         f"center_x = {cx:.3f}",

@@ -41,7 +41,7 @@ class BoltzBackend(EnsembleBackend):
         self.sampling_steps = sampling_steps
         self.accelerator = accelerator
         self.cache_dir = cache_dir
-        # MSA options — use_msa_server=True hits ColabFold for MSA generation;
+        # MSA options - use_msa_server=True hits ColabFold for MSA generation;
         # improves ECL/loop region accuracy at the cost of a network round-trip.
         self.use_msa_server = use_msa_server
         self.msa_server_url = msa_server_url
@@ -128,11 +128,11 @@ class BoltzBackend(EnsembleBackend):
                 try:
                     s = load_structure(pdb_file)
                     coords = coords_array(s)
-                    # Align atom count — Boltz may add or reorder atoms
+                    # Align atom count - Boltz may add or reorder atoms
                     if coords.shape[0] == n_atoms:
                         conformers.append(coords)
                     else:
-                        # Try to match by truncating/padding — take first N atoms
+                        # Try to match by truncating/padding - take first N atoms
                         n = min(coords.shape[0], n_atoms)
                         padded = np.zeros((n_atoms, 3), dtype=np.float32)
                         padded[:n] = coords[:n]
@@ -159,7 +159,7 @@ class BoltzBackend(EnsembleBackend):
                 f"      sequence: {seq}",
             ]
             if not self.use_msa_server:
-                # PLM-only mode — no MSA server required, fast but ECL loops are noisier
+                # PLM-only mode - no MSA server required, fast but ECL loops are noisier
                 chain_lines.append(f"      msa: empty")
             # When use_msa_server=True: omit msa field so Boltz fetches from ColabFold
             lines += chain_lines

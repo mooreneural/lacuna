@@ -1,6 +1,6 @@
 """End-to-end tests for the lacuna CLI commands.
 
-Uses click's CliRunner so tests run in-process — no real subprocess, no TTY.
+Uses click's CliRunner so tests run in-process - no real subprocess, no TTY.
 """
 
 from __future__ import annotations

@@ -6,7 +6,7 @@ Algorithm:
   1. Build protein occupancy grid (VDW spheres).
   2. Compute Euclidean distance transform: dist[i,j,k] = Å to nearest protein atom.
   3. Find LOCAL MAXIMA of the distance field inside the interaction zone.
-     Each local max is an "alpha point" — a sphere that fits snugly into a
+     Each local max is an "alpha point" - a sphere that fits snugly into a
      protein concavity and touches multiple atoms on all sides.  This is the
      core idea behind fpocket / CASTp.
   4. Cluster nearby alpha points into pockets (DBSCAN-style dilation + labelling).
@@ -42,15 +42,15 @@ MIN_VOLUME_A3 = 80.0     # minimum pocket volume to report
 MAX_VOLUME_A3 = 1500.0
 
 # Interaction zone
-ALPHA_DIST_MIN = 1.6     # Å  — too small: inside VDW sphere
-ALPHA_DIST_MAX = 6.0     # Å  — too large: bulk solvent alpha sphere
+ALPHA_DIST_MIN = 1.6     # Å  - too small: inside VDW sphere
+ALPHA_DIST_MAX = 6.0     # Å  - too large: bulk solvent alpha sphere
 
 # Cluster radius: alpha points within this distance are merged into one pocket
 CLUSTER_RADIUS_A = 4.0   # Å
 
 # Lining residues: a residue lines the pocket if any of its atoms is within this
 # distance of the detected cavity (the alpha-cluster void voxels). This is a true
-# atomic-contact definition — replaces the earlier centroid+9 Å sphere, which
+# atomic-contact definition - replaces the earlier centroid+9 Å sphere, which
 # swept in a large shell of non-lining residues and inflated residue overlap.
 LINING_CONTACT_A = 5.0   # Å from any cavity voxel
 
@@ -104,7 +104,7 @@ def detect_pockets(
         return []
 
     # 5. For each cluster, compute volume, lining residues, and druggability props.
-    # Pre-compute once — used per-pocket for enclosure scoring
+    # Pre-compute once - used per-pocket for enclosure scoring
     local_density = uniform_filter(protein_mask.astype(np.float32), size=9)
     # Atom KDTree for fast contact-based lining-residue lookup.
     atom_tree = cKDTree(coords)
@@ -115,7 +115,7 @@ def detect_pockets(
     for label_id in range(1, n_labels + 1):
         alpha_cluster = labeled == label_id
 
-        # Volume from the alpha-cluster core (not the grown region) — avoids
+        # Volume from the alpha-cluster core (not the grown region) - avoids
         # over-inflation in large inter-chain spaces.
         alpha_void = alpha_cluster & (~protein_mask)
         volume = float(alpha_void.sum()) * voxel_vol
@@ -137,8 +137,8 @@ def detect_pockets(
         centroid = tuple((centroid_vox * grid_spacing + lo).tolist())
 
         # Lining residues: any residue with an atom within LINING_CONTACT_A of the
-        # detected cavity (the alpha-cluster void voxels). True atomic contact —
-        # not a centroid sphere — so the set reflects the residues that actually
+        # detected cavity (the alpha-cluster void voxels). True atomic contact -
+        # not a centroid sphere - so the set reflects the residues that actually
         # wall the pocket and feed accurate druggability + docking outputs.
         cavity_world = vox_indices * grid_spacing + lo  # (K, 3) cavity voxel centers
         neighbor_lists = atom_tree.query_ball_point(cavity_world, r=LINING_CONTACT_A)
@@ -184,7 +184,7 @@ def _build_protein_mask(
     shape: np.ndarray,
     grid_spacing: float,
 ) -> np.ndarray:
-    # Mark atom centers in the grid (vectorized — O(N_atoms))
+    # Mark atom centers in the grid (vectorized - O(N_atoms))
     atom_grid = np.zeros(shape, dtype=bool)
     indices = np.clip(
         np.round((coords - lo) / grid_spacing).astype(int),

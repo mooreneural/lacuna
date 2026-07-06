@@ -18,7 +18,7 @@ import math
 import random
 from typing import Iterable, Sequence
 
-# Thresholds — the one prespecified headline set. Ablations may sweep around these
+# Thresholds - the one prespecified headline set. Ablations may sweep around these
 # but the reported headline stays fixed.
 JACCARD_THRESHOLD = 0.25       # size-robust IoU
 CENTROID_THRESHOLD = 4.0       # Å, field-standard localization
@@ -32,7 +32,7 @@ def found_resnums(cluster_residues: Iterable[str]) -> set[int]:
 
     Labels are ``NAME+seq:chain`` (e.g. ``ALA123:A``); we take the part before
     ``:`` and keep its digits. (Canonical (chain, resseq) IDs on the Pocket model
-    would remove this parsing step — tracked as a follow-up.)
+    would remove this parsing step - tracked as a follow-up.)
     """
     out: set[int] = set()
     for label in cluster_residues:
@@ -44,12 +44,12 @@ def found_resnums(cluster_residues: Iterable[str]) -> set[int]:
 
 
 def residue_recall(found: set[int], known: set[int]) -> float:
-    """|found ∩ known| / |known| — SIZE-GAMEABLE, backward comparison only."""
+    """|found ∩ known| / |known| - SIZE-GAMEABLE, backward comparison only."""
     return len(found & known) / len(known) if known else 0.0
 
 
 def jaccard(found: set[int], known: set[int]) -> float:
-    """|found ∩ known| / |found ∪ known| — size-robust; anchors honest reporting."""
+    """|found ∩ known| / |found ∪ known| - size-robust; anchors honest reporting."""
     union = found | known
     return len(found & known) / len(union) if union else 0.0
 
@@ -117,7 +117,7 @@ def paired_bootstrap_ci(
     """Return (mean, lo, hi) of a per-target hit rate via bootstrap resampling.
 
     Resamples targets (not residues) so the interval reflects target-level
-    uncertainty — the unit an honest cryptic-pocket claim is made over.
+    uncertainty - the unit an honest cryptic-pocket claim is made over.
     """
     n = len(hits)
     if n == 0:

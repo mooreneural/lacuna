@@ -11,7 +11,7 @@ The backend feeds detection the same atom set (and order) as the rest of the
 pipeline: it starts from ``load_structure`` (which drops HETATM/water and can
 select a single chain), so the force field never sees ligands/ions, and it maps
 the MD positions back onto the original heavy-atom order by (chain, resSeq,
-atom-name). Atoms with no MD match (rare — e.g. an alternate-name terminal atom)
+atom-name). Atoms with no MD match (rare - e.g. an alternate-name terminal atom)
 keep their input coordinate.
 
 Requires: pip install "lacuna-pockets[openmm]"  (openmm + pdbfixer)
@@ -99,14 +99,14 @@ class OpenMMBackend(EnsembleBackend):
 
             fixer = PDBFixer(filename=str(clean_pdb))
             fixer.findMissingResidues()
-            # Do not model in whole missing loops — only complete partial residues.
+            # Do not model in whole missing loops - only complete partial residues.
             fixer.missingResidues = {}
             fixer.findMissingAtoms()
             fixer.addMissingAtoms()
             fixer.addMissingHydrogens(7.0)
 
             # The GBn2 implicit solvent is supplied by the implicit/gbn2.xml force
-            # field itself in OpenMM 8.x — createSystem must NOT also receive the
+            # field itself in OpenMM 8.x - createSystem must NOT also receive the
             # legacy implicitSolvent= kwargs (they are rejected as unused).
             ff = app.ForceField("amber14-all.xml", "implicit/gbn2.xml")
             system = ff.createSystem(
@@ -159,7 +159,7 @@ def _select_platform(mm):
 def _build_atom_remap(topology, structure) -> list[int]:
     """For each original structure atom, the MD-position index (or -1 if unmatched).
 
-    Keyed on (chain_id, res_seq, atom_name) — stable across PDBFixer, which
+    Keyed on (chain_id, res_seq, atom_name) - stable across PDBFixer, which
     preserves residue ids and standard atom names.
     """
     md_index: dict[tuple[str, int, str], int] = {}

@@ -8,7 +8,7 @@ Uses a simple coarse approach:
      scaled by a noise level parameter.
   3. Propagate atom displacements using a Gaussian decay from each Cα.
 
-This is intentionally lightweight — no force field, no minimization.
+This is intentionally lightweight - no force field, no minimization.
 It's good enough to open/close shallow pockets and test the pipeline.
 For real cryptic pocket work, use BoltzBackend or OpenMMBackend.
 """
@@ -24,7 +24,7 @@ from lacuna.io.structure import load_structure, coords_array
 
 
 class RandomBackend(EnsembleBackend):
-    """Backbone perturbation ensemble — no external dependencies required."""
+    """Backbone perturbation ensemble - no external dependencies required."""
 
     def __init__(self, noise_levels: list[float] | None = None, seed: int | None = None):
         # noise_levels: per-conformer RMS displacement in Å

@@ -69,7 +69,7 @@ class TestDetectPockets:
         coords, structure = _box_pocket(inner=6.0)
         pockets = detect_pockets(coords, structure, min_volume_a3=50.0)
         if not pockets:
-            pytest.skip("No pockets found — box may be too small for this grid spacing")
+            pytest.skip("No pockets found - box may be too small for this grid spacing")
         largest = max(pockets, key=lambda p: p.volume_a3)
         cx, cy, cz = largest.centroid
         # Centroid should be within the box interior
@@ -77,7 +77,7 @@ class TestDetectPockets:
         assert cz < 0.5, f"Centroid should be inside box (z<0), got z={cz:.2f}"
 
     def test_flat_slab_no_large_buried_pocket(self):
-        """A flat slab has low buriedness — no large pocket should survive the filter."""
+        """A flat slab has low buriedness - no large pocket should survive the filter."""
         coords, structure = _flat_slab()
         # Use a high min_volume to avoid tiny spurious hits
         pockets = detect_pockets(coords, structure, min_volume_a3=500.0)

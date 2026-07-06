@@ -8,7 +8,7 @@ script evaluates Lacuna on the held-out **test fold** (222 apo structures).
 
 For each apo structure the main (highest-pRMSD) cryptic pocket is the target; the
 apo residues are taken directly from ``apo_pocket_selection`` (e.g. ``"B_12"`` =
-chain B, residue 12 — no order-based mapping needed). Lacuna runs with its default
+chain B, residue 12 - no order-based mapping needed). Lacuna runs with its default
 configuration (NMA backend, crypticity ranking); a top-5 pocket counts as a hit if
 its lining residues overlap >=30% of the pocket residues or it centres within 4 A
 of their Ca centroid.

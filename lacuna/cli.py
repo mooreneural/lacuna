@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (C) 2026 Clayton Moore
-"""Lacuna CLI — cryptic binding pocket discovery."""
+"""Lacuna CLI - cryptic binding pocket discovery."""
 
 from __future__ import annotations
 
@@ -47,7 +47,7 @@ def _auto_backend():
 @click.group()
 @click.version_option(version=__version__, prog_name="lacuna")
 def main():
-    """Lacuna — cryptic binding pocket discovery via conformational ensemble analysis.
+    """Lacuna - cryptic binding pocket discovery via conformational ensemble analysis.
 
     \b
     Typical workflow:
@@ -139,7 +139,7 @@ def discover(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if not quiet:
-        console.print(f"\n[bold cyan]Lacuna[/bold cyan] — cryptic pocket discovery")
+        console.print(f"\n[bold cyan]Lacuna[/bold cyan] - cryptic pocket discovery")
         console.print(f"  Input:    [green]{input_path}[/green]")
         console.print(f"  Backend:  {backend}")
         console.print(f"  Output:   {output_dir}\n")

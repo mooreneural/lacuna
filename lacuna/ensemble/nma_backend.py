@@ -4,7 +4,7 @@
 
 Generates physically meaningful conformational diversity by displacing along
 the lowest-frequency normal modes of the protein's elastic network. These modes
-correspond to collective motions — hinge bending, domain twisting, breathing —
+correspond to collective motions - hinge bending, domain twisting, breathing -
 that are the primary mechanisms by which cryptic pockets open and close.
 
 Zero additional dependencies beyond the core lacuna install (numpy + scipy).
@@ -30,7 +30,7 @@ class NMABackend(EnsembleBackend):
     Samples conformers by displacing Cα atoms along the lowest-frequency
     normal modes of an elastic network, then propagates to all atoms using
     Gaussian-weighted interpolation. Physically grounded alternative to
-    RandomBackend — generates hinge/breathing motions rather than random noise.
+    RandomBackend - generates hinge/breathing motions rather than random noise.
 
     Parameters
     ----------
@@ -104,7 +104,7 @@ class NMABackend(EnsembleBackend):
             Optional (N, N) per-pair spring-constant multiplier. ``None`` (the
             default) means a uniform network (all springs = 1.0), which
             reproduces the standard ANM exactly. Values < 1 soften specific
-            contacts — a hook for spring-perturbation experiments (e.g. releasing
+            contacts - a hook for spring-perturbation experiments (e.g. releasing
             the local "cage" of contacts that hold a candidate cryptic pocket
             shut) that recompute the modes of a locally softened network.
         """
@@ -136,7 +136,7 @@ class NMABackend(EnsembleBackend):
         for i in range(n):
             H[3 * i : 3 * i + 3, 3 * i : 3 * i + 3] += diag_blocks[i]
 
-        # Partial eigendecomposition — only the lowest n_request modes
+        # Partial eigendecomposition - only the lowest n_request modes
         eigenvalues, eigenvectors = eigh(H, subset_by_index=[0, n_request - 1])
 
         # Filter: keep only genuinely non-trivial modes.

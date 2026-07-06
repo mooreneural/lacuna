@@ -92,9 +92,9 @@ def main(pdb_path: str):
         write_vina_box(c, output_dir, i)
 
     print(f"\nResults written to {output_dir}/")
-    print("  pocket_report.json  — full ranked report")
-    print("  pocket_0_constraint.yaml  — Boltz docking input for top pocket")
-    print("  pocket_0_vina.conf  — AutoDock Vina box for top pocket")
+    print("  pocket_report.json  - full ranked report")
+    print("  pocket_0_constraint.yaml  - Boltz docking input for top pocket")
+    print("  pocket_0_vina.conf  - AutoDock Vina box for top pocket")
 
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ from lacuna.ensemble.random_backend import RandomBackend
 from lacuna.ensemble.nma_backend import NMABackend
 
 
-# Minimal valid PDB content — 10 alanine residues in a helix
+# Minimal valid PDB content - 10 alanine residues in a helix
 _MINI_PDB = """\
 ATOM      1  N   ALA A   1      -0.677   0.000   0.000  1.00  0.00           N
 ATOM      2  CA  ALA A   1       0.000   1.000   0.000  1.00  0.00           C
@@ -98,7 +98,7 @@ class TestRandomBackend:
             np.testing.assert_array_equal(a, b)
 
 
-# Larger mini PDB — enough Cα atoms for ENM to have non-trivial modes
+# Larger mini PDB - enough Cα atoms for ENM to have non-trivial modes
 _MINI_PDB_LARGE = """\
 ATOM      1  N   ALA A   1       0.000   0.000   0.000  1.00  0.00           N
 ATOM      2  CA  ALA A   1       1.520   0.000   0.000  1.00  0.00           C
@@ -201,7 +201,7 @@ class TestNMABackend:
         np.testing.assert_allclose(np.abs(modes0), np.abs(modes1), rtol=1e-3, atol=1e-3)
 
 class TestOpenMMBackend:
-    """OpenMM implicit-MD backend — skipped when openmm/pdbfixer are absent."""
+    """OpenMM implicit-MD backend - skipped when openmm/pdbfixer are absent."""
 
     def _backend(self):
         pytest.importorskip("openmm")

@@ -1,4 +1,4 @@
-"""Cryptic pocket benchmark — apo/holo PDB pairs.
+"""Cryptic pocket benchmark - apo/holo PDB pairs.
 
 For each entry we either supply known binding-site residues directly (taken
 from the published literature) OR supply a holo PDB ID and let the script
@@ -40,11 +40,11 @@ if hasattr(sys.stdout, "reconfigure"):
 TOOL_CITATION = "Moore 2026 Lacuna (github.com/mooreneural/lacuna)"
 
 CONFORMERS = 20
-HOLO_CUTOFF = 4.5          # Å — residue within this of any ligand atom → binding site
-CENTROID_THRESHOLD = 4.0   # Å — primary: pocket centroid within this of site centroid
+HOLO_CUTOFF = 4.5          # Å - residue within this of any ligand atom → binding site
+CENTROID_THRESHOLD = 4.0   # Å - primary: pocket centroid within this of site centroid
 OVERLAP_THRESHOLD = 0.30   # legacy recall = |found∩known|/|known| (size-gameable)
 JACCARD_THRESHOLD = 0.25   # size-robust IoU = |found∩known|/|found∪known|
-CORE_RADIUS = 8.0          # Å — hotspot-core: known Cα within this of pocket hotspot
+CORE_RADIUS = 8.0          # Å - hotspot-core: known Cα within this of pocket hotspot
 HOTSPOT_CORE_THRESHOLD = 0.50  # size-robust: fraction of site wrapping the hotspot
 
 # HETATM residue names to ignore when selecting the "principal ligand"
@@ -310,13 +310,13 @@ DATASET = [
         "citation": "Hancock 2015; Moore 2026 Lacuna",
     },
 
-    # ── ADDITIONAL CRYPTIC POCKETS (round 3) — targets N ≥ 20 ────────────────
+    # ── ADDITIONAL CRYPTIC POCKETS (round 3) - targets N ≥ 20 ────────────────
 
     {
         "id": "BCL2_BH3",
         "name": "BCL-2 BH3-binding groove (venetoclax/ABT-199)",
         "category": "cryptic",
-        # 1G5M = apo BCL-2 isoform 1 — no small-molecule HETATM, BH3 groove
+        # 1G5M = apo BCL-2 isoform 1 - no small-molecule HETATM, BH3 groove
         # partially occluded by the C-terminal flexible loop (cf. BCL-XL in 1LXL).
         # 6O0K = BCL-2 co-crystallised with venetoclax (LBM, 55 atoms).
         "apo_pdb": "1G5M", "apo_chain": "A",
@@ -329,7 +329,7 @@ DATASET = [
         "name": "IDH1 R132H allosteric dimer-interface (ivosidenib target)",
         "category": "cryptic",
         # 3MAP = IDH1 R132H homodimer with NADP+/isocitrate substrates but NO
-        # allosteric inhibitor — dimer-interface pocket is absent/closed.
+        # allosteric inhibitor - dimer-interface pocket is absent/closed.
         # 4UMX = IDH1 R132H + CPD-1 allosteric inhibitor (VVS, 27 atoms) at the
         # dimer interface.  NAP (NADP+, 96 atoms) must be excluded so VVS wins
         # the principal-ligand selection.
@@ -342,7 +342,7 @@ DATASET = [
         "id": "PKM2_activator",
         "name": "PKM2 allosteric activator pocket (TEPP-46 / subunit interface)",
         "category": "cryptic",
-        # 1ZJH = human PKM2 apo (2005, Dombrauckas) — no HETATM at all; activator
+        # 1ZJH = human PKM2 apo (2005, Dombrauckas) - no HETATM at all; activator
         # pocket at the dimer-dimer interface is absent in this T-state structure.
         # 3U2Z = activator-bound PKM2 R-state (Anastasiou 2012).  Exclude FBP and
         # oxalate so the synthetic activator compound (residue "551", 100 atoms)
@@ -411,11 +411,11 @@ DATASET = [
 # Coarse, literature-based annotation of the DOMINANT structural change that opens
 # each cryptic site (Beglov 2018; CryptoBench 2024 examples; per-target papers).
 # The taxonomy follows the mechanism classes discussed for cryptic pockets:
-#   sidechain — a side-chain rotamer flip unblocks the site
-#   loop      — a loop swings/reorders over the site
-#   helix     — helix / secondary-structure remodeling or a capping helix moves
-#   hinge     — large domain / inter-lobe breathing
-#   interface — an oligomeric (inter-subunit) interface pocket
+#   sidechain - a side-chain rotamer flip unblocks the site
+#   loop      - a loop swings/reorders over the site
+#   helix     - helix / secondary-structure remodeling or a capping helix moves
+#   hinge     - large domain / inter-lobe breathing
+#   interface - an oligomeric (inter-subunit) interface pocket
 # These are single dominant labels for a genuinely multi-factor process, and each
 # class has a small N, so per-mechanism rates are diagnostic, not statistical.
 MECHANISM = {
@@ -487,7 +487,7 @@ def extract_binding_site(
     """Find principal ligand in holo structure.
 
     Returns:
-        (binding_residues, ligand_centroid) — binding_residues is the set of
+        (binding_residues, ligand_centroid) - binding_residues is the set of
         protein residue numbers within HOLO_CUTOFF Å of the principal ligand;
         ligand_centroid is the mean (x,y,z) of all ligand atoms.  Both are None
         / empty if no principal ligand is found.
@@ -495,7 +495,7 @@ def extract_binding_site(
     atoms = _parse_atoms(holo_path)
     exclude = SOLVENT_CODES | extra_exclude
 
-    # Collect HETATM groups (resname, chain, resseq) — skip solvent
+    # Collect HETATM groups (resname, chain, resseq) - skip solvent
     from collections import defaultdict
     lig_groups: dict[tuple, list] = defaultdict(list)
     for a in atoms:
@@ -630,7 +630,7 @@ def _found_resnums(cluster_residues: list[str]) -> set[int]:
 def residue_overlap(cluster_residues: list[str], known: set[int]) -> float:
     """Recall of the known site: |found ∩ known| / |known|.
 
-    NOTE: size-gameable — a pocket with many lining residues trivially overlaps a
+    NOTE: size-gameable - a pocket with many lining residues trivially overlaps a
     small known site, so a model can inflate this by simply returning larger
     pockets.  Reported for backward comparison; prefer ``residue_jaccard`` (below)
     or the centroid criterion for a size-robust judgement.
@@ -738,7 +738,7 @@ def main():
                         default="all")
     parser.add_argument("--backend", choices=["nma", "random", "openmm", "boltz"],
                         default="nma",
-                        help="Ensemble backend (default: nma — the package default)")
+                        help="Ensemble backend (default: nma - the package default)")
     parser.add_argument("--rank-by", dest="rank_by",
                         choices=["crypticity", "druggability", "persistence", "balanced"],
                         default="crypticity",
@@ -777,7 +777,7 @@ def main():
         entries = [e for e in entries if e["id"] in wanted]
 
     print("=" * 70)
-    print(f"  LACUNA — CRYPTIC POCKET BENCHMARK  ({len(entries)} proteins, {n_conf} conformers)")
+    print(f"  LACUNA - CRYPTIC POCKET BENCHMARK  ({len(entries)} proteins, {n_conf} conformers)")
     print(f"  backend={args.backend}  rank_by={args.rank_by}  top_n={args.top_n}"
           f"  nma_rmsd={args.nma_rmsd}  nma_modes={args.nma_modes}")
     print("=" * 70)
@@ -786,7 +786,7 @@ def main():
 
     for entry in entries:
         print(f"\n{'─'*70}")
-        print(f"  [{entry['category'].upper()}]  {entry['id']}  —  {entry['name']}")
+        print(f"  [{entry['category'].upper()}]  {entry['id']}  -  {entry['name']}")
         print(f"{'─'*70}")
 
         # ── resolve binding site ──────────────────────────────────────────────
@@ -861,7 +861,7 @@ def main():
         # ── score ─────────────────────────────────────────────────────────────
         # Centroid distance: field-standard, robust to residue-numbering offsets.
         # Computed in the APO coordinate frame (ref centroid = Cα centroid of binding
-        # site residues in the apo structure, not from the holo — see above).
+        # site residues in the apo structure, not from the holo - see above).
         best_dist, best_dist_rank = pocket_min_centroid_dist(clusters, ref_centroid, top_n=args.top_n)
 
         # Residue metrics: recall (legacy, size-gameable) and Jaccard (size-robust).
@@ -900,7 +900,7 @@ def main():
         found = dist_ok or ov_ok
         status = "PASS" if found else "MISS"
         # Size-robust criterion: centroid proximity OR Jaccard ≥ threshold. This is
-        # the honest headline — it cannot be gamed by returning larger pockets.
+        # the honest headline - it cannot be gamed by returning larger pockets.
         found_robust = dist_ok or jac_ok
         status_robust = "PASS" if found_robust else "MISS"
 
@@ -956,8 +956,8 @@ def main():
             m = "✅" if r["status"] == "PASS" else "❌"
             d = r.get("centroid_dist_A")
             dist_s = f"{d:.1f}Å" if d is not None else "n/a "
-            jac = f"{r['jaccard']:.0%}" if r.get("jaccard") is not None else "—"
-            ov = f"{r['overlap']:.0%}" if r.get("overlap") is not None else "—"
+            jac = f"{r['jaccard']:.0%}" if r.get("jaccard") is not None else "-"
+            ov = f"{r['overlap']:.0%}" if r.get("overlap") is not None else "-"
             t = f"{r['elapsed_s']:.1f}s" if r.get("elapsed_s") is not None else ""
             print(f"    {m} {r['apo_pdb']}  {dist_s:6s} jac={jac:4s} recall={ov:5s}  {t:6s}  {r['name']}")
         grand_pass += n_pass
@@ -982,7 +982,7 @@ def main():
         return dist, recall, jac, core, robust, legacy
 
     print(f"\n{'─'*70}")
-    print(f"  CRYPTIC ONLY — size-robust headline: {cr_pass}/{len(cryptic_rows)}"
+    print(f"  CRYPTIC ONLY - size-robust headline: {cr_pass}/{len(cryptic_rows)}"
           f"   (legacy recall-based: {cr_pass_legacy}/{len(cryptic_rows)})")
     print(f"  TOTAL (all categories, size-robust): {grand_pass}/{grand_total}")
     print(f"  Size-robust criterion (top-{args.top_n}, OR): centroid ≤ {CENTROID_THRESHOLD} Å "
@@ -1004,7 +1004,7 @@ def main():
               f"{jac[0.30]:6d}  {core:7d}  {recall:8d}  {robust:5d}  {legacy:5d}   (n={len(rows)})")
 
     # Per-mechanism stratification (cryptic only): which OPENING MECHANISM class
-    # does the sampler handle, and which does it fail? Small N per class — a
+    # does the sampler handle, and which does it fail? Small N per class - a
     # diagnostic of where sampling breaks down (e.g. interface vs side-chain), not
     # a statistical claim. Mechanism labels are the coarse literature annotations
     # in MECHANISM above.
@@ -1021,7 +1021,7 @@ def main():
 
     # Top-k detection curve + bootstrap CI on the headline (top-5). A flat curve
     # (top-5 ≈ top-20) means the ceiling is detection/sampling, not ranking. The CI
-    # is over targets (resampled), the unit an honest claim is made over — reporting
+    # is over targets (resampled), the unit an honest claim is made over - reporting
     # a range instead of a single number is the guard against over-claiming.
     try:
         from metrics import paired_bootstrap_ci

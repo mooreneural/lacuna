@@ -5,7 +5,7 @@ All notable changes to Lacuna are documented here. The project follows
 governs its benchmarks: reported numbers are the ones we can defend on held-out
 data, never the most flattering ones available.
 
-## [0.3.1] — 2026-07-04
+## [0.3.1] - 2026-07-04
 
 **Honesty correction to v0.3.0.** The v0.3.0 notes claimed the OpenMM MD backend
 opens oligomeric-interface pockets NMA cannot, and that NMA ∪ MD reaches 9/22
@@ -19,7 +19,7 @@ hinge/interface classes; the robust union is ~7/22, the same as NMA alone. The
 v0.3.0 entry below has been edited to remove the inflated claims.
 
 ### Added
-- **`benchmarks/metrics.py`** — a shared, canonical size-robust metric module
+- **`benchmarks/metrics.py`** - a shared, canonical size-robust metric module
   (Jaccard, centroid distance, hotspot-core, headline/strict-localized hits) with
   `paired_bootstrap_ci` for target-level confidence intervals and an explicit
   volume-gaming unit test.
@@ -37,7 +37,7 @@ v0.3.0 entry below has been edited to remove the inflated claims.
   methodological: short MD is high-variance, so evaluate it with variance across
   runs, never a single number (which is how the v0.3.0 error happened).
 
-## [0.3.0] — 2026-07-04
+## [0.3.0] - 2026-07-04
 
 A **rigor and diagnostics** release. It makes the benchmark trustworthy
 (size-robust metrics), diagnoses exactly where the tool fails (per-mechanism
@@ -49,8 +49,8 @@ Several sampling and modelling ideas were tried and honestly shelved as negative
 
 ### Added
 - **Size-robust benchmark metric (Jaccard).** All three benchmarks now report a
-  size-robust headline — Jaccard overlap (|found ∩ known| / |found ∪ known|) ≥
-  0.25 **or** centroid ≤ 4 Å — beside the legacy recall metric. Recall
+  size-robust headline - Jaccard overlap (|found ∩ known| / |found ∪ known|) ≥
+  0.25 **or** centroid ≤ 4 Å - beside the legacy recall metric. Recall
   (|found ∩ known| / |known|) is size-gameable: a large pocket engulfs a small
   known site without being localized on it. Under the size-robust criterion the
   honest numbers roughly halve: curated **32%** (was 59% recall), PocketMiner
@@ -63,7 +63,7 @@ Several sampling and modelling ideas were tried and honestly shelved as negative
   dominant opening mechanism (sidechain / loop / helix / hinge / interface) with
   a per-mechanism pass-rate breakdown. This exposes the failure structure
   cleanly: NMA handles side-chain openings (3/4) but fails on the large-motion
-  classes — hinge (0/2) and interface (0/3) — that an elastic network cannot
+  classes - hinge (0/2) and interface (0/3) - that an elastic network cannot
   sample.
 - **Working OpenMM implicit-MD backend.** The `openmm` backend was previously
   broken (it crashed on any structure containing a HETATM and never aligned MD
@@ -89,20 +89,20 @@ Several sampling and modelling ideas were tried and honestly shelved as negative
   keeping the legacy recall figures shown transparently alongside.
 
 ### Investigated and shelved (honest negatives)
-- **Counterfactual spring-softening NMA** — softening the local "cage" of
+- **Counterfactual spring-softening NMA** - softening the local "cage" of
   contacts around a candidate cavity did not raise the detection ceiling
   (set-overlap unchanged); only a small localization gain at a conformer-budget
   cost. Backend removed; the γ hook it needed was kept.
-- **Interface-first / biological-assembly analysis** — building the assembly
+- **Interface-first / biological-assembly analysis** - building the assembly
   made things worse (cluster counts balloon, interface pockets rank lower);
   single-chain analysis already partially sees these sites but cannot localize
   them past the bar. The bottleneck is sampling precision, not chain handling.
-- **Mode-guided branching** — biasing second-generation sampling toward
+- **Mode-guided branching** - biasing second-generation sampling toward
   cavity-opening modes beat uniform branching slightly but did not beat the
   plain-NMA baseline and did not touch the hinge/interface failures.
-- **Per-residue cryptic-propensity model** — a small feature model reached
+- **Per-residue cryptic-propensity model** - a small feature model reached
   0.834 held-out AUC on PocketMiner labels, but a single geometric feature (depth)
-  alone reached 0.849 — the model adds nothing over one trivial feature, and
+  alone reached 0.849 - the model adds nothing over one trivial feature, and
   neither approaches PocketMiner's 0.87 GNN. A competitive per-residue model needs
   a GNN/PLM (a larger research effort), so nothing was shipped.
 

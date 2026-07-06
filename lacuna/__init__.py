@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (C) 2026 Clayton Moore
-"""Lacuna — cryptic binding pocket discovery via conformational ensemble analysis."""
+"""Lacuna - cryptic binding pocket discovery via conformational ensemble analysis."""
 
 __version__ = "0.3.1"
 

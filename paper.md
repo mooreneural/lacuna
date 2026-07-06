@@ -22,8 +22,8 @@ archive_doi: https://doi.org/10.5281/zenodo.20533638
 # Summary
 
 Lacuna is a Python tool for discovering cryptic binding pockets in protein
-structures. Most protein structure predictors — AlphaFold [@jumper2021], Boltz
-[@wohlwend2024], Chai — return a single static ground-state conformation. But
+structures. Most protein structure predictors - AlphaFold [@jumper2021], Boltz
+[@wohlwend2024], Chai - return a single static ground-state conformation. But
 many clinically important binding sites are absent or too small in the apo
 crystal structure and only open transiently during conformational fluctuation.
 These are cryptic pockets, and finding them is one of the central unsolved
@@ -47,7 +47,7 @@ site in their experimentally determined structures and are classified as
 before a cryptic pocket in its switch-II loop was discovered, leading directly
 to the FDA-approved drugs sotorasib and adagrasib. More recently, cryptic
 pockets have been implicated in allosteric regulation of MDM2 [@kussie1996],
-BCL-2 family proteins, and IDH1 — all now drugged.
+BCL-2 family proteins, and IDH1 - all now drugged.
 
 Existing computational tools for cryptic pocket detection fall into two
 categories. Structure-based tools like fpocket [@leguiloux2009] and CASTp
@@ -60,7 +60,7 @@ infrastructure or specialized expertise.
 
 Lacuna occupies the gap between these extremes. It requires no GPU, no
 simulation software, and no training data. Starting from any PDB or mmCIF
-file — including predicted structures from AlphaFold or Boltz — it produces a
+file - including predicted structures from AlphaFold or Boltz - it produces a
 ranked cryptic pocket report in seconds to minutes on commodity hardware. The
 default ensemble backend is an Anisotropic Network Model (ANM)
 [@atilgan2001], which generates physically meaningful collective motions
@@ -96,7 +96,7 @@ Each conformer is analyzed using a grid-based alpha-sphere algorithm adapted
 from fpocket [@leguiloux2009]. A 1 Å voxel grid is built around the protein,
 and a Euclidean distance transform identifies the distance from each voxel to
 the nearest protein atom. Local maxima of this distance field in the 1.4–6 Å
-interaction zone are alpha points — locations where a sphere is simultaneously
+interaction zone are alpha points - locations where a sphere is simultaneously
 tangent to multiple protein atoms, indicating a surface concavity. Nearby alpha
 points are clustered using binary dilation, and each cluster is grown to
 compute pocket volume, surface enclosure, and residue lining.
@@ -107,7 +107,7 @@ Each pocket cluster is scored by a composite druggability metric adapted from
 Halgren's SiteMap [@halgren2009] and extended with enclosure [@schmidtke2011]:
 a Gaussian volume reward centered at 300 Å³, enclosure fraction (buriedness),
 hydrophobic residue fraction, and aromatic residue count. By default pockets are
-ranked by their peak open-state composite score — the druggability evaluated in
+ranked by their peak open-state composite score - the druggability evaluated in
 the most-open conformer, which is the relevant figure for a transiently-open
 cryptic site (alternative rankings by persistence, a balanced combination, or
 crypticity are available). A pocket is marked `cryptic: true` if it appears in

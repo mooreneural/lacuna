@@ -194,9 +194,9 @@ def main():
         print("  Continuing with Lacuna-only benchmarks.\n")
 
     print("=" * 70)
-    print("  LACUNA vs FPOCKET — HEAD-TO-HEAD BENCHMARK")
+    print("  LACUNA vs FPOCKET - HEAD-TO-HEAD BENCHMARK")
     if not has_fpocket:
-        print("  (fpocket unavailable — Lacuna only)")
+        print("  (fpocket unavailable - Lacuna only)")
     print("=" * 70)
 
     rows = []

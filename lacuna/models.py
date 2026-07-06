@@ -71,7 +71,7 @@ class PocketCluster:
     cryptic: bool               # True if persistence < 0.9
     lining_residues: list[str]
     appears_in_conformers: list[int]
-    # Ensemble volume dynamics — how the pocket breathes across conformers.
+    # Ensemble volume dynamics - how the pocket breathes across conformers.
     volume_min_a3: float = 0.0
     volume_max_a3: float = 0.0
     # Peak druggability over the ensemble (the pocket scored in its most-open

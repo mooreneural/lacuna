@@ -61,5 +61,5 @@ def score_pocket(pocket: Pocket) -> DrugabilityScore:
     )
 
 
-# avoid circular import — numpy used only internally
+# avoid circular import - numpy used only internally
 import numpy as np  # noqa: E402
