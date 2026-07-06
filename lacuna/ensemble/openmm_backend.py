@@ -51,11 +51,17 @@ class OpenMMBackend(EnsembleBackend):
         simulation_time_ps: float = 50.0,
         timestep_fs: float = 2.0,
         equilibrate_ps: float = 10.0,
+        seed: int | None = 42,
     ):
         self.temperature_k = temperature_k
         self.simulation_time_ps = simulation_time_ps
         self.timestep_fs = timestep_fs
         self.equilibrate_ps = equilibrate_ps
+        # A fixed seed makes runs reproducible. Note this only freezes ONE sample
+        # from a stochastic process: short MD is high-variance run to run, so a
+        # single seeded result is not evidence of a robust capability. Report
+        # variance / confidence intervals across seeds, not a single number.
+        self.seed = seed
 
     @property
     def name(self) -> str:
@@ -114,12 +120,15 @@ class OpenMMBackend(EnsembleBackend):
                 1.0 / unit.picosecond,
                 self.timestep_fs * unit.femtosecond,
             )
+            if self.seed is not None:
+                integrator.setRandomNumberSeed(int(self.seed))
             platform = _select_platform(mm)
             simulation = app.Simulation(fixer.topology, system, integrator, platform)
             simulation.context.setPositions(fixer.positions)
 
             simulation.minimizeEnergy(maxIterations=500)
-            simulation.context.setVelocitiesToTemperature(self.temperature_k * unit.kelvin, 0)
+            simulation.context.setVelocitiesToTemperature(
+                self.temperature_k * unit.kelvin, self.seed if self.seed is not None else 0)
             if self.equilibrate_ps > 0:
                 simulation.step(int(self.equilibrate_ps * 1000 / self.timestep_fs))
 

@@ -5,16 +5,36 @@ All notable changes to Lacuna are documented here. The project follows
 governs its benchmarks: reported numbers are the ones we can defend on held-out
 data, never the most flattering ones available.
 
+## [0.3.1] — 2026-07-04
+
+**Honesty correction to v0.3.0.** The v0.3.0 notes claimed the OpenMM MD backend
+opens oligomeric-interface pockets NMA cannot, and that NMA ∪ MD reaches 9/22
+(41%) on the curated cryptic set. That came from a single, non-reproducible MD
+run. Short implicit-solvent MD is high-variance run to run, and the backend was
+not seeding its integrator. On four repeats per target at the same settings, MD
+opens Caspase-1 **0/4**, IDH1 **0/4**, PKM2 **1/4**, and 400 K opens the
+T4-lysozyme L99A cavity **0/4**. The honest result: the (now working) MD backend
+roughly matches NMA on the easy pockets and does **not** reliably open the
+hinge/interface classes; the robust union is ~7/22, the same as NMA alone. The
+v0.3.0 entry below has been edited to remove the inflated claims.
+
+### Changed
+- **OpenMM backend now seeds its integrator** (default 42) as best-effort
+  determinism. Note this does **not** make it bitwise reproducible on GPU
+  platforms (OpenCL/CUDA), where floating-point non-determinism plus chaotic
+  dynamics still diverge short trajectories run to run. The honest takeaway is
+  methodological: short MD is high-variance, so evaluate it with variance across
+  runs, never a single number (which is how the v0.3.0 error happened).
+
 ## [0.3.0] — 2026-07-04
 
-A **rigor + first real ceiling-raise** release. It makes the benchmark
-trustworthy (size-robust metrics), diagnoses exactly where the tool fails
-(per-mechanism stratification), and — for the first time — cracks a failure
-class the elastic-network sampler structurally cannot: the working OpenMM MD
-backend opens **oligomeric-interface pockets** that NMA misses entirely. On the
-curated cryptic set NMA and MD each pass 7/22 but on *complementary* targets, so
-their **union reaches 9/22 (41%)** vs 7/22 (32%) for either alone. Several other
-sampling and modelling ideas were tried and honestly shelved as negatives (below).
+A **rigor and diagnostics** release. It makes the benchmark trustworthy
+(size-robust metrics), diagnoses exactly where the tool fails (per-mechanism
+stratification), and repairs the previously-broken OpenMM MD backend so it runs
+end to end. (An early version of this entry claimed MD opened interface pockets
+and lifted the curated set to 9/22; that did not reproduce, see [0.3.1] above.)
+Several sampling and modelling ideas were tried and honestly shelved as negatives
+(below).
 
 ### Added
 - **Size-robust benchmark metric (Jaccard).** All three benchmarks now report a
@@ -39,9 +59,9 @@ sampling and modelling ideas were tried and honestly shelved as negatives (below
   atoms to the detection structure). It now reuses `load_structure` (which drops
   ligands/ions and selects the chain), maps MD positions back onto the original
   heavy-atom order, and selects the fastest available platform (CUDA→OpenCL→CPU).
-  A `temperature_k` knob enables simple enhanced sampling (e.g. 400 K opens the
-  buried T4-lysozyme L99A cavity that 310 K and NMA both miss). This is the first
-  backend to open interface pockets (PKM2, Caspase-1) — complementary to NMA.
+  A `temperature_k` knob exposes elevated-temperature sampling. On the honest,
+  size-robust metric it roughly matches NMA and does not reliably open the
+  hinge/interface classes (see the [0.3.1] correction above).
   Benchmark flags: `--backend openmm --openmm-temp --openmm-time`.
 - **Per-pair spring-constant hook** in the ANM backend (`_compute_modes(gamma=…)`),
   a reusable extension point for spring-perturbation experiments. Default
@@ -69,19 +89,17 @@ sampling and modelling ideas were tried and honestly shelved as negatives (below
 - **Mode-guided branching** — biasing second-generation sampling toward
   cavity-opening modes beat uniform branching slightly but did not beat the
   plain-NMA baseline and did not touch the hinge/interface failures.
-- **Interface-first / biological-assembly analysis** — building the assembly made
-  things worse (cluster counts balloon, interface pockets rank lower); the
-  bottleneck is sampling precision, not chain handling. (OpenMM MD, above, is what
-  actually opened the interface pockets.)
 - **Per-residue cryptic-propensity model** — a small feature model reached
   0.834 held-out AUC on PocketMiner labels, but a single geometric feature (depth)
   alone reached 0.849 — the model adds nothing over one trivial feature, and
   neither approaches PocketMiner's 0.87 GNN. A competitive per-residue model needs
   a GNN/PLM (a larger research effort), so nothing was shipped.
 
-The lesson from the NMA-family attempts (spring-softening, mode-guided branching):
-elastic-network tricks are exhausted for large-motion cryptic sites. Physical MD
-(OpenMM) is what finally opened them, and NMA+MD are complementary.
+The lesson so far: NMA-family tricks (spring-softening, mode-guided branching) are
+exhausted for large-motion cryptic sites, and short implicit-solvent MD does not
+reliably open them either. The hinge and interface classes remain unsolved; the
+most plausible next levers are enhanced sampling (metadynamics on a gate CV) and
+cosolvent MD, evaluated with variance, not single runs.
 
 ## [0.2.1] and earlier
 

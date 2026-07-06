@@ -121,9 +121,12 @@ which is ≈ 0 for a constitutive site already formed in the apo structure and n
 Cryptic pockets that form at protein-protein interfaces require the biological
 assembly rather than the asymmetric unit for detection. The `--homodimer` flag
 reads REMARK 350 BIOMT records (PDB) or `_pdbx_struct_oper_list` (mmCIF) and
-applies the symmetry operations to construct the full assembly before analysis,
-enabling discovery of dimer interface pockets such as those in Caspase-1 and
-IDH1 R132H.
+applies the symmetry operations to construct the full assembly before analysis.
+In practice, however, the oligomeric-interface targets in the benchmark
+(Caspase-1, IDH1 R132H, PKM2) remain misses under the size-robust criterion:
+building the assembly increases the pocket count without localizing the interface
+site, so these classes are limited by conformational sampling rather than by
+assembly construction (see Benchmark).
 
 ## Benchmark
 
