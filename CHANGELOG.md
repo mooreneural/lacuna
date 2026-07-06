@@ -18,6 +18,17 @@ roughly matches NMA on the easy pockets and does **not** reliably open the
 hinge/interface classes; the robust union is ~7/22, the same as NMA alone. The
 v0.3.0 entry below has been edited to remove the inflated claims.
 
+### Added
+- **`benchmarks/metrics.py`** — a shared, canonical size-robust metric module
+  (Jaccard, centroid distance, hotspot-core, headline/strict-localized hits) with
+  `paired_bootstrap_ci` for target-level confidence intervals and an explicit
+  volume-gaming unit test.
+- **Top-k detection curve with 95% CIs** in `cryptic_benchmark.py`: the
+  size-robust hit rate at k = 1, 3, 5, 10, 20, reported as a range over targets
+  rather than a single point. A flat curve (top-5 ≈ top-20) shows the ceiling is
+  detection/sampling, not ranking. This tooling is the direct guard against the
+  single-number over-claim this release corrects.
+
 ### Changed
 - **OpenMM backend now seeds its integrator** (default 42) as best-effort
   determinism. Note this does **not** make it bitwise reproducible on GPU
