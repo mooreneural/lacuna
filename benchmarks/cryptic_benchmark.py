@@ -407,6 +407,35 @@ DATASET = [
 ]
 
 
+# ── opening-mechanism labels ───────────────────────────────────────────────────
+# Coarse, literature-based annotation of the DOMINANT structural change that opens
+# each cryptic site (Beglov 2018; CryptoBench 2024 examples; per-target papers).
+# The taxonomy follows the mechanism classes discussed for cryptic pockets:
+#   sidechain — a side-chain rotamer flip unblocks the site
+#   loop      — a loop swings/reorders over the site
+#   helix     — helix / secondary-structure remodeling or a capping helix moves
+#   hinge     — large domain / inter-lobe breathing
+#   interface — an oligomeric (inter-subunit) interface pocket
+# These are single dominant labels for a genuinely multi-factor process, and each
+# class has a small N, so per-mechanism rates are diagnostic, not statistical.
+MECHANISM = {
+    # cryptic
+    "T4L_L99A": "sidechain", "KRAS_SIIP": "loop", "IL2": "sidechain",
+    "GCK": "hinge", "p38_DFGout": "loop", "HIVRT_NNRTI": "sidechain",
+    "SRC_myristate": "helix", "MDM2": "sidechain", "SHP2_allosteric": "hinge",
+    "ABL1_myristate": "helix", "PTP1B_allosteric": "helix", "NS5B_thumb": "loop",
+    "BCLXL": "helix", "CASP1": "interface", "ERK2": "loop", "BCL2_BH3": "helix",
+    "IDH1_R132H": "interface", "PKM2_activator": "interface",
+    "PPARG_allosteric": "helix", "MMP13_allosteric": "loop",
+    "TEM1_allosteric": "helix", "RICIN_pterin": "loop",
+    # conformational
+    "AK": "hinge", "CypA": "sidechain",
+    # orthosteric controls (always-open; mechanism is nominal)
+    "lysozyme": "sidechain", "HIV_PR": "loop", "thrombin": "loop",
+    "trypsin": "sidechain", "DHFR": "loop", "HIF2a": "sidechain",
+}
+
+
 # ── PDB parsing helpers ────────────────────────────────────────────────────────
 
 def download_pdb(pdb_id: str, dest_dir: Path) -> Path:
@@ -867,6 +896,7 @@ def main():
             "id": entry["id"],
             "name": entry["name"],
             "category": entry["category"],
+            "mechanism": MECHANISM.get(entry["id"], "unknown"),
             "apo_pdb": entry["apo_pdb"],
             "status": status_robust,
             "status_legacy": status,
@@ -951,6 +981,23 @@ def main():
         label = "ALL" if cat == "__all__" else cat
         print(f"    {label:16s}  {dist:5d}  {jac[0.20]:6d}  {jac[0.25]:6d}  "
               f"{jac[0.30]:6d}  {core:7d}  {recall:8d}  {robust:5d}  {legacy:5d}   (n={len(rows)})")
+
+    # Per-mechanism stratification (cryptic only): which OPENING MECHANISM class
+    # does the sampler handle, and which does it fail? Small N per class — a
+    # diagnostic of where sampling breaks down (e.g. interface vs side-chain), not
+    # a statistical claim. Mechanism labels are the coarse literature annotations
+    # in MECHANISM above.
+    mech_order = ["sidechain", "loop", "helix", "hinge", "interface"]
+    print(f"\n  Cryptic by opening mechanism (size-robust ROBUST / n):")
+    for mech in mech_order:
+        mrows = [r for r in cryptic_rows if r.get("mechanism") == mech]
+        if not mrows:
+            continue
+        npass = sum(1 for r in mrows if r["status"] == "PASS")
+        ids = ", ".join(r["apo_pdb"] for r in mrows if r["status"] != "PASS")
+        miss_s = f"  misses: {ids}" if ids else ""
+        print(f"    {mech:10s}  {npass}/{len(mrows)}{miss_s}")
+
     if skipped:
         print(f"  Skipped: {len(skipped)} "
               f"({', '.join(s['id'] for s in skipped)})")
