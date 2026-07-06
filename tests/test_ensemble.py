@@ -200,6 +200,36 @@ class TestNMABackend:
         np.testing.assert_allclose(freqs0, freqs1, rtol=1e-4, atol=1e-6)
         np.testing.assert_allclose(np.abs(modes0), np.abs(modes1), rtol=1e-3, atol=1e-3)
 
+class TestOpenMMBackend:
+    """OpenMM implicit-MD backend — skipped when openmm/pdbfixer are absent."""
+
+    def _backend(self):
+        pytest.importorskip("openmm")
+        pytest.importorskip("pdbfixer")
+        from lacuna.ensemble.openmm_backend import OpenMMBackend
+        # Tiny, fast settings for the test.
+        return OpenMMBackend(simulation_time_ps=2.0, equilibrate_ps=1.0)
+
+    def test_generates_aligned_conformers(self, large_pdb):
+        from lacuna.io.structure import load_structure
+        backend = self._backend()
+        s = load_structure(large_pdb)
+        conformers = backend.generate(large_pdb, n_conformers=2)
+        assert len(conformers) == 2
+        for c in conformers:
+            # Coords must align with the detection structure's heavy-atom order.
+            assert c.shape == (len(s.atoms), 3)
+            assert np.isfinite(c).all()
+
+    def test_conformers_move_from_input(self, large_pdb):
+        from lacuna.io.structure import load_structure, coords_array
+        backend = self._backend()
+        base = coords_array(load_structure(large_pdb))
+        conformers = backend.generate(large_pdb, n_conformers=2)
+        assert max(float(np.sqrt(((c - base) ** 2).mean())) for c in conformers) > 1e-3
+
+
+class TestSpringSoftening:
     def test_softening_springs_changes_modes(self, large_pdb):
         """Per-pair gamma < 1 (the spring-perturbation hook) must change the modes."""
         from lacuna.io.structure import load_structure, coords_array

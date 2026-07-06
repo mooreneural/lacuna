@@ -654,7 +654,8 @@ def residue_jaccard(cluster_residues: list[str], known: set[int]) -> float:
 # ── Lacuna runner ──────────────────────────────────────────────────────────────
 
 def _make_backend(name: str, nma_rmsd: float = 2.0, nma_modes: int = 10,
-                  boltz_msa: bool = False):
+                  boltz_msa: bool = False, openmm_temp: float = 310.0,
+                  openmm_time: float = 50.0):
     if name == "nma":
         from lacuna.ensemble.nma_backend import NMABackend
         return NMABackend(seed=42, max_rmsd=nma_rmsd, n_modes=nma_modes)
@@ -663,7 +664,7 @@ def _make_backend(name: str, nma_rmsd: float = 2.0, nma_modes: int = 10,
         return RandomBackend(seed=42)
     if name == "openmm":
         from lacuna.ensemble.openmm_backend import OpenMMBackend
-        return OpenMMBackend()
+        return OpenMMBackend(temperature_k=openmm_temp, simulation_time_ps=openmm_time)
     if name == "boltz":
         from lacuna.ensemble.boltz_backend import BoltzBackend
         return BoltzBackend(use_msa_server=boltz_msa)
@@ -680,6 +681,8 @@ def run_lacuna(
     nma_rmsd: float = 2.0,
     nma_modes: int = 10,
     boltz_msa: bool = False,
+    openmm_temp: float = 310.0,
+    openmm_time: float = 50.0,
 ) -> tuple[list, float]:
     from lacuna.io.structure import load_structure, coords_array, make_biological_assembly
     from lacuna.io.writers import write_structure_pdb
@@ -687,7 +690,8 @@ def run_lacuna(
     from lacuna.pockets.clusterer import cluster_pockets
 
     backend = _make_backend(backend_name, nma_rmsd=nma_rmsd, nma_modes=nma_modes,
-                            boltz_msa=boltz_msa)
+                            boltz_msa=boltz_msa, openmm_temp=openmm_temp,
+                            openmm_time=openmm_time)
     t0 = time.perf_counter()
 
     if homodimer:
@@ -752,6 +756,12 @@ def main():
     parser.add_argument("--boltz-msa", dest="boltz_msa", action="store_true",
                         help="Boltz backend: fetch an MSA from the ColabFold server "
                              "(native-like structures) instead of msa:empty PLM-only mode")
+    parser.add_argument("--openmm-temp", dest="openmm_temp", type=float, default=310.0,
+                        help="OpenMM backend temperature in K (default 310; raise, e.g. "
+                             "400, for enhanced-sampling cavity opening)")
+    parser.add_argument("--openmm-time", dest="openmm_time", type=float, default=50.0,
+                        help="OpenMM backend total production MD time per protein in ps "
+                             "(default 50)")
     args = parser.parse_args()
 
     n_conf = 10 if args.quick else args.conformers
@@ -841,6 +851,7 @@ def main():
                 homodimer=entry.get("homodimer", False),
                 nma_rmsd=args.nma_rmsd, nma_modes=args.nma_modes,
                 boltz_msa=args.boltz_msa,
+                openmm_temp=args.openmm_temp, openmm_time=args.openmm_time,
             )
         except Exception as e:
             print(f"  [ERROR] Lacuna failed: {e}")

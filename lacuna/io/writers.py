@@ -160,8 +160,12 @@ def write_structure_pdb(structure: "Structure", path: Path) -> None:
             name_str = f"{name:<4}"
         chain = (atom.chain_id[0] if atom.chain_id else "A")
         elem = atom.element[:2].rjust(2) if atom.element else " C"
+        # Column layout (PDB spec): name cols 13-16, altLoc col 17 (blank),
+        # resName cols 18-20. The space before res_name is the altLoc placeholder —
+        # without it the residue name shifts one column left and strict parsers
+        # (e.g. OpenMM) reject the file.
         lines.append(
-            f"ATOM  {atom.serial + 1:5d} {name_str}{atom.res_name:>3s} {chain}"
+            f"ATOM  {atom.serial + 1:5d} {name_str} {atom.res_name:>3s} {chain}"
             f"{atom.res_seq:4d}    {x:8.3f}{y:8.3f}{z:8.3f}  1.00  0.00"
             f"          {elem}  "
         )
