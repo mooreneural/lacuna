@@ -66,14 +66,29 @@ def download_cif(pdb: str) -> Path:
     return out
 
 
+def _resnum(part: str) -> int | None:
+    """Parse a residue number, tolerating a trailing insertion code (e.g. '60A' ->
+    60). Lacuna's residue model drops insertion codes, so this matches its
+    numbering. Handles negative residue numbers too."""
+    digits = "".join(c for c in part if c.isdigit())
+    if not digits:
+        return None
+    return -int(digits) if part.lstrip().startswith("-") else int(digits)
+
+
 def main_pocket(assocs: list) -> tuple[str, set[int]]:
     """Return (apo_chain, residue_set) for the highest-pRMSD (main) cryptic pocket."""
     main = next((a for a in assocs if a.get("is_main_holo_structure")), None)
     if main is None:
         main = max(assocs, key=lambda a: a.get("pRMSD", 0.0))
     chain = main["apo_chain"]
-    res = {int(s.split("_")[1]) for s in main["apo_pocket_selection"]
-           if s.split("_")[0] == chain}
+    res: set[int] = set()
+    for s in main["apo_pocket_selection"]:
+        parts = s.split("_")
+        if len(parts) >= 2 and parts[0] == chain:
+            n = _resnum(parts[1])
+            if n is not None:
+                res.add(n)
     return chain, res
 
 
@@ -87,16 +102,26 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=0, help="only run first N (0=all)")
     ap.add_argument("--conformers", type=int, default=20)
+    ap.add_argument("--folds", default="test",
+                    help="comma-separated fold names to run (default: test). Use "
+                         "e.g. train-0,train-1,train-2,train-3 to score brand-new "
+                         "pockets held out from all tuning.")
+    ap.add_argument("--shuffle", action="store_true",
+                    help="shuffle the id order (seed 0) so a --limit subset is a "
+                         "representative sample rather than the first N.")
     args = ap.parse_args()
 
     dataset = json.loads(_fetch("dataset.json").read_text())
     folds = json.loads(_fetch("folds.json").read_text())
-    test_ids = folds["test"]
+    test_ids = [pid for f in args.folds.split(",") for pid in folds[f.strip()]]
+    if args.shuffle:
+        import random
+        random.Random(0).shuffle(test_ids)
     if args.limit:
         test_ids = test_ids[:args.limit]
 
     print("=" * 70)
-    print(f"  CRYPTOBENCH TEST FOLD  ({len(test_ids)} apo structures, NMA + crypticity)")
+    print(f"  CRYPTOBENCH [{args.folds}]  ({len(test_ids)} apo structures, NMA + crypticity)")
     print("=" * 70, flush=True)
 
     n_pass = n_run = n_skip = n_pass_legacy = 0
