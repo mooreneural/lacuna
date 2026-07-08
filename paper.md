@@ -157,7 +157,11 @@ criterion Lacuna scores 14/45 (31%) on the PocketMiner cryptic-pocket set (Melle
 et al. 2023) and 32/180 (18%) on the held-out test fold of CryptoBench (Vavra et
 al. 2024), the largest and most diverse cryptic-site dataset (legacy recall: 60%
 and 49% respectively). The two curated/field-standard sets converge at ~31-32% and
-the hardest comprehensive set floors at 18%.
+the hardest comprehensive set floors at 18%. As a generalization check, scoring all
+749 CryptoBench train-fold structures (never used in any tuning) gives 12.8%
+size-robust (95% CI 10.4-15.5%) and 50% legacy recall, statistically consistent
+with the test fold under overlapping confidence intervals, so the reported numbers
+hold up on genuinely unseen pockets.
 
 The benchmark also uses a stricter atomic-contact lining definition than earlier
 revisions (which used a ~13 Å sphere around the pocket center); the stricter,

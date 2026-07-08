@@ -179,8 +179,11 @@ Measured on three independent datasets (NMA + crypticity, top-5). Both criteria 
 | Curated apo/holo set (this repo) | 22 | **32%** | 59% | literature cryptic pairs |
 | PocketMiner (Meller 2023, *Nat. Commun.*) | 45 | **31%** | 60% | per-residue cryptic labels |
 | CryptoBench test fold (Vavra 2024, *Bioinformatics*) | 180 | **18%** | 49% | largest & most diverse; harder |
+| CryptoBench train folds (generalization check) | 749 | **13%** | 50% | brand-new pockets, held out from all tuning |
 
-The two curated/field-standard sets converge at ~31-32% under the size-robust metric; **CryptoBench** - the field's largest cryptic set (1107 structures; 180 of its 222-structure held-out test fold evaluated here) - is harder at **18%**. The legacy recall column roughly doubles every number: that gap is the size-gaming headroom the recall metric leaves open (a large pocket covers a small known site without being localized on it), which is exactly why the size-robust number is the one we lead with. Reproduce (each script prints both criteria):
+The two curated/field-standard sets converge at ~31-32% under the size-robust metric; **CryptoBench** - the field's largest cryptic set (1107 structures; 180 of its 222-structure held-out test fold evaluated here) - is harder at **18%**. The legacy recall column roughly doubles every number: that gap is the size-gaming headroom the recall metric leaves open (a large pocket covers a small known site without being localized on it), which is exactly why the size-robust number is the one we lead with.
+
+**Generalization.** To check that these numbers are not an artifact of the specific test fold, we scored all 749 CryptoBench *train*-fold structures, which were never used in any tuning: **13%** size-robust (95% CI 10-16%) and 50% legacy. Both are statistically consistent with the test fold (overlapping confidence intervals), so the honest headline holds up on genuinely unseen pockets. Reproduce (each script prints both criteria):
 
 ```bash
 python benchmarks/pocketminer_benchmark.py    # PocketMiner (auto-downloads)
