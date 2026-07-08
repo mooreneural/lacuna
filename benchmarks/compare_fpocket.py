@@ -70,7 +70,7 @@ def download_pdb(pdb_id: str, dest_dir: Path) -> Path:
     return out
 
 
-def residue_overlap(residue_labels: list[str], known: set[int]) -> float:
+def _parse_resnums(residue_labels: list[str]) -> set[int]:
     found: set[int] = set()
     for label in residue_labels:
         try:
@@ -78,7 +78,21 @@ def residue_overlap(residue_labels: list[str], known: set[int]) -> float:
             found.add(num)
         except (ValueError, IndexError):
             pass
+    return found
+
+
+def residue_overlap(residue_labels: list[str], known: set[int]) -> float:
+    """Legacy recall: |found ∩ known| / |known|. Size-gameable, kept for
+    backward comparison; prefer residue_jaccard for the headline criterion."""
+    found = _parse_resnums(residue_labels)
     return len(found & known) / len(known) if known else 0.0
+
+
+def residue_jaccard(residue_labels: list[str], known: set[int]) -> float:
+    """Size-robust IoU: |found ∩ known| / |found ∪ known|."""
+    found = _parse_resnums(residue_labels)
+    union = found | known
+    return len(found & known) / len(union) if union else 0.0
 
 
 # ── fpocket runner ─────────────────────────────────────────────────────────────
@@ -219,22 +233,33 @@ def main():
             print(f"{len(fp_pockets)} pockets in {fp_elapsed:.1f}s")
 
             best_ov, best_rank = 0.0, None
+            best_jac, best_jac_rank = 0.0, None
             for p in fp_pockets[:5]:
                 ov = residue_overlap(p["residues"], known)
                 if ov > best_ov:
                     best_ov = ov
                     best_rank = p["rank"]
+                jac = residue_jaccard(p["residues"], known)
+                if jac > best_jac:
+                    best_jac = jac
+                    best_jac_rank = p["rank"]
 
             found = best_ov >= 0.30
+            found_robust = best_jac >= 0.25
             fp_result = {
                 "status": "PASS" if found else "MISS",
                 "overlap": round(best_ov, 3),
                 "rank": best_rank,
+                "status_robust": "PASS" if found_robust else "MISS",
+                "jaccard": round(best_jac, 3),
+                "jaccard_rank": best_jac_rank,
                 "n_pockets": len(fp_pockets),
                 "elapsed_s": round(fp_elapsed, 2),
             }
             marker = "✅" if found else "❌"
-            print(f"  fpocket: {marker} overlap={best_ov:.0%}  rank={best_rank}")
+            rmarker = "✅" if found_robust else "❌"
+            print(f"  fpocket: {marker} overlap={best_ov:.0%}@{best_rank}  "
+                  f"{rmarker} jaccard={best_jac:.0%}@{best_jac_rank}")
 
         # ── Lacuna ───────────────────────────────────────────────────────────
         print(f"  Running Lacuna (NMA backend, {DEFAULT_CONFORMERS} conformers)...", end=" ", flush=True)
@@ -242,22 +267,33 @@ def main():
         print(f"{len(clusters)} pocket clusters in {lac_elapsed:.1f}s")
 
         best_ov, best_rank = 0.0, None
+        best_jac, best_jac_rank = 0.0, None
         for c in clusters[:5]:
             ov = residue_overlap(c.lining_residues, known)
             if ov > best_ov:
                 best_ov = ov
                 best_rank = c.rank
+            jac = residue_jaccard(c.lining_residues, known)
+            if jac > best_jac:
+                best_jac = jac
+                best_jac_rank = c.rank
 
         lac_found = best_ov >= 0.30
+        lac_found_robust = best_jac >= 0.25
         lac_result = {
             "status": "PASS" if lac_found else "MISS",
             "overlap": round(best_ov, 3),
             "rank": best_rank,
+            "status_robust": "PASS" if lac_found_robust else "MISS",
+            "jaccard": round(best_jac, 3),
+            "jaccard_rank": best_jac_rank,
             "n_clusters": len(clusters),
             "elapsed_s": round(lac_elapsed, 2),
         }
         marker = "✅" if lac_found else "❌"
-        print(f"  Lacuna:  {marker} overlap={best_ov:.0%}  rank={best_rank}  {lac_elapsed:.1f}s")
+        rmarker = "✅" if lac_found_robust else "❌"
+        print(f"  Lacuna:  {marker} overlap={best_ov:.0%}@{best_rank}  "
+              f"{rmarker} jaccard={best_jac:.0%}@{best_jac_rank}  {lac_elapsed:.1f}s")
 
         rows.append({
             "pdb": pdb_id,
@@ -272,11 +308,11 @@ def main():
     print("  SUMMARY")
     print(f"{'='*70}")
 
-    header = f"{'Target':<20} {'Pocket type':<30} {'fpocket':^12} {'Lacuna':^16}"
+    header = f"{'Target':<8} {'Pocket type':<30} {'fpocket (recall/jaccard)':<26} {'Lacuna (recall/jaccard)'}"
     print(header)
     print("─" * len(header))
 
-    fp_pass = lac_pass = fp_total = 0
+    fp_pass = lac_pass = fp_pass_robust = lac_pass_robust = fp_total = 0
     for r in rows:
         fp = r["fpocket"]
         lac = r["lacuna"]
@@ -284,23 +320,32 @@ def main():
         if fp["status"] != "n/a":
             fp_total += 1
             fp_icon = "✅" if fp["status"] == "PASS" else "❌"
-            fp_col = f"{fp_icon} {fp['overlap']:.0%} @{fp['rank']}"
+            fp_ricon = "✅" if fp["status_robust"] == "PASS" else "❌"
+            fp_col = f"{fp_icon}{fp['overlap']:.0%}@{fp['rank']} / {fp_ricon}{fp['jaccard']:.0%}@{fp['jaccard_rank']}"
         else:
             fp_col = "n/a"
 
         lac_icon = "✅" if lac["status"] == "PASS" else "❌"
-        lac_col = f"{lac_icon} {lac['overlap']:.0%} @{lac['rank']} ({lac['elapsed_s']:.1f}s)"
+        lac_ricon = "✅" if lac["status_robust"] == "PASS" else "❌"
+        lac_col = (f"{lac_icon}{lac['overlap']:.0%}@{lac['rank']} / "
+                  f"{lac_ricon}{lac['jaccard']:.0%}@{lac['jaccard_rank']} ({lac['elapsed_s']:.1f}s)")
 
         if fp["status"] == "PASS":
             fp_pass += 1
+        if fp.get("status_robust") == "PASS":
+            fp_pass_robust += 1
         if lac["status"] == "PASS":
             lac_pass += 1
+        if lac["status_robust"] == "PASS":
+            lac_pass_robust += 1
 
-        print(f"{r['pdb']:<8} {r['pocket_type']:<30}  {fp_col:<16}  {lac_col}")
+        print(f"{r['pdb']:<8} {r['pocket_type']:<30} {fp_col:<26} {lac_col}")
 
     print("─" * len(header))
     fp_score = f"{fp_pass}/{fp_total}" if fp_total else "n/a"
-    print(f"{'Score':<38} {fp_score:^12}   {lac_pass}/{len(rows)}")
+    fp_score_r = f"{fp_pass_robust}/{fp_total}" if fp_total else "n/a"
+    print(f"Legacy recall (>=30%) score:      fpocket {fp_score:>6}   Lacuna {lac_pass}/{len(rows)}")
+    print(f"Size-robust (Jaccard>=25%) score: fpocket {fp_score_r:>6}   Lacuna {lac_pass_robust}/{len(rows)}")
 
     # ── JSON output ───────────────────────────────────────────────────────────
     out_path = Path(__file__).parent / "fpocket_comparison.json"
