@@ -190,6 +190,14 @@ python benchmarks/pocketminer_benchmark.py    # PocketMiner (auto-downloads)
 python benchmarks/cryptobench_benchmark.py    # CryptoBench test fold (auto-downloads, ~10 min)
 ```
 
+### Limitations and scaling (this ceiling is a compute problem)
+
+The honest ceiling above (about 32% on the curated set, 13 to 18% on CryptoBench under the size-robust metric) is set by **conformational sampling**, not by ranking or pocket detection. At a top-20 cutoff the numbers rise only slightly, which means the pocket is usually not found-but-mis-ranked; it is simply never sampled in an open state.
+
+The remaining misses concentrate in the **large-collective-motion classes**, hinge and oligomeric-interface openings. The default NMA backend is harmonic and cannot generate those motions. Molecular dynamics can in principle, but a cryptic opening is a **rare event**: in our tests, short trajectories (0.5 to 3 ns) essentially never caught one, and enhanced-temperature MD, metadynamics along an apo-derived collective variable, and SWISH scaled-water MD were all null at the sampling a single workstation affords (see `benchmarks/experiments/`).
+
+Raising this ceiling is a **compute problem, not a missing algorithm**. Reliably observing rare openings needs orders of magnitude more MD sampling: tens to hundreds of nanoseconds per trajectory across dozens of independent replicas, aggregating microseconds per target, the scale used by the successful literature (for example PocketMiner's ~940,000 simulation windows and Folding@home-style datasets). As an anchor, the development GPU runs a small protein at roughly 300 ns/day; sampling rare openings across the 22 to 885 benchmark targets, with the frontier proteins several times slower, is tens to hundreds of GPU-days. **That is cluster or cloud GPU scale.** With that budget, the same pipeline could be driven by long multi-replica MD (or cosolvent MD) to attack the hinge and interface classes that are out of reach on a single machine.
+
 ### Orthosteric / conformational controls
 
 Crypticity ranking (the default) intentionally de-prioritizes always-open sites, so for orthosteric / general pocket finding use `--rank-by druggability`. Under the corrected contact-lining pipeline (NMA, `--rank-by druggability`):
