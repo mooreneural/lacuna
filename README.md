@@ -242,25 +242,23 @@ A constitutive pocket already formed in the input structure scores ≈ 0; a pock
 
 ### Head-to-head: Lacuna vs fpocket
 
-fpocket detects pockets on a single static structure. Lacuna generates a conformational ensemble - the critical difference for cryptic sites that are absent in the apo crystal.
+fpocket detects pockets on a single static structure. Lacuna generates a conformational ensemble to expose sites that only become visible once the protein moves. Run side by side on the same structures under the same size-robust criterion (top-5, Jaccard ≥ 0.25 or centroid ≤ 4 Å), the two tools catch largely different pockets:
 
-| Target | fpocket 4.2 | Lacuna (NMA backend) |
-|--------|------------|----------------------|
-| 1HEL hen lysozyme (orthosteric) | ✅ rank 1 | ✅ 100% |
-| 1L90 T4L L99A **(cryptic)** | ❌ not in top 5 | ✅ 100%, rank 1 |
-| 4OBE K-Ras switch-II **(cryptic)** | ❌ not in top 5 | ✅ 79%, rank 3 |
-| 1HPV HIV-1 protease (orthosteric) | ✅ rank 1 | ✅ rank 1 |
-| **Score** | **2 / 4** | **4 / 4** |
+| Set | fpocket | Lacuna | **Combined (either)** |
+|-----|:-------:|:------:|:----------------------:|
+| CryptoBench test fold (n=180) | 28% (51/180) | 16% (29/180) | **38% (68/180)** |
+| Curated cryptic set (n=22) | 18% (4/22) | 18% (4/22) | **36% (8/22)** |
 
-T4L L99A and K-Ras switch-II are the canonical single-structure benchmark failures: the T4L cavity is physically absent in the apo crystal (<100 Å³), and the K-Ras switch-II pocket only opens during nucleotide exchange.
+On CryptoBench, Lacuna independently recovers **17 pockets that fpocket misses entirely**: sites invisible to single-structure geometric detection that only open once the ensemble samples them. On the curated set, the hit lists don't overlap at all: fpocket catches T4 lysozyme's buried cavity and PTP1B's allosteric site, while Lacuna catches the BCL-2/BCL-XL BH3 grooves, MDM2's p53-binding cleft, and IL-2's helix pocket, sites that open through conformational change rather than being present in one fixed geometry. Running both and taking the union beats either tool alone on both benchmarks.
 
 > **Reproduce:**
 > ```bash
-> python benchmarks/cryptic_benchmark.py --category cryptic   # 22 cryptic targets, NMA (~4 min)
-> python benchmarks/cryptic_benchmark.py --quick              # 10 conformers, faster
+> python benchmarks/compare_fpocket.py                            # 22 curated cryptic targets vs fpocket
+> python benchmarks/compare_fpocket_cryptobench.py --folds test   # CryptoBench test fold vs fpocket (~7 min)
+> python benchmarks/cryptic_benchmark.py --category cryptic       # 22 cryptic targets, NMA (~4 min)
+> python benchmarks/cryptic_benchmark.py --quick                  # 10 conformers, faster
 > python benchmarks/cryptic_benchmark.py --category cryptic --rank-by druggability  # ablation
 > python benchmarks/cryptic_benchmark.py --category cryptic --top-n 20              # detection ceiling
-> python benchmarks/compare_fpocket.py                        # fpocket head-to-head
 > ```
 
 ---
