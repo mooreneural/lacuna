@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="docs/bclxl_pocket_example.png" alt="Lacuna-detected cryptic pocket on apo BCL-XL (blue) coinciding with the ABT-737 binding site" width="65%">
-</p>
+<img width="1066" height="760" alt="bclxl_pocket" src="https://github.com/user-attachments/assets/995fcb60-91ed-4bfc-83b3-602731cbe2f5" />
 
 # Lacuna
 
