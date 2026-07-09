@@ -1,4 +1,6 @@
-# Introduction
+<img width="1066" height="760" alt="bclxl_pocket" src="https://github.com/user-attachments/assets/995fcb60-91ed-4bfc-83b3-602731cbe2f5" />
+
+# Lacuna
 
 **Cryptic binding pocket discovery via conformational ensemble analysis.**
 
@@ -8,15 +10,6 @@ Lacuna finds those pockets. It generates a conformational ensemble from any inpu
 
 ```
 lacuna discover kras.pdb --conformers 20 --emit-boltz-constraints --emit-vina-boxes
-```
-
-<p align="center">
-  <img src="docs/bclxl_pocket_example.png" alt="Lacuna-detected cryptic pocket on apo BCL-XL (blue) coinciding with the ABT-737 binding site" width="65%">
-</p>
-
-<p align="center"><em>Apo BCL-XL (1LXL): the pocket Lacuna detects and ranks first (blue) sits exactly where the inhibitor ABT-737 (orange, from the holo structure 2YXJ) binds, a site never shown to the detector.</em></p>
-
----
 
 ## Install
 
@@ -277,7 +270,7 @@ corresponding source available under the same license.
 A separate **[commercial license](LICENSE_COMMERCIAL)** removes the AGPL
 copyleft obligation (for embedding Lacuna in closed-source products or hosted
 services without releasing your own source) and adds warranty, indemnification,
-support SLAs, and custom development. Contact claytonwaynemoore@gmail.com.
+support SLAs, and custom development.
 
 > Versions ≤ 0.1.2 were released under the MIT License and remain available
 > under those terms. AGPL-3.0 applies from version 0.2.0 onward.
