@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="docs/lacuna_banner.png" alt="Lacuna - cryptic binding pocket discovery via conformational ensemble analysis" width="100%">
-</p>
-
 # Introduction
 
 **Cryptic binding pocket discovery via conformational ensemble analysis.**
@@ -13,6 +9,12 @@ Lacuna finds those pockets. It generates a conformational ensemble from any inpu
 ```
 lacuna discover kras.pdb --conformers 20 --emit-boltz-constraints --emit-vina-boxes
 ```
+
+<p align="center">
+  <img src="docs/bclxl_pocket_example.png" alt="Lacuna-detected cryptic pocket on apo BCL-XL (blue) coinciding with the ABT-737 binding site" width="65%">
+</p>
+
+<p align="center"><em>Apo BCL-XL (1LXL): the pocket Lacuna detects and ranks first (blue) sits exactly where the inhibitor ABT-737 (orange, from the holo structure 2YXJ) binds, a site never shown to the detector.</em></p>
 
 ---
 
@@ -133,42 +135,13 @@ This curated result is cross-validated on two further independent datasets - **P
 
 **Size-robust success criterion (top-5 pockets):** a pocket whose lining residues reach a **Jaccard overlap ≥ 0.25** with the known ligand-contact site (Jaccard = |found ∩ known| / |found ∪ known|), **or** whose center is within 4 Å of the site centroid. Lining residues use a true atomic-contact definition (any residue with an atom within 5 Å of the detected cavity). Reproduce with `python benchmarks/cryptic_benchmark.py --category cryptic`.
 
-> **Why the number is lower than you may have seen before - please read.** Earlier releases reported this benchmark using plain **recall** (|found ∩ known| / |known| ≥ 30%), which gave **13/22 (59%)**. That metric is *size-gameable*: a large pocket engulfs most of a small known site and scores high recall while sitting nowhere near it. We verified this directly - a learned re-ranker reached 84% on the recall metric purely by ranking pockets on raw volume. We therefore switched the headline to a **size-robust** criterion (Jaccard, which penalizes oversized pockets, OR a ≤4 Å centroid hit). Under it the honest numbers roughly halve. Both criteria are printed side by side by every benchmark script; we lead with the robust one because it is the number we can defend on held-out data.
->
-> Of the 22 cryptic targets, **2 pass the strict ≤4 Å centroid test** (IL-2, PTP1B) and 5 more clear Jaccard ≥ 0.25. Precise pocket-center localization is genuinely hard for elongated, partially-open cryptic grooves, which is why the centroid-only pass rate is low. `cryptic_benchmark.py` prints the full per-metric breakdown (centroid, Jaccard at 0.20/0.25/0.30, and legacy recall).
+> **Why the number is lower than you may have seen before - please read.** Earlier releases led with plain **recall** (|found ∩ known| / |known| ≥ 30%), which gave **13/22 (59%)** but is *size-gameable*: a large pocket engulfs a small known site and scores high recall while sitting nowhere near it. A learned re-ranker confirmed this by reaching 84% on recall purely by ranking pockets on raw volume. The headline now leads with **size-robust** Jaccard (or a ≤4 Å centroid hit) instead, which roughly halves the numbers but is the one we can defend on held-out data; only 2/22 pass the strict centroid test alone. Both criteria print side by side in every benchmark script.
 
 ### Cryptic pockets - 7 / 22 (32%)
 
-Sorted by Jaccard (size-robust overlap). ✅ = passes the size-robust criterion (Jaccard ≥ 0.25 **or** centroid ≤ 4 Å); recall is the legacy size-gameable metric, shown for contrast. "Rank" is the position of the best-matching top-5 pocket.
+The remaining gap is mostly sampling, not ranking: at top-20 the size-robust score only rises to 10/22, so 12 of the misses are never localized at all rather than found-but-mis-ranked. The hard cases split into oligomeric-interface pockets (invisible to single-chain analysis, partly addressable with `--homodimer`) and large-rearrangement sites that need sampling beyond elastic-network modes.
 
-| Protein | Apo PDB | Drug target | Jaccard | Recall | Rank |
-|---------|---------|-------------|--------:|-------:|:----:|
-| ✅ BCL-XL BH3 groove | 1LXL | navitoclax | 56% | 68% | 1 |
-| ✅ BCL-2 BH3 groove | 1G5M | venetoclax | 48% | 59% | 1 |
-| ✅ MDM2 p53-binding cleft | 1Z1M | nutlin-3 | 39% | 47% | 1 |
-| ✅ PTP1B allosteric helix site | 1A5Y | benzofurans | 36% | 94% | 5 |
-| ✅ IL-2 helix-α1 site | 1M47 | - | 36% | 93% | 1 |
-| ✅ HIV-1 RT NNRTI pocket | 1HMV | nevirapine | 33% | 62% | 4 |
-| ✅ K-Ras switch-II pocket | 4OBE | sotorasib/adagrasib | 26% | 79% | 3 |
-| ❌ Ricin A pterin pocket | 1RTC | - | 18% | 50% | - |
-| ❌ T4 Lysozyme L99A cavity | 1L90 | - | 17% | 62% | - |
-| ❌ HCV NS5B thumb-site I | 1NB4 | VXR class | 16% | 47% | - |
-| ❌ Glucokinase allosteric site | 1V4S | activators | 15% | 39% | - |
-| ❌ Src myristate pocket | 2SRC | - | 14% | 36% | - |
-| ❌ PPARγ allosteric site | 2PRG | metaglidasen | 11% | 35% | - |
-| ❌ c-ABL myristate pocket | 3CS9 | asciminib | 7% | 19% | - |
-| ❌ p38α DFG-out pocket | 1P38 | BIRB 796 | 7% | 24% | - |
-| ❌ ERK2 allosteric site | 2ERK | - | 6% | 19% | - |
-| ❌ Caspase-1 dimer interface | 2HBQ | - | 5% | 25% | - |
-| ❌ PKM2 subunit interface | 1ZJH | TEPP-46 | 4% | 17% | - |
-| ❌ MMP-13 S1′ tunnel | 2OZR | non-zinc | 4% | 6% | - |
-| ❌ TEM-1 allosteric site | 1JWP | CBT | 2% | 17% | - |
-| ❌ IDH1 R132H dimer interface | 3MAP | ivosidenib | 2% | 7% | - |
-| ❌ SHP-2 allosteric tunnel | 2SHP | SHP099 | 0% | 0% | - |
-
-**The remaining gap is mostly sampling, not ranking.** Raising the cutoff from top-5 to top-20 lifts the size-robust score only from **7/22 to 10/22** - just 3 pockets are detected-but-mis-ranked. The other 12 misses are not localized at all even at top-20, so they are a sampling/localization ceiling (the NMA ensemble never opens or the detector never localizes the site tightly enough) rather than a ranking failure. This is the honest picture: under the older recall metric the top-20 ceiling looked like 73%, which made the problem appear to be ranking - it was largely the metric. The hard cases split into **oligomeric-interface pockets** (Caspase-1, IDH1, PKM2) that form *between* subunits and are invisible to single-chain analysis, and **large-rearrangement sites** (p38 DFG-out, c-ABL myristate) that need sampling beyond elastic-network modes.
-
-Dimer-interface pockets are partly addressable with `--homodimer` (reads BIOMT records and builds the biological assembly), though this benchmark's single-chain-referenced scoring does not credit them. For large-rearrangement sites the optional Boltz-2 backend samples more broadly, but its current sequence-based integration is noisy - see [Backends](#backends).
+**[Full 22-target breakdown, per-target Jaccard/recall/rank →](docs/BENCHMARKS.md#cryptic-pockets-full-22-target-breakdown)**
 
 ### Independent validation - three benchmarks
 
@@ -198,16 +171,7 @@ The remaining misses concentrate in the **large-collective-motion classes**, hin
 
 Raising this ceiling is a **compute problem, not a missing algorithm**. Reliably observing rare openings needs orders of magnitude more MD sampling: tens to hundreds of nanoseconds per trajectory across dozens of independent replicas, aggregating microseconds per target, the scale used by the successful literature (for example PocketMiner's ~940,000 simulation windows and Folding@home-style datasets). As an anchor, the development GPU runs a small protein at roughly 300 ns/day; sampling rare openings across the 22 to 885 benchmark targets, with the frontier proteins several times slower, is tens to hundreds of GPU-days. **That is cluster or cloud GPU scale.** With that budget, the same pipeline could be driven by long multi-replica MD (or cosolvent MD) to attack the hinge and interface classes that are out of reach on a single machine.
 
-### Orthosteric / conformational controls
-
-Crypticity ranking (the default) intentionally de-prioritizes always-open sites, so for orthosteric / general pocket finding use `--rank-by druggability`. Under the corrected contact-lining pipeline (NMA, `--rank-by druggability`):
-
-| Category | Result | Notes |
-|----------|--------|-------|
-| Orthosteric | 3 / 6 | hen lysozyme 100%, HIF-2α 96% (1.1 Å centroid), DHFR 50%; misses HIV protease, thrombin, trypsin (1S0Q numbering) |
-| Conformational | 1 / 1 | adenylate kinase open→closed |
-
-Orthosteric detection is a known relative weakness of the tight-contact pipeline - the tool is tuned for transient cryptic sites, not always-open active-site grooves.
+Crypticity ranking (the default) intentionally de-prioritizes always-open sites; for orthosteric / general pocket finding use `--rank-by druggability` (orthosteric controls: [3/6 →](docs/BENCHMARKS.md#orthosteric--conformational-controls), a known relative weakness of this tight-contact pipeline).
 
 ### Crypticity score
 
@@ -220,25 +184,7 @@ crypticity = opening × peak_open_state_druggability
 
 A constitutive pocket already formed in the input structure scores ≈ 0; a pocket absent in the apo structure that opens into a druggable cavity scores near 1. Ranking by crypticity is the **default** and recovers the most cryptic targets. The JSON report also includes per-pocket volume dynamics (`apo_volume_A3`, `volume_range_A3`) and `max_druggability`.
 
-### Ranking strategies
-
-`--rank-by` selects how pockets are ordered (cryptic benchmark pass rate, NMA, N=20):
-
-| Strategy | Description | Cryptic pass |
-|----------|-------------|--------------|
-| `crypticity` (default) | most cryptic sites first | **12 / 20** |
-| `druggability` | peak open-state composite druggability | 10 / 20 |
-| `balanced` | druggability with a mild persistence bonus | 8 / 20 |
-| `persistence` | legacy persistence × druggability | 7 / 20 |
-
-### Speed (NMA backend, no GPU)
-
-| Protein size | Time |
-|-------------|------|
-| ~130 residues (lysozyme) | 0.6s |
-| ~170 residues (MDM2) | 1.1s |
-| ~350 residues (K-Ras) | 0.9s |
-| ~530 residues (HIV-1 RT chain A) | 8.4s |
+`--rank-by` selects how pockets are ordered: `crypticity` (default, most cryptic sites first, 12/20 cryptic pass), `druggability`, `balanced`, or `persistence`. NMA runtime is sub-second to ~8s per protein on a laptop CPU, no GPU required. **[Full ranking-strategy ablation and per-size timing →](docs/BENCHMARKS.md#ranking-strategies)**
 
 ### Head-to-head: Lacuna vs fpocket
 
