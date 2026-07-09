@@ -1,3 +1,5 @@
+<img width="550" height="541" alt="bclxl_pocket" src="https://github.com/user-attachments/assets/6169cd25-c400-4579-8836-29fd3cccccd3" />
+
 # Introduction
 
 **Cryptic binding pocket discovery via conformational ensemble analysis.**
