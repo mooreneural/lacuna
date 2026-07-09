@@ -8,8 +8,9 @@ Most protein structure predictors (AlphaFold, Boltz, Chai) give you one static s
 
 Lacuna finds those pockets. It generates a conformational ensemble from any input structure, detects pockets per conformer, and clusters them across the ensemble to surface sites that only appear transiently - ranked by a continuous crypticity score.
 
-```
+```bash
 lacuna discover kras.pdb --conformers 20 --emit-boltz-constraints --emit-vina-boxes
+```
 
 ## Install
 
@@ -107,10 +108,10 @@ for c in clusters[:5]:
 
 | Backend | Install | Quality | Speed | Notes |
 |---------|---------|---------|-------|-------|
-| `nma` | built-in | good | ~0.1s/conf | Anisotropic Network Model normal mode analysis - hinge bending, breathing, twist motions |
-| `openmm` | `lacuna[openmm]` | good | ~2s/conf | 100ps Langevin MD, GBn2 implicit solvent |
-| `boltz` | `lacuna[boltz]` | experimental | ~100s/protein (GPU) | Boltz-2 diffusion sampling from sequence; high diversity but noisy (see note) |
-| `random` | built-in | baseline | ~0.04s/conf | Correlated Gaussian backbone perturbation |
+| `nma` | built-in | good | ~0.1s/conf | Elastic-network normal modes (default) |
+| `openmm` | `lacuna[openmm]` | good | ~2s/conf | Implicit-solvent MD, 100ps |
+| `boltz` | `lacuna[boltz]` | experimental | ~100s/protein (GPU) | Diffusion sampling, noisy (see note below) |
+| `random` | built-in | baseline | ~0.04s/conf | Gaussian backbone perturbation |
 
 **Auto-selection order:** `boltz` → `openmm` → `nma` → `random`. On a plain `pip install lacuna`, the NMA backend runs automatically.
 
@@ -143,9 +144,11 @@ Measured on three independent datasets (NMA + crypticity, top-5). Both criteria 
 | Benchmark | N | Size-robust | Legacy recall | Notes |
 |-----------|--:|:-----------:|:-------------:|-------|
 | Curated apo/holo set (this repo) | 22 | **32%** | 59% | literature cryptic pairs |
-| PocketMiner (Meller 2023, *Nat. Commun.*) | 45 | **31%** | 60% | per-residue cryptic labels |
-| CryptoBench test fold (Vavra 2024, *Bioinformatics*) | 180 | **18%** | 49% | largest & most diverse; harder |
-| CryptoBench train folds (generalization check) | 749 | **13%** | 50% | brand-new pockets, held out from all tuning |
+| PocketMiner | 45 | **31%** | 60% | per-residue cryptic labels |
+| CryptoBench (test fold) | 180 | **18%** | 49% | largest & most diverse |
+| CryptoBench (train, generalization) | 749 | **13%** | 50% | held out from all tuning |
+
+Datasets: PocketMiner (Meller et al. 2023, *Nat. Commun.*); CryptoBench (Vavra et al. 2024, *Bioinformatics*).
 
 The two curated/field-standard sets converge at ~31-32% under the size-robust metric; **CryptoBench** - the field's largest cryptic set (1107 structures; 180 of its 222-structure held-out test fold evaluated here) - is harder at **18%**. The legacy recall column roughly doubles every number: that gap is the size-gaming headroom the recall metric leaves open (a large pocket covers a small known site without being localized on it), which is exactly why the size-robust number is the one we lead with.
 
@@ -247,7 +250,7 @@ If you use Lacuna in published research, please cite:
              via Conformational Ensemble Analysis},
   year    = {2026},
   url     = {https://github.com/mooreneural/lacuna},
-  version = {0.2.0}
+  version = {0.3.1}
 }
 ```
 
