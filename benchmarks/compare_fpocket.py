@@ -1,84 +1,65 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Clayton Moore
 """Lacuna vs fpocket head-to-head benchmark.
 
-Runs both tools on the same apo PDB structures and reports pocket recovery
-using the same criterion: ≥30% residue overlap with known binding site in top-5.
+Runs both tools on the same apo structures, from the curated 22-target cryptic
+set used throughout the project (benchmarks/cryptic_benchmark.py DATASET,
+category="cryptic"), and reports pocket recovery under both criteria used
+elsewhere in this repo:
 
-fpocket must be on PATH.  If missing, the script prints instructions and exits.
+  legacy recall     >= 30% residue overlap with the known binding site, top-5
+  size-robust (IoU) >= 25% Jaccard overlap, top-5 (penalizes oversized pockets)
+
+Reusing the same DATASET, known-site resolution, and Lacuna run configuration
+(NMA backend, 20 conformers, crypticity ranking) as the rest of the benchmark
+suite keeps this an apples-to-apples, single-chain comparison for both tools.
+
+fpocket must be on PATH (built from github.com/Discngine/fpocket or via a
+package manager; not available as a Windows-native binary, use WSL or Linux).
+If missing, the script prints instructions and runs Lacuna-only.
 
 Usage:
-    python benchmarks/compare_fpocket.py
-
-This requires the PDB files in benchmarks/pdb_cache/ (run run_benchmarks.py
-first or download manually from RCSB).
+    python benchmarks/compare_fpocket.py             # all 22 cryptic targets
+    python benchmarks/compare_fpocket.py --limit 8    # quick subset
+    python benchmarks/compare_fpocket.py --only T4L_L99A,4OBE
 """
 
 from __future__ import annotations
 
+import argparse
 import json
-import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
 import time
-import urllib.request
 from pathlib import Path
 
-# ── benchmark definitions ──────────────────────────────────────────────────────
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-BENCHMARKS = {
-    "1HEL": {
-        "name": "Hen lysozyme (orthosteric)",
-        "chain": "A",
-        "known_residues": {35, 52, 101, 102, 103, 104, 107, 108},
-        "pocket_type": "Orthosteric (always open)",
-    },
-    "1L90": {
-        "name": "T4 Lysozyme L99A (cryptic hydrophobic cavity)",
-        "chain": "A",
-        "known_residues": {99, 102, 106, 111, 118, 121, 133, 153},
-        "pocket_type": "Cryptic (buried cavity)",
-    },
-    "4OBE": {
-        "name": "K-Ras WT apo (switch-II cryptic pocket)",
-        "chain": "A",
-        "known_residues": {12, 13, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36},
-        "pocket_type": "Cryptic (switch-II closed in GDP form)",
-    },
-    "1HPV": {
-        "name": "HIV-1 protease apo (active site / flap region)",
-        "chain": "A",
-        "known_residues": {25, 26, 27, 28, 29, 30, 49, 50, 51, 52, 53},
-        "pocket_type": "Active site (open)",
-    },
-}
+sys.path.insert(0, str(Path(__file__).parent))
+from cryptic_benchmark import (  # noqa: E402
+    DATASET, download_pdb, extract_binding_site, run_lacuna,
+    OVERLAP_THRESHOLD, JACCARD_THRESHOLD,
+)
+from lacuna.io.structure import load_structure  # noqa: E402
+from lacuna.io.writers import write_structure_pdb  # noqa: E402
 
 DEFAULT_CONFORMERS = 20
 
 
-# ── helpers ────────────────────────────────────────────────────────────────────
-
-def download_pdb(pdb_id: str, dest_dir: Path) -> Path:
-    out = dest_dir / f"{pdb_id}.pdb"
-    if out.exists():
-        return out
-    url = f"https://files.rcsb.org/download/{pdb_id}.pdb"
-    print(f"  Downloading {pdb_id}...", end=" ", flush=True)
-    urllib.request.urlretrieve(url, out)
-    print("done")
-    return out
-
+# ── shared residue-overlap helpers ──────────────────────────────────────────────
 
 def _parse_resnums(residue_labels: list[str]) -> set[int]:
-    found: set[int] = set()
+    out: set[int] = set()
     for label in residue_labels:
         try:
-            num = int("".join(c for c in label.split(":")[0] if c.isdigit()))
-            found.add(num)
+            out.add(int("".join(c for c in label.split(":")[0] if c.isdigit())))
         except (ValueError, IndexError):
             pass
-    return found
+    return out
 
 
 def residue_overlap(residue_labels: list[str], known: set[int]) -> float:
@@ -97,34 +78,6 @@ def residue_jaccard(residue_labels: list[str], known: set[int]) -> float:
 
 # ── fpocket runner ─────────────────────────────────────────────────────────────
 
-def parse_fpocket_pockets(out_dir: Path, chain: str) -> list[dict]:
-    """Parse fpocket _info.txt summary into a ranked list of pocket dicts."""
-    pockets = []
-    # fpocket writes one pocketN_atm.pdb per pocket; parse info file for ranking
-    info_files = sorted(out_dir.glob("*_info.txt"))
-    if not info_files:
-        return pockets
-
-    with open(info_files[0]) as f:
-        text = f.read()
-
-    # Each pocket block starts with "Pocket N :"
-    blocks = re.split(r"Pocket\s+(\d+)\s+:", text)
-    # blocks: ['', rank, body, rank, body, ...]
-    for i in range(1, len(blocks) - 1, 2):
-        rank = int(blocks[i])
-        body = blocks[i + 1]
-
-        residues: list[str] = []
-        for line in body.splitlines():
-            m = re.search(r"Residue IDs\s*:\s*(.+)", line)
-            if m:
-                residues = [r.strip() for r in m.group(1).split() if r.strip()]
-        pockets.append({"rank": rank, "residues": residues})
-
-    return pockets
-
-
 def parse_fpocket_atoms(pocket_pdb: Path, chain: str) -> list[str]:
     """Extract residue IDs from an fpocket pocket PDB file."""
     residues = set()
@@ -139,10 +92,20 @@ def parse_fpocket_atoms(pocket_pdb: Path, chain: str) -> list[str]:
 
 
 def run_fpocket(pdb_path: Path, chain: str) -> list[dict]:
-    """Run fpocket on a PDB file; return list of {rank, residues}."""
+    """Run fpocket on a structure (PDB or mmCIF); return list of {rank, residues}.
+
+    fpocket accepts mmCIF input directly, but then names its per-pocket output
+    files pocketN_atm.cif instead of .pdb, silently producing zero results
+    against a PDB-only glob (and mmCIF's whitespace-token atom format is not
+    parsed by the fixed-column PDB reader below anyway). To keep exactly one
+    tested parsing path, always normalize the input to a clean, single-chain
+    PDB via load_structure/write_structure_pdb before invoking fpocket,
+    regardless of the source format.
+    """
     with tempfile.TemporaryDirectory() as tmp:
-        tmp_pdb = Path(tmp) / pdb_path.name
-        shutil.copy(pdb_path, tmp_pdb)
+        tmp_pdb = Path(tmp) / "input.pdb"
+        structure = load_structure(pdb_path, chain=chain)
+        write_structure_pdb(structure, tmp_pdb)
 
         result = subprocess.run(
             ["fpocket", "-f", str(tmp_pdb)],
@@ -152,12 +115,10 @@ def run_fpocket(pdb_path: Path, chain: str) -> list[dict]:
             print(f"    fpocket error: {result.stderr[:200]}")
             return []
 
-        # fpocket creates <stem>_out/ directory
         out_dir = Path(tmp) / f"{tmp_pdb.stem}_out"
         if not out_dir.exists():
             return []
 
-        # Parse per-pocket PDB files directly for residue lists
         pocket_files = sorted(out_dir.glob("pockets/pocket*_atm.pdb"))
         pockets = []
         for i, pf in enumerate(pocket_files, 1):
@@ -166,69 +127,86 @@ def run_fpocket(pdb_path: Path, chain: str) -> list[dict]:
         return pockets
 
 
-# ── lacuna runner ──────────────────────────────────────────────────────────────
-
-def run_lacuna(pdb_path: Path) -> tuple[list, float]:
-    from lacuna.io.structure import load_structure, coords_array
-    from lacuna.ensemble.nma_backend import NMABackend
-    from lacuna.pockets.detector import detect_pockets
-    from lacuna.pockets.clusterer import cluster_pockets
-
-    structure = load_structure(pdb_path)
-    backend = NMABackend(seed=42)
-
-    t0 = time.perf_counter()
-    coord_sets = backend.generate(pdb_path, n_conformers=DEFAULT_CONFORMERS)
-    base = coords_array(structure)
-    all_coords = [base] + coord_sets
-
-    pocket_lists = []
-    for ci, coords in enumerate(all_coords):
-        pockets = detect_pockets(coords, structure)
-        for p in pockets:
-            p.conformer_idx = ci
-        pocket_lists.append(pockets)
-
-    clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coords))
-    elapsed = time.perf_counter() - t0
-    return clusters, elapsed
-
-
 # ── main ───────────────────────────────────────────────────────────────────────
 
 def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--limit", type=int, default=0, help="only first N cryptic targets")
+    ap.add_argument("--only", default=None, help="comma-separated DATASET ids")
+    ap.add_argument("--conformers", type=int, default=DEFAULT_CONFORMERS)
+    args = ap.parse_args()
+
     pdb_dir = Path(__file__).parent / "pdb_cache"
     pdb_dir.mkdir(exist_ok=True)
 
-    # Check fpocket availability
     has_fpocket = shutil.which("fpocket") is not None
     if not has_fpocket:
         print("WARNING: fpocket not found on PATH.")
-        print("  Install: https://github.com/Discngine/fpocket or `sudo apt install fpocket`")
-        print("  Continuing with Lacuna-only benchmarks.\n")
+        print("  Install: https://github.com/Discngine/fpocket (Linux/WSL; build from source")
+        print("  with libnetcdf-dev, `make`, `sudo make install`). Continuing Lacuna-only.\n")
+
+    entries = [e for e in DATASET if e["category"] == "cryptic"]
+    if args.only:
+        wanted = {s.strip() for s in args.only.split(",")}
+        entries = [e for e in entries if e["id"] in wanted]
+    if args.limit:
+        entries = entries[:args.limit]
 
     print("=" * 70)
-    print("  LACUNA vs FPOCKET - HEAD-TO-HEAD BENCHMARK")
+    print(f"  LACUNA vs FPOCKET - HEAD-TO-HEAD ({len(entries)} curated cryptic targets)")
     if not has_fpocket:
         print("  (fpocket unavailable - Lacuna only)")
     print("=" * 70)
 
     rows = []
 
-    for pdb_id, spec in BENCHMARKS.items():
+    for entry in entries:
+        pdb_id = entry["apo_pdb"]
+        chain = entry.get("apo_chain", "A")
         print(f"\n{'─'*70}")
-        print(f"  {pdb_id}  {spec['name']}")
+        print(f"  {entry['id']}  ({pdb_id})  {entry['name']}")
         print(f"{'─'*70}")
 
-        pdb_path = download_pdb(pdb_id, pdb_dir)
-        known = spec["known_residues"]
+        try:
+            pdb_path = download_pdb(pdb_id, pdb_dir)
+        except Exception as e:
+            print(f"  [SKIP] apo download failed: {e}")
+            continue
+
+        if "known_residues" in entry:
+            known = entry["known_residues"]
+        else:
+            try:
+                holo_path = download_pdb(entry["holo_pdb"], pdb_dir)
+            except Exception as e:
+                print(f"  [SKIP] holo download failed: {e}")
+                continue
+            known, _ = extract_binding_site(
+                holo_path, entry.get("holo_chain", "A"), entry.get("extra_exclude", frozenset()))
+        if not known:
+            print("  [SKIP] no known binding site resolved")
+            continue
+
+        max_res = entry.get("max_residues", 600)
+        try:
+            s = load_structure(pdb_path, chain=chain)
+            if len(s.residues) > max_res:
+                print(f"  [SKIP] {len(s.residues)} residues > max_residues={max_res}")
+                continue
+        except Exception as e:
+            print(f"  [SKIP] structure load failed: {e}")
+            continue
 
         # ── fpocket ──────────────────────────────────────────────────────────
         fp_result = {"status": "n/a", "overlap": None, "rank": None}
         if has_fpocket:
             print("  Running fpocket...", end=" ", flush=True)
             t0 = time.perf_counter()
-            fp_pockets = run_fpocket(pdb_path, spec["chain"])
+            try:
+                fp_pockets = run_fpocket(pdb_path, chain)
+            except Exception as e:
+                print(f"error: {e}")
+                fp_pockets = []
             fp_elapsed = time.perf_counter() - t0
             print(f"{len(fp_pockets)} pockets in {fp_elapsed:.1f}s")
 
@@ -237,33 +215,35 @@ def main():
             for p in fp_pockets[:5]:
                 ov = residue_overlap(p["residues"], known)
                 if ov > best_ov:
-                    best_ov = ov
-                    best_rank = p["rank"]
+                    best_ov, best_rank = ov, p["rank"]
                 jac = residue_jaccard(p["residues"], known)
                 if jac > best_jac:
-                    best_jac = jac
-                    best_jac_rank = p["rank"]
+                    best_jac, best_jac_rank = jac, p["rank"]
 
-            found = best_ov >= 0.30
-            found_robust = best_jac >= 0.25
+            found = best_ov >= OVERLAP_THRESHOLD
+            found_robust = best_jac >= JACCARD_THRESHOLD
             fp_result = {
                 "status": "PASS" if found else "MISS",
-                "overlap": round(best_ov, 3),
-                "rank": best_rank,
+                "overlap": round(best_ov, 3), "rank": best_rank,
                 "status_robust": "PASS" if found_robust else "MISS",
-                "jaccard": round(best_jac, 3),
-                "jaccard_rank": best_jac_rank,
-                "n_pockets": len(fp_pockets),
-                "elapsed_s": round(fp_elapsed, 2),
+                "jaccard": round(best_jac, 3), "jaccard_rank": best_jac_rank,
+                "n_pockets": len(fp_pockets), "elapsed_s": round(fp_elapsed, 2),
             }
-            marker = "✅" if found else "❌"
-            rmarker = "✅" if found_robust else "❌"
-            print(f"  fpocket: {marker} overlap={best_ov:.0%}@{best_rank}  "
+            marker = "PASS" if found else "miss"
+            rmarker = "PASS" if found_robust else "miss"
+            print(f"  fpocket: {marker} recall={best_ov:.0%}@{best_rank}  "
                   f"{rmarker} jaccard={best_jac:.0%}@{best_jac_rank}")
 
-        # ── Lacuna ───────────────────────────────────────────────────────────
-        print(f"  Running Lacuna (NMA backend, {DEFAULT_CONFORMERS} conformers)...", end=" ", flush=True)
-        clusters, lac_elapsed = run_lacuna(pdb_path)
+        # ── Lacuna (same config as the rest of the benchmark suite) ─────────────
+        print(f"  Running Lacuna (NMA, {args.conformers} conformers, crypticity)...",
+              end=" ", flush=True)
+        try:
+            clusters, lac_elapsed = run_lacuna(
+                pdb_path, args.conformers, chain=chain,
+                backend_name="nma", rank_by="crypticity")
+        except Exception as e:
+            print(f"error: {e}")
+            continue
         print(f"{len(clusters)} pocket clusters in {lac_elapsed:.1f}s")
 
         best_ov, best_rank = 0.0, None
@@ -271,87 +251,67 @@ def main():
         for c in clusters[:5]:
             ov = residue_overlap(c.lining_residues, known)
             if ov > best_ov:
-                best_ov = ov
-                best_rank = c.rank
+                best_ov, best_rank = ov, c.rank
             jac = residue_jaccard(c.lining_residues, known)
             if jac > best_jac:
-                best_jac = jac
-                best_jac_rank = c.rank
+                best_jac, best_jac_rank = jac, c.rank
 
-        lac_found = best_ov >= 0.30
-        lac_found_robust = best_jac >= 0.25
+        lac_found = best_ov >= OVERLAP_THRESHOLD
+        lac_found_robust = best_jac >= JACCARD_THRESHOLD
         lac_result = {
             "status": "PASS" if lac_found else "MISS",
-            "overlap": round(best_ov, 3),
-            "rank": best_rank,
+            "overlap": round(best_ov, 3), "rank": best_rank,
             "status_robust": "PASS" if lac_found_robust else "MISS",
-            "jaccard": round(best_jac, 3),
-            "jaccard_rank": best_jac_rank,
-            "n_clusters": len(clusters),
-            "elapsed_s": round(lac_elapsed, 2),
+            "jaccard": round(best_jac, 3), "jaccard_rank": best_jac_rank,
+            "n_clusters": len(clusters), "elapsed_s": round(lac_elapsed, 2),
         }
-        marker = "✅" if lac_found else "❌"
-        rmarker = "✅" if lac_found_robust else "❌"
-        print(f"  Lacuna:  {marker} overlap={best_ov:.0%}@{best_rank}  "
+        marker = "PASS" if lac_found else "miss"
+        rmarker = "PASS" if lac_found_robust else "miss"
+        print(f"  Lacuna:  {marker} recall={best_ov:.0%}@{best_rank}  "
               f"{rmarker} jaccard={best_jac:.0%}@{best_jac_rank}  {lac_elapsed:.1f}s")
 
         rows.append({
-            "pdb": pdb_id,
-            "name": spec["name"],
-            "pocket_type": spec["pocket_type"],
-            "fpocket": fp_result,
-            "lacuna": lac_result,
+            "id": entry["id"], "pdb": pdb_id, "name": entry["name"],
+            "fpocket": fp_result, "lacuna": lac_result,
         })
 
-    # ── Summary table ─────────────────────────────────────────────────────────
+    # ── Summary ──────────────────────────────────────────────────────────────
     print(f"\n{'='*70}")
     print("  SUMMARY")
     print(f"{'='*70}")
-
-    header = f"{'Target':<8} {'Pocket type':<30} {'fpocket (recall/jaccard)':<26} {'Lacuna (recall/jaccard)'}"
+    header = f"{'ID':<18} {'fpocket recall/jaccard':<26} {'Lacuna recall/jaccard'}"
     print(header)
     print("─" * len(header))
 
-    fp_pass = lac_pass = fp_pass_robust = lac_pass_robust = fp_total = 0
+    fp_pass = lac_pass = fp_pass_r = lac_pass_r = fp_total = 0
     for r in rows:
-        fp = r["fpocket"]
-        lac = r["lacuna"]
-
+        fp, lac = r["fpocket"], r["lacuna"]
         if fp["status"] != "n/a":
             fp_total += 1
-            fp_icon = "✅" if fp["status"] == "PASS" else "❌"
-            fp_ricon = "✅" if fp["status_robust"] == "PASS" else "❌"
-            fp_col = f"{fp_icon}{fp['overlap']:.0%}@{fp['rank']} / {fp_ricon}{fp['jaccard']:.0%}@{fp['jaccard_rank']}"
+            fp_col = f"{fp['overlap']:.0%}@{fp['rank']} / {fp['jaccard']:.0%}@{fp['jaccard_rank']}"
+            fp_pass += fp["status"] == "PASS"
+            fp_pass_r += fp["status_robust"] == "PASS"
         else:
             fp_col = "n/a"
-
-        lac_icon = "✅" if lac["status"] == "PASS" else "❌"
-        lac_ricon = "✅" if lac["status_robust"] == "PASS" else "❌"
-        lac_col = (f"{lac_icon}{lac['overlap']:.0%}@{lac['rank']} / "
-                  f"{lac_ricon}{lac['jaccard']:.0%}@{lac['jaccard_rank']} ({lac['elapsed_s']:.1f}s)")
-
-        if fp["status"] == "PASS":
-            fp_pass += 1
-        if fp.get("status_robust") == "PASS":
-            fp_pass_robust += 1
-        if lac["status"] == "PASS":
-            lac_pass += 1
-        if lac["status_robust"] == "PASS":
-            lac_pass_robust += 1
-
-        print(f"{r['pdb']:<8} {r['pocket_type']:<30} {fp_col:<26} {lac_col}")
+        lac_col = f"{lac['overlap']:.0%}@{lac['rank']} / {lac['jaccard']:.0%}@{lac['jaccard_rank']}"
+        lac_pass += lac["status"] == "PASS"
+        lac_pass_r += lac["status_robust"] == "PASS"
+        print(f"{r['id']:<18} {fp_col:<26} {lac_col}")
 
     print("─" * len(header))
-    fp_score = f"{fp_pass}/{fp_total}" if fp_total else "n/a"
-    fp_score_r = f"{fp_pass_robust}/{fp_total}" if fp_total else "n/a"
-    print(f"Legacy recall (>=30%) score:      fpocket {fp_score:>6}   Lacuna {lac_pass}/{len(rows)}")
-    print(f"Size-robust (Jaccard>=25%) score: fpocket {fp_score_r:>6}   Lacuna {lac_pass_robust}/{len(rows)}")
+    print(f"n = {len(rows)} targets ({fp_total} scored by fpocket)")
+    if fp_total:
+        print(f"Legacy recall (>={OVERLAP_THRESHOLD:.0%}) score:      "
+              f"fpocket {fp_pass}/{fp_total}   Lacuna {lac_pass}/{len(rows)}")
+        print(f"Size-robust (Jaccard>={JACCARD_THRESHOLD:.0%}) score: "
+              f"fpocket {fp_pass_r}/{fp_total}   Lacuna {lac_pass_r}/{len(rows)}")
+    else:
+        print(f"Lacuna only: legacy {lac_pass}/{len(rows)}, size-robust {lac_pass_r}/{len(rows)}")
 
-    # ── JSON output ───────────────────────────────────────────────────────────
     out_path = Path(__file__).parent / "fpocket_comparison.json"
     with open(out_path, "w") as f:
         json.dump(rows, f, indent=2)
-    print(f"\nFull results → {out_path}")
+    print(f"\nFull results -> {out_path}")
 
 
 if __name__ == "__main__":

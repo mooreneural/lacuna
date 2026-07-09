@@ -1,0 +1,2162 @@
+[
+  {
+    "id": "3fzoA",
+    "n_known": 25,
+    "fpocket": {
+      "recall": 0.04,
+      "jaccard": 0.033
+    },
+    "lacuna": {
+      "recall": 0.48,
+      "jaccard": 0.179
+    }
+  },
+  {
+    "id": "3ly8A",
+    "n_known": 5,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.4,
+      "jaccard": 0.053
+    }
+  },
+  {
+    "id": "8j11X",
+    "n_known": 3,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.333,
+      "jaccard": 0.021
+    }
+  },
+  {
+    "id": "1lbeB",
+    "n_known": 8,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.25,
+      "jaccard": 0.083
+    }
+  },
+  {
+    "id": "4hyeA",
+    "n_known": 4,
+    "fpocket": {
+      "recall": 0.75,
+      "jaccard": 0.273
+    },
+    "lacuna": {
+      "recall": 1.0,
+      "jaccard": 0.118
+    }
+  },
+  {
+    "id": "5hijA",
+    "n_known": 21,
+    "fpocket": {
+      "recall": 0.19,
+      "jaccard": 0.16
+    },
+    "lacuna": {
+      "recall": 0.286,
+      "jaccard": 0.167
+    }
+  },
+  {
+    "id": "4fkmB",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.5,
+      "jaccard": 0.16
+    }
+  },
+  {
+    "id": "6btyB",
+    "n_known": 9,
+    "fpocket": {
+      "recall": 0.333,
+      "jaccard": 0.231
+    },
+    "lacuna": {
+      "recall": 0.556,
+      "jaccard": 0.103
+    }
+  },
+  {
+    "id": "1vsnA",
+    "n_known": 5,
+    "fpocket": {
+      "recall": 0.4,
+      "jaccard": 0.222
+    },
+    "lacuna": {
+      "recall": 0.4,
+      "jaccard": 0.042
+    }
+  },
+  {
+    "id": "1m5wD",
+    "n_known": 13,
+    "fpocket": {
+      "recall": 0.154,
+      "jaccard": 0.111
+    },
+    "lacuna": {
+      "recall": 0.231,
+      "jaccard": 0.064
+    }
+  },
+  {
+    "id": "7qzrD",
+    "n_known": 3,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "3a0xA",
+    "n_known": 21,
+    "fpocket": {
+      "recall": 0.524,
+      "jaccard": 0.423
+    },
+    "lacuna": {
+      "recall": 0.619,
+      "jaccard": 0.419
+    }
+  },
+  {
+    "id": "1bk2A",
+    "n_known": 5,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.6,
+      "jaccard": 0.286
+    }
+  },
+  {
+    "id": "1h13A",
+    "n_known": 5,
+    "fpocket": {
+      "recall": 0.8,
+      "jaccard": 0.222
+    },
+    "lacuna": {
+      "recall": 0.6,
+      "jaccard": 0.06
+    }
+  },
+  {
+    "id": "7nlxA",
+    "n_known": 15,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.533,
+      "jaccard": 0.19
+    }
+  },
+  {
+    "id": "4bg8A",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.125,
+      "jaccard": 0.065
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "6eqjA",
+    "n_known": 14,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.786,
+      "jaccard": 0.164
+    }
+  },
+  {
+    "id": "8b9pA",
+    "n_known": 5,
+    "fpocket": {
+      "recall": 0.8,
+      "jaccard": 0.211
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "5sc2A",
+    "n_known": 5,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.8,
+      "jaccard": 0.222
+    }
+  },
+  {
+    "id": "5tc0B",
+    "n_known": 22,
+    "fpocket": {
+      "recall": 0.136,
+      "jaccard": 0.12
+    },
+    "lacuna": {
+      "recall": 0.545,
+      "jaccard": 0.273
+    }
+  },
+  {
+    "id": "1evyA",
+    "n_known": 32,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.281,
+      "jaccard": 0.107
+    }
+  },
+  {
+    "id": "9atcA",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.625,
+      "jaccard": 0.476
+    },
+    "lacuna": {
+      "recall": 0.125,
+      "jaccard": 0.038
+    }
+  },
+  {
+    "id": "5kcgB",
+    "n_known": 15,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.267,
+      "jaccard": 0.068
+    }
+  },
+  {
+    "id": "4r0xA",
+    "n_known": 21,
+    "fpocket": {
+      "recall": 0.524,
+      "jaccard": 0.524
+    },
+    "lacuna": {
+      "recall": 0.714,
+      "jaccard": 0.455
+    }
+  },
+  {
+    "id": "7x0iB",
+    "n_known": 12,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.667,
+      "jaccard": 0.296
+    }
+  },
+  {
+    "id": "2v6mD",
+    "n_known": 32,
+    "fpocket": {
+      "recall": 0.031,
+      "jaccard": 0.024
+    },
+    "lacuna": {
+      "recall": 0.031,
+      "jaccard": 0.014
+    }
+  },
+  {
+    "id": "4mwiA",
+    "n_known": 25,
+    "fpocket": {
+      "recall": 0.08,
+      "jaccard": 0.067
+    },
+    "lacuna": {
+      "recall": 0.28,
+      "jaccard": 0.184
+    }
+  },
+  {
+    "id": "1xgdA",
+    "n_known": 19,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.368,
+      "jaccard": 0.091
+    }
+  },
+  {
+    "id": "5e0vA",
+    "n_known": 15,
+    "fpocket": {
+      "recall": 0.067,
+      "jaccard": 0.045
+    },
+    "lacuna": {
+      "recall": 0.867,
+      "jaccard": 0.65
+    }
+  },
+  {
+    "id": "8iasB",
+    "n_known": 11,
+    "fpocket": {
+      "recall": 0.182,
+      "jaccard": 0.143
+    },
+    "lacuna": {
+      "recall": 0.364,
+      "jaccard": 0.098
+    }
+  },
+  {
+    "id": "3tpoA",
+    "n_known": 7,
+    "fpocket": {
+      "recall": 0.286,
+      "jaccard": 0.222
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "3w90A",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.625,
+      "jaccard": 0.323
+    }
+  },
+  {
+    "id": "7x0fA",
+    "n_known": 13,
+    "fpocket": {
+      "recall": 0.385,
+      "jaccard": 0.278
+    },
+    "lacuna": {
+      "recall": 1.0,
+      "jaccard": 0.25
+    }
+  },
+  {
+    "id": "3h8aB",
+    "n_known": 18,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.111,
+      "jaccard": 0.038
+    }
+  },
+  {
+    "id": "1nd7A",
+    "n_known": 4,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "8breB",
+    "n_known": 17,
+    "fpocket": {
+      "recall": 0.176,
+      "jaccard": 0.12
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "5o8bA",
+    "n_known": 4,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "1e6kA",
+    "n_known": 8,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 1.0,
+      "jaccard": 0.211
+    }
+  },
+  {
+    "id": "2vl2C",
+    "n_known": 10,
+    "fpocket": {
+      "recall": 0.5,
+      "jaccard": 0.312
+    },
+    "lacuna": {
+      "recall": 0.5,
+      "jaccard": 0.208
+    }
+  },
+  {
+    "id": "6a98C",
+    "n_known": 13,
+    "fpocket": {
+      "recall": 0.923,
+      "jaccard": 0.522
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "5cazA",
+    "n_known": 3,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 1.0,
+      "jaccard": 0.068
+    }
+  },
+  {
+    "id": "1kx9A",
+    "n_known": 14,
+    "fpocket": {
+      "recall": 0.357,
+      "jaccard": 0.263
+    },
+    "lacuna": {
+      "recall": 0.714,
+      "jaccard": 0.323
+    }
+  },
+  {
+    "id": "2qbvA",
+    "n_known": 14,
+    "fpocket": {
+      "recall": 0.857,
+      "jaccard": 0.632
+    },
+    "lacuna": {
+      "recall": 0.571,
+      "jaccard": 0.333
+    }
+  },
+  {
+    "id": "4kmyA",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.562,
+      "jaccard": 0.321
+    },
+    "lacuna": {
+      "recall": 0.188,
+      "jaccard": 0.103
+    }
+  },
+  {
+    "id": "8onnE",
+    "n_known": 22,
+    "fpocket": {
+      "recall": 0.864,
+      "jaccard": 0.633
+    },
+    "lacuna": {
+      "recall": 0.364,
+      "jaccard": 0.148
+    }
+  },
+  {
+    "id": "1p9oA",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.25,
+      "jaccard": 0.2
+    },
+    "lacuna": {
+      "recall": 0.125,
+      "jaccard": 0.049
+    }
+  },
+  {
+    "id": "1xtcA",
+    "n_known": 18,
+    "fpocket": {
+      "recall": 0.611,
+      "jaccard": 0.379
+    },
+    "lacuna": {
+      "recall": 0.722,
+      "jaccard": 0.213
+    }
+  },
+  {
+    "id": "5yqpA",
+    "n_known": 25,
+    "fpocket": {
+      "recall": 0.84,
+      "jaccard": 0.6
+    },
+    "lacuna": {
+      "recall": 0.24,
+      "jaccard": 0.171
+    }
+  },
+  {
+    "id": "1pu5C",
+    "n_known": 11,
+    "fpocket": {
+      "recall": 0.364,
+      "jaccard": 0.267
+    },
+    "lacuna": {
+      "recall": 0.545,
+      "jaccard": 0.222
+    }
+  },
+  {
+    "id": "1k47D",
+    "n_known": 14,
+    "fpocket": {
+      "recall": 0.429,
+      "jaccard": 0.3
+    },
+    "lacuna": {
+      "recall": 0.286,
+      "jaccard": 0.08
+    }
+  },
+  {
+    "id": "2h7sA",
+    "n_known": 8,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.625,
+      "jaccard": 0.152
+    }
+  },
+  {
+    "id": "4zm7A",
+    "n_known": 7,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 1.0,
+      "jaccard": 0.28
+    }
+  },
+  {
+    "id": "5i3tE",
+    "n_known": 4,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "4rvtB",
+    "n_known": 26,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.231,
+      "jaccard": 0.074
+    }
+  },
+  {
+    "id": "8aqiB",
+    "n_known": 13,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.385,
+      "jaccard": 0.167
+    }
+  },
+  {
+    "id": "3rwvA",
+    "n_known": 18,
+    "fpocket": {
+      "recall": 0.056,
+      "jaccard": 0.042
+    },
+    "lacuna": {
+      "recall": 0.389,
+      "jaccard": 0.212
+    }
+  },
+  {
+    "id": "5uxaA",
+    "n_known": 24,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.125,
+      "jaccard": 0.059
+    }
+  },
+  {
+    "id": "2x47A",
+    "n_known": 25,
+    "fpocket": {
+      "recall": 0.6,
+      "jaccard": 0.5
+    },
+    "lacuna": {
+      "recall": 0.16,
+      "jaccard": 0.098
+    }
+  },
+  {
+    "id": "4j4eF",
+    "n_known": 9,
+    "fpocket": {
+      "recall": 0.667,
+      "jaccard": 0.6
+    },
+    "lacuna": {
+      "recall": 0.333,
+      "jaccard": 0.07
+    }
+  },
+  {
+    "id": "3gdgB",
+    "n_known": 31,
+    "fpocket": {
+      "recall": 0.29,
+      "jaccard": 0.273
+    },
+    "lacuna": {
+      "recall": 0.71,
+      "jaccard": 0.239
+    }
+  },
+  {
+    "id": "6isuA",
+    "n_known": 20,
+    "fpocket": {
+      "recall": 0.15,
+      "jaccard": 0.125
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "3flgA",
+    "n_known": 8,
+    "fpocket": {
+      "recall": 0.625,
+      "jaccard": 0.357
+    },
+    "lacuna": {
+      "recall": 0.125,
+      "jaccard": 0.05
+    }
+  },
+  {
+    "id": "7c48A",
+    "n_known": 21,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.095,
+      "jaccard": 0.047
+    }
+  },
+  {
+    "id": "7e5qB",
+    "n_known": 6,
+    "fpocket": {
+      "recall": 0.5,
+      "jaccard": 0.3
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "7c63A",
+    "n_known": 10,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.2,
+      "jaccard": 0.032
+    }
+  },
+  {
+    "id": "1xqvA",
+    "n_known": 13,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.154,
+      "jaccard": 0.057
+    }
+  },
+  {
+    "id": "3bjpA",
+    "n_known": 5,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.2,
+      "jaccard": 0.031
+    }
+  },
+  {
+    "id": "8i84B",
+    "n_known": 17,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "3pbfA",
+    "n_known": 7,
+    "fpocket": {
+      "recall": 0.143,
+      "jaccard": 0.071
+    },
+    "lacuna": {
+      "recall": 0.286,
+      "jaccard": 0.087
+    }
+  },
+  {
+    "id": "3mwgB",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.25,
+      "jaccard": 0.138
+    },
+    "lacuna": {
+      "recall": 0.25,
+      "jaccard": 0.133
+    }
+  },
+  {
+    "id": "1ukaA",
+    "n_known": 6,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.5,
+      "jaccard": 0.058
+    }
+  },
+  {
+    "id": "2pwzG",
+    "n_known": 31,
+    "fpocket": {
+      "recall": 0.258,
+      "jaccard": 0.2
+    },
+    "lacuna": {
+      "recall": 0.194,
+      "jaccard": 0.115
+    }
+  },
+  {
+    "id": "1kxrA",
+    "n_known": 19,
+    "fpocket": {
+      "recall": 0.053,
+      "jaccard": 0.038
+    },
+    "lacuna": {
+      "recall": 0.211,
+      "jaccard": 0.105
+    }
+  },
+  {
+    "id": "7x0gB",
+    "n_known": 18,
+    "fpocket": {
+      "recall": 0.444,
+      "jaccard": 0.381
+    },
+    "lacuna": {
+      "recall": 0.389,
+      "jaccard": 0.113
+    }
+  },
+  {
+    "id": "2phzA",
+    "n_known": 17,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.235,
+      "jaccard": 0.083
+    }
+  },
+  {
+    "id": "2pkfA",
+    "n_known": 18,
+    "fpocket": {
+      "recall": 0.389,
+      "jaccard": 0.368
+    },
+    "lacuna": {
+      "recall": 0.222,
+      "jaccard": 0.103
+    }
+  },
+  {
+    "id": "2fhzB",
+    "n_known": 14,
+    "fpocket": {
+      "recall": 0.214,
+      "jaccard": 0.167
+    },
+    "lacuna": {
+      "recall": 0.643,
+      "jaccard": 0.31
+    }
+  },
+  {
+    "id": "5ey7B",
+    "n_known": 25,
+    "fpocket": {
+      "recall": 0.08,
+      "jaccard": 0.071
+    },
+    "lacuna": {
+      "recall": 0.36,
+      "jaccard": 0.173
+    }
+  },
+  {
+    "id": "6kscA",
+    "n_known": 10,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.9,
+      "jaccard": 0.36
+    }
+  },
+  {
+    "id": "4dncB",
+    "n_known": 20,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.35,
+      "jaccard": 0.158
+    }
+  },
+  {
+    "id": "4gv9A",
+    "n_known": 5,
+    "fpocket": {
+      "recall": 0.2,
+      "jaccard": 0.059
+    },
+    "lacuna": {
+      "recall": 1.0,
+      "jaccard": 0.111
+    }
+  },
+  {
+    "id": "4ilgA",
+    "n_known": 6,
+    "fpocket": {
+      "recall": 0.333,
+      "jaccard": 0.133
+    },
+    "lacuna": {
+      "recall": 0.167,
+      "jaccard": 0.034
+    }
+  },
+  {
+    "id": "1x2gC",
+    "n_known": 15,
+    "fpocket": {
+      "recall": 0.267,
+      "jaccard": 0.16
+    },
+    "lacuna": {
+      "recall": 0.733,
+      "jaccard": 0.268
+    }
+  },
+  {
+    "id": "1ksgB",
+    "n_known": 18,
+    "fpocket": {
+      "recall": 0.5,
+      "jaccard": 0.31
+    },
+    "lacuna": {
+      "recall": 0.444,
+      "jaccard": 0.2
+    }
+  },
+  {
+    "id": "4e1yA",
+    "n_known": 5,
+    "fpocket": {
+      "recall": 0.2,
+      "jaccard": 0.091
+    },
+    "lacuna": {
+      "recall": 0.2,
+      "jaccard": 0.019
+    }
+  },
+  {
+    "id": "4p2fA",
+    "n_known": 10,
+    "fpocket": {
+      "recall": 0.7,
+      "jaccard": 0.583
+    },
+    "lacuna": {
+      "recall": 0.3,
+      "jaccard": 0.068
+    }
+  },
+  {
+    "id": "5ysbB",
+    "n_known": 6,
+    "fpocket": {
+      "recall": 0.333,
+      "jaccard": 0.133
+    },
+    "lacuna": {
+      "recall": 0.167,
+      "jaccard": 0.03
+    }
+  },
+  {
+    "id": "5z18C",
+    "n_known": 14,
+    "fpocket": {
+      "recall": 0.214,
+      "jaccard": 0.107
+    },
+    "lacuna": {
+      "recall": 0.286,
+      "jaccard": 0.055
+    }
+  },
+  {
+    "id": "5locA",
+    "n_known": 27,
+    "fpocket": {
+      "recall": 0.185,
+      "jaccard": 0.147
+    },
+    "lacuna": {
+      "recall": 0.222,
+      "jaccard": 0.133
+    }
+  },
+  {
+    "id": "6cqeB",
+    "n_known": 21,
+    "fpocket": {
+      "recall": 0.762,
+      "jaccard": 0.593
+    },
+    "lacuna": {
+      "recall": 0.238,
+      "jaccard": 0.096
+    }
+  },
+  {
+    "id": "3idhA",
+    "n_known": 22,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.409,
+      "jaccard": 0.097
+    }
+  },
+  {
+    "id": "1i7nA",
+    "n_known": 20,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.3,
+      "jaccard": 0.111
+    }
+  },
+  {
+    "id": "1dq2A",
+    "n_known": 9,
+    "fpocket": {
+      "recall": 0.333,
+      "jaccard": 0.2
+    },
+    "lacuna": {
+      "recall": 0.556,
+      "jaccard": 0.104
+    }
+  },
+  {
+    "id": "3ugkA",
+    "n_known": 26,
+    "fpocket": {
+      "recall": 0.038,
+      "jaccard": 0.03
+    },
+    "lacuna": {
+      "recall": 0.615,
+      "jaccard": 0.262
+    }
+  },
+  {
+    "id": "2iytA",
+    "n_known": 17,
+    "fpocket": {
+      "recall": 0.529,
+      "jaccard": 0.5
+    },
+    "lacuna": {
+      "recall": 0.706,
+      "jaccard": 0.387
+    }
+  },
+  {
+    "id": "6neiB",
+    "n_known": 21,
+    "fpocket": {
+      "recall": 0.381,
+      "jaccard": 0.364
+    },
+    "lacuna": {
+      "recall": 0.333,
+      "jaccard": 0.115
+    }
+  },
+  {
+    "id": "2xsaA",
+    "n_known": 15,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.067,
+      "jaccard": 0.024
+    }
+  },
+  {
+    "id": "7w19A",
+    "n_known": 23,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.043,
+      "jaccard": 0.02
+    }
+  },
+  {
+    "id": "4jaxF",
+    "n_known": 15,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "7xgfE",
+    "n_known": 21,
+    "fpocket": {
+      "recall": 0.286,
+      "jaccard": 0.222
+    },
+    "lacuna": {
+      "recall": 0.619,
+      "jaccard": 0.394
+    }
+  },
+  {
+    "id": "1p4vA",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.375,
+      "jaccard": 0.161
+    }
+  },
+  {
+    "id": "3vgmA",
+    "n_known": 19,
+    "fpocket": {
+      "recall": 0.474,
+      "jaccard": 0.474
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "4jfrC",
+    "n_known": 12,
+    "fpocket": {
+      "recall": 0.833,
+      "jaccard": 0.455
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "7yjcA",
+    "n_known": 6,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "4oqoB",
+    "n_known": 7,
+    "fpocket": {
+      "recall": 0.429,
+      "jaccard": 0.273
+    },
+    "lacuna": {
+      "recall": 0.571,
+      "jaccard": 0.073
+    }
+  },
+  {
+    "id": "6heiA",
+    "n_known": 26,
+    "fpocket": {
+      "recall": 0.231,
+      "jaccard": 0.214
+    },
+    "lacuna": {
+      "recall": 0.154,
+      "jaccard": 0.062
+    }
+  },
+  {
+    "id": "2w8nA",
+    "n_known": 11,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.182,
+      "jaccard": 0.023
+    }
+  },
+  {
+    "id": "5yhbA",
+    "n_known": 5,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.8,
+      "jaccard": 0.143
+    }
+  },
+  {
+    "id": "3uyiA",
+    "n_known": 18,
+    "fpocket": {
+      "recall": 0.167,
+      "jaccard": 0.125
+    },
+    "lacuna": {
+      "recall": 0.444,
+      "jaccard": 0.222
+    }
+  },
+  {
+    "id": "6tx0B",
+    "n_known": 4,
+    "fpocket": {
+      "recall": 0.5,
+      "jaccard": 0.143
+    },
+    "lacuna": {
+      "recall": 0.25,
+      "jaccard": 0.04
+    }
+  },
+  {
+    "id": "3n4uA",
+    "n_known": 10,
+    "fpocket": {
+      "recall": 0.1,
+      "jaccard": 0.053
+    },
+    "lacuna": {
+      "recall": 0.3,
+      "jaccard": 0.035
+    }
+  },
+  {
+    "id": "5zj4D",
+    "n_known": 11,
+    "fpocket": {
+      "recall": 0.636,
+      "jaccard": 0.333
+    },
+    "lacuna": {
+      "recall": 0.727,
+      "jaccard": 0.143
+    }
+  },
+  {
+    "id": "3i8sB",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.562,
+      "jaccard": 0.45
+    },
+    "lacuna": {
+      "recall": 0.562,
+      "jaccard": 0.25
+    }
+  },
+  {
+    "id": "7f2mB",
+    "n_known": 7,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.143,
+      "jaccard": 0.03
+    }
+  },
+  {
+    "id": "4amvB",
+    "n_known": 15,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "4aemA",
+    "n_known": 4,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.75,
+      "jaccard": 0.081
+    }
+  },
+  {
+    "id": "2dfpA",
+    "n_known": 11,
+    "fpocket": {
+      "recall": 0.091,
+      "jaccard": 0.05
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "8h27A",
+    "n_known": 27,
+    "fpocket": {
+      "recall": 0.259,
+      "jaccard": 0.25
+    },
+    "lacuna": {
+      "recall": 0.333,
+      "jaccard": 0.176
+    }
+  },
+  {
+    "id": "7ndlB",
+    "n_known": 19,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "4cmwB",
+    "n_known": 19,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.316,
+      "jaccard": 0.122
+    }
+  },
+  {
+    "id": "5htoE",
+    "n_known": 31,
+    "fpocket": {
+      "recall": 0.516,
+      "jaccard": 0.516
+    },
+    "lacuna": {
+      "recall": 0.194,
+      "jaccard": 0.107
+    }
+  },
+  {
+    "id": "1xjfA",
+    "n_known": 15,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.2,
+      "jaccard": 0.043
+    }
+  },
+  {
+    "id": "3k01A",
+    "n_known": 26,
+    "fpocket": {
+      "recall": 0.538,
+      "jaccard": 0.538
+    },
+    "lacuna": {
+      "recall": 0.192,
+      "jaccard": 0.068
+    }
+  },
+  {
+    "id": "5tviV",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.312,
+      "jaccard": 0.263
+    },
+    "lacuna": {
+      "recall": 0.75,
+      "jaccard": 0.522
+    }
+  },
+  {
+    "id": "1bzjA",
+    "n_known": 10,
+    "fpocket": {
+      "recall": 0.4,
+      "jaccard": 0.308
+    },
+    "lacuna": {
+      "recall": 0.3,
+      "jaccard": 0.055
+    }
+  },
+  {
+    "id": "6g6yA",
+    "n_known": 22,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.227,
+      "jaccard": 0.152
+    }
+  },
+  {
+    "id": "5yj2C",
+    "n_known": 7,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.286,
+      "jaccard": 0.059
+    }
+  },
+  {
+    "id": "7v8kB",
+    "n_known": 5,
+    "fpocket": {
+      "recall": 0.2,
+      "jaccard": 0.083
+    },
+    "lacuna": {
+      "recall": 0.6,
+      "jaccard": 0.136
+    }
+  },
+  {
+    "id": "4uc8A",
+    "n_known": 3,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "1zm0A",
+    "n_known": 10,
+    "fpocket": {
+      "recall": 0.4,
+      "jaccard": 0.308
+    },
+    "lacuna": {
+      "recall": 1.0,
+      "jaccard": 0.476
+    }
+  },
+  {
+    "id": "4gpiC",
+    "n_known": 14,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.071,
+      "jaccard": 0.023
+    }
+  },
+  {
+    "id": "1cwqA",
+    "n_known": 6,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.167,
+      "jaccard": 0.033
+    }
+  },
+  {
+    "id": "6fc2C",
+    "n_known": 12,
+    "fpocket": {
+      "recall": 0.25,
+      "jaccard": 0.188
+    },
+    "lacuna": {
+      "recall": 0.917,
+      "jaccard": 0.216
+    }
+  },
+  {
+    "id": "5wbmB",
+    "n_known": 13,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "7kayA",
+    "n_known": 36,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.139,
+      "jaccard": 0.066
+    }
+  },
+  {
+    "id": "1q4kA",
+    "n_known": 2,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "7qoqA",
+    "n_known": 10,
+    "fpocket": {
+      "recall": 0.1,
+      "jaccard": 0.056
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "3nx1B",
+    "n_known": 10,
+    "fpocket": {
+      "recall": 0.6,
+      "jaccard": 0.316
+    },
+    "lacuna": {
+      "recall": 1.0,
+      "jaccard": 0.161
+    }
+  },
+  {
+    "id": "2zj7A",
+    "n_known": 8,
+    "fpocket": {
+      "recall": 0.375,
+      "jaccard": 0.2
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "6jq9B",
+    "n_known": 7,
+    "fpocket": {
+      "recall": 0.143,
+      "jaccard": 0.071
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "5ighA",
+    "n_known": 24,
+    "fpocket": {
+      "recall": 0.042,
+      "jaccard": 0.033
+    },
+    "lacuna": {
+      "recall": 0.25,
+      "jaccard": 0.188
+    }
+  },
+  {
+    "id": "4uumA",
+    "n_known": 34,
+    "fpocket": {
+      "recall": 0.206,
+      "jaccard": 0.2
+    },
+    "lacuna": {
+      "recall": 0.471,
+      "jaccard": 0.302
+    }
+  },
+  {
+    "id": "1uteA",
+    "n_known": 2,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 1.0,
+      "jaccard": 0.056
+    }
+  },
+  {
+    "id": "3jzgA",
+    "n_known": 12,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "4ikvA",
+    "n_known": 10,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.2,
+      "jaccard": 0.051
+    }
+  },
+  {
+    "id": "6w10A",
+    "n_known": 12,
+    "fpocket": {
+      "recall": 0.417,
+      "jaccard": 0.312
+    },
+    "lacuna": {
+      "recall": 0.833,
+      "jaccard": 0.357
+    }
+  },
+  {
+    "id": "1p4oB",
+    "n_known": 17,
+    "fpocket": {
+      "recall": 0.118,
+      "jaccard": 0.091
+    },
+    "lacuna": {
+      "recall": 0.529,
+      "jaccard": 0.164
+    }
+  },
+  {
+    "id": "2d05A",
+    "n_known": 15,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.2,
+      "jaccard": 0.094
+    }
+  },
+  {
+    "id": "8vxuB",
+    "n_known": 8,
+    "fpocket": {
+      "recall": 0.125,
+      "jaccard": 0.071
+    },
+    "lacuna": {
+      "recall": 1.0,
+      "jaccard": 0.296
+    }
+  },
+  {
+    "id": "5acvB",
+    "n_known": 4,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.75,
+      "jaccard": 0.15
+    }
+  },
+  {
+    "id": "1g59A",
+    "n_known": 15,
+    "fpocket": {
+      "recall": 0.2,
+      "jaccard": 0.158
+    },
+    "lacuna": {
+      "recall": 0.067,
+      "jaccard": 0.014
+    }
+  },
+  {
+    "id": "3wb9C",
+    "n_known": 28,
+    "fpocket": {
+      "recall": 0.393,
+      "jaccard": 0.306
+    },
+    "lacuna": {
+      "recall": 0.107,
+      "jaccard": 0.061
+    }
+  },
+  {
+    "id": "2femA",
+    "n_known": 13,
+    "fpocket": {
+      "recall": 0.615,
+      "jaccard": 0.364
+    },
+    "lacuna": {
+      "recall": 0.231,
+      "jaccard": 0.075
+    }
+  },
+  {
+    "id": "2i3rA",
+    "n_known": 17,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.294,
+      "jaccard": 0.079
+    }
+  },
+  {
+    "id": "7de1A",
+    "n_known": 8,
+    "fpocket": {
+      "recall": 0.75,
+      "jaccard": 0.6
+    },
+    "lacuna": {
+      "recall": 0.75,
+      "jaccard": 0.4
+    }
+  },
+  {
+    "id": "1se8A",
+    "n_known": 3,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.333,
+      "jaccard": 0.03
+    }
+  },
+  {
+    "id": "6vleA",
+    "n_known": 19,
+    "fpocket": {
+      "recall": 0.053,
+      "jaccard": 0.034
+    },
+    "lacuna": {
+      "recall": 0.263,
+      "jaccard": 0.082
+    }
+  },
+  {
+    "id": "5b0eB",
+    "n_known": 13,
+    "fpocket": {
+      "recall": 0.538,
+      "jaccard": 0.438
+    },
+    "lacuna": {
+      "recall": 0.692,
+      "jaccard": 0.205
+    }
+  },
+  {
+    "id": "2vyrA",
+    "n_known": 14,
+    "fpocket": {
+      "recall": 0.357,
+      "jaccard": 0.357
+    },
+    "lacuna": {
+      "recall": 0.5,
+      "jaccard": 0.241
+    }
+  },
+  {
+    "id": "6n5jB",
+    "n_known": 18,
+    "fpocket": {
+      "recall": 0.389,
+      "jaccard": 0.389
+    },
+    "lacuna": {
+      "recall": 0.278,
+      "jaccard": 0.152
+    }
+  },
+  {
+    "id": "8u3nA",
+    "n_known": 8,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 1.0,
+      "jaccard": 0.421
+    }
+  },
+  {
+    "id": "4ttpA",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.625,
+      "jaccard": 0.333
+    }
+  },
+  {
+    "id": "4nzvB",
+    "n_known": 12,
+    "fpocket": {
+      "recall": 0.25,
+      "jaccard": 0.188
+    },
+    "lacuna": {
+      "recall": 0.167,
+      "jaccard": 0.044
+    }
+  },
+  {
+    "id": "6du4A",
+    "n_known": 26,
+    "fpocket": {
+      "recall": 0.038,
+      "jaccard": 0.022
+    },
+    "lacuna": {
+      "recall": 0.154,
+      "jaccard": 0.07
+    }
+  },
+  {
+    "id": "7nc8D",
+    "n_known": 11,
+    "fpocket": {
+      "recall": 0.636,
+      "jaccard": 0.538
+    },
+    "lacuna": {
+      "recall": 0.636,
+      "jaccard": 0.189
+    }
+  },
+  {
+    "id": "8aeqA",
+    "n_known": 8,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.125,
+      "jaccard": 0.019
+    }
+  },
+  {
+    "id": "2vqzF",
+    "n_known": 7,
+    "fpocket": {
+      "recall": 0.143,
+      "jaccard": 0.111
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "3t8bA",
+    "n_known": 15,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.8,
+      "jaccard": 0.316
+    }
+  },
+  {
+    "id": "1rtcA",
+    "n_known": 6,
+    "fpocket": {
+      "recall": 0.5,
+      "jaccard": 0.3
+    },
+    "lacuna": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    }
+  },
+  {
+    "id": "6o4fH",
+    "n_known": 11,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.455,
+      "jaccard": 0.082
+    }
+  },
+  {
+    "id": "2rfjB",
+    "n_known": 12,
+    "fpocket": {
+      "recall": 0.5,
+      "jaccard": 0.316
+    },
+    "lacuna": {
+      "recall": 0.667,
+      "jaccard": 0.35
+    }
+  },
+  {
+    "id": "1rjbA",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.188,
+      "jaccard": 0.111
+    },
+    "lacuna": {
+      "recall": 0.125,
+      "jaccard": 0.031
+    }
+  },
+  {
+    "id": "4qvkB",
+    "n_known": 21,
+    "fpocket": {
+      "recall": 0.19,
+      "jaccard": 0.182
+    },
+    "lacuna": {
+      "recall": 0.143,
+      "jaccard": 0.075
+    }
+  },
+  {
+    "id": "6f52A",
+    "n_known": 12,
+    "fpocket": {
+      "recall": 0.917,
+      "jaccard": 0.44
+    },
+    "lacuna": {
+      "recall": 0.5,
+      "jaccard": 0.102
+    }
+  },
+  {
+    "id": "6fgjB",
+    "n_known": 16,
+    "fpocket": {
+      "recall": 0.188,
+      "jaccard": 0.136
+    },
+    "lacuna": {
+      "recall": 0.438,
+      "jaccard": 0.206
+    }
+  },
+  {
+    "id": "1arlA",
+    "n_known": 7,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.429,
+      "jaccard": 0.048
+    }
+  },
+  {
+    "id": "2i3aD",
+    "n_known": 10,
+    "fpocket": {
+      "recall": 0.5,
+      "jaccard": 0.294
+    },
+    "lacuna": {
+      "recall": 0.2,
+      "jaccard": 0.071
+    }
+  },
+  {
+    "id": "3st6C",
+    "n_known": 17,
+    "fpocket": {
+      "recall": 0.059,
+      "jaccard": 0.037
+    },
+    "lacuna": {
+      "recall": 0.294,
+      "jaccard": 0.078
+    }
+  },
+  {
+    "id": "3f4kA",
+    "n_known": 19,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.632,
+      "jaccard": 0.375
+    }
+  },
+  {
+    "id": "3v55A",
+    "n_known": 23,
+    "fpocket": {
+      "recall": 0.0,
+      "jaccard": 0.0
+    },
+    "lacuna": {
+      "recall": 0.391,
+      "jaccard": 0.176
+    }
+  }
+]

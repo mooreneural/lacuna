@@ -1,0 +1,552 @@
+[
+  {
+    "id": "T4L_L99A",
+    "pdb": "1L90",
+    "name": "T4 Lysozyme L99A (hydrophobic cavity)",
+    "fpocket": {
+      "status": "PASS",
+      "overlap": 0.875,
+      "rank": 2,
+      "status_robust": "PASS",
+      "jaccard": 0.438,
+      "jaccard_rank": 2,
+      "n_pockets": 10,
+      "elapsed_s": 0.21
+    },
+    "lacuna": {
+      "status": "PASS",
+      "overlap": 0.625,
+      "rank": 1,
+      "status_robust": "MISS",
+      "jaccard": 0.167,
+      "jaccard_rank": 1,
+      "n_clusters": 40,
+      "elapsed_s": 0.87
+    }
+  },
+  {
+    "id": "KRAS_SIIP",
+    "pdb": "4OBE",
+    "name": "K-Ras WT apo (switch-II cryptic pocket)",
+    "fpocket": {
+      "status": "PASS",
+      "overlap": 0.429,
+      "rank": 4,
+      "status_robust": "PASS",
+      "jaccard": 0.261,
+      "jaccard_rank": 4,
+      "n_pockets": 10,
+      "elapsed_s": 0.24
+    },
+    "lacuna": {
+      "status": "MISS",
+      "overlap": 0.071,
+      "rank": 1,
+      "status_robust": "MISS",
+      "jaccard": 0.025,
+      "jaccard_rank": 1,
+      "n_clusters": 27,
+      "elapsed_s": 0.89
+    }
+  },
+  {
+    "id": "IL2",
+    "pdb": "1M47",
+    "name": "Interleukin-2 (cryptic helix-\u03b11 site)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.214,
+      "rank": 4,
+      "status_robust": "MISS",
+      "jaccard": 0.167,
+      "jaccard_rank": 4,
+      "n_pockets": 6,
+      "elapsed_s": 0.16
+    },
+    "lacuna": {
+      "status": "PASS",
+      "overlap": 0.929,
+      "rank": 1,
+      "status_robust": "PASS",
+      "jaccard": 0.361,
+      "jaccard_rank": 1,
+      "n_clusters": 31,
+      "elapsed_s": 0.45
+    }
+  },
+  {
+    "id": "GCK",
+    "pdb": "1V4S",
+    "name": "Glucokinase (allosteric activator site)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.0,
+      "rank": null,
+      "status_robust": "MISS",
+      "jaccard": 0.0,
+      "jaccard_rank": null,
+      "n_pockets": 26,
+      "elapsed_s": 0.56
+    },
+    "lacuna": {
+      "status": "PASS",
+      "overlap": 0.391,
+      "rank": 2,
+      "status_robust": "MISS",
+      "jaccard": 0.15,
+      "jaccard_rank": 2,
+      "n_clusters": 96,
+      "elapsed_s": 2.35
+    }
+  },
+  {
+    "id": "p38_DFGout",
+    "pdb": "1P38",
+    "name": "p38\u03b1 MAPK DFG-out pocket (BIRB 796)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.0,
+      "rank": null,
+      "status_robust": "MISS",
+      "jaccard": 0.0,
+      "jaccard_rank": null,
+      "n_pockets": 24,
+      "elapsed_s": 0.51
+    },
+    "lacuna": {
+      "status": "MISS",
+      "overlap": 0.238,
+      "rank": 2,
+      "status_robust": "MISS",
+      "jaccard": 0.064,
+      "jaccard_rank": 2,
+      "n_clusters": 87,
+      "elapsed_s": 1.75
+    }
+  },
+  {
+    "id": "HIVRT_NNRTI",
+    "pdb": "1HMV",
+    "name": "HIV-1 RT NNRTI binding pocket (nevirapine)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.0,
+      "rank": null,
+      "status_robust": "MISS",
+      "jaccard": 0.0,
+      "jaccard_rank": null,
+      "n_pockets": 42,
+      "elapsed_s": 1.08
+    },
+    "lacuna": {
+      "status": "MISS",
+      "overlap": 0.062,
+      "rank": 1,
+      "status_robust": "MISS",
+      "jaccard": 0.019,
+      "jaccard_rank": 1,
+      "n_clusters": 134,
+      "elapsed_s": 4.45
+    }
+  },
+  {
+    "id": "SRC_myristate",
+    "pdb": "2SRC",
+    "name": "Src kinase myristate/SH2-linker pocket",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.12,
+      "rank": 1,
+      "status_robust": "MISS",
+      "jaccard": 0.094,
+      "jaccard_rank": 1,
+      "n_pockets": 33,
+      "elapsed_s": 0.72
+    },
+    "lacuna": {
+      "status": "PASS",
+      "overlap": 0.44,
+      "rank": 4,
+      "status_robust": "MISS",
+      "jaccard": 0.216,
+      "jaccard_rank": 4,
+      "n_clusters": 95,
+      "elapsed_s": 2.43
+    }
+  },
+  {
+    "id": "MDM2",
+    "pdb": "1Z1M",
+    "name": "MDM2 p53-binding cleft (cryptic Trp/Leu pocket)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.211,
+      "rank": 1,
+      "status_robust": "MISS",
+      "jaccard": 0.148,
+      "jaccard_rank": 1,
+      "n_pockets": 6,
+      "elapsed_s": 0.6
+    },
+    "lacuna": {
+      "status": "PASS",
+      "overlap": 0.474,
+      "rank": 1,
+      "status_robust": "PASS",
+      "jaccard": 0.391,
+      "jaccard_rank": 1,
+      "n_clusters": 20,
+      "elapsed_s": 1.33
+    }
+  },
+  {
+    "id": "SHP2_allosteric",
+    "pdb": "2SHP",
+    "name": "SHP-2 allosteric tunnel (SHP836/SHP099 site)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.0,
+      "rank": null,
+      "status_robust": "MISS",
+      "jaccard": 0.0,
+      "jaccard_rank": null,
+      "n_pockets": 34,
+      "elapsed_s": 0.75
+    },
+    "lacuna": {
+      "status": "MISS",
+      "overlap": 0.0,
+      "rank": null,
+      "status_robust": "MISS",
+      "jaccard": 0.0,
+      "jaccard_rank": null,
+      "n_clusters": 99,
+      "elapsed_s": 3.73
+    }
+  },
+  {
+    "id": "ABL1_myristate",
+    "pdb": "3CS9",
+    "name": "c-ABL myristate/allosteric pocket (asciminib target)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.0,
+      "rank": null,
+      "status_robust": "MISS",
+      "jaccard": 0.0,
+      "jaccard_rank": null,
+      "n_pockets": 17,
+      "elapsed_s": 0.41
+    },
+    "lacuna": {
+      "status": "PASS",
+      "overlap": 0.312,
+      "rank": 1,
+      "status_robust": "MISS",
+      "jaccard": 0.079,
+      "jaccard_rank": 1,
+      "n_clusters": 54,
+      "elapsed_s": 1.21
+    }
+  },
+  {
+    "id": "PTP1B_allosteric",
+    "pdb": "1A5Y",
+    "name": "PTP1B allosteric site (C-terminal helix pocket)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.294,
+      "rank": 4,
+      "status_robust": "PASS",
+      "jaccard": 0.263,
+      "jaccard_rank": 4,
+      "n_pockets": 19,
+      "elapsed_s": 0.35
+    },
+    "lacuna": {
+      "status": "MISS",
+      "overlap": 0.059,
+      "rank": 1,
+      "status_robust": "MISS",
+      "jaccard": 0.018,
+      "jaccard_rank": 1,
+      "n_clusters": 75,
+      "elapsed_s": 1.38
+    }
+  },
+  {
+    "id": "NS5B_thumb",
+    "pdb": "1NB4",
+    "name": "HCV NS5B thumb-site I allosteric pocket",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.0,
+      "rank": null,
+      "status_robust": "MISS",
+      "jaccard": 0.0,
+      "jaccard_rank": null,
+      "n_pockets": 38,
+      "elapsed_s": 0.83
+    },
+    "lacuna": {
+      "status": "MISS",
+      "overlap": 0.133,
+      "rank": 2,
+      "status_robust": "MISS",
+      "jaccard": 0.041,
+      "jaccard_rank": 2,
+      "n_clusters": 113,
+      "elapsed_s": 3.15
+    }
+  },
+  {
+    "id": "BCLXL",
+    "pdb": "1LXL",
+    "name": "BCL-XL BH3-binding groove (navitoclax/ABT-737)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.091,
+      "rank": 2,
+      "status_robust": "MISS",
+      "jaccard": 0.077,
+      "jaccard_rank": 2,
+      "n_pockets": 25,
+      "elapsed_s": 0.39
+    },
+    "lacuna": {
+      "status": "PASS",
+      "overlap": 0.591,
+      "rank": 2,
+      "status_robust": "PASS",
+      "jaccard": 0.433,
+      "jaccard_rank": 2,
+      "n_clusters": 41,
+      "elapsed_s": 1.66
+    }
+  },
+  {
+    "id": "CASP1",
+    "pdb": "2HBQ",
+    "name": "Caspase-1 allosteric dimer-interface pocket",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.0,
+      "rank": null,
+      "status_robust": "MISS",
+      "jaccard": 0.0,
+      "jaccard_rank": null,
+      "n_pockets": 12,
+      "elapsed_s": 0.26
+    },
+    "lacuna": {
+      "status": "MISS",
+      "overlap": 0.25,
+      "rank": 3,
+      "status_robust": "MISS",
+      "jaccard": 0.048,
+      "jaccard_rank": 3,
+      "n_clusters": 46,
+      "elapsed_s": 1.0
+    }
+  },
+  {
+    "id": "ERK2",
+    "pdb": "2ERK",
+    "name": "ERK2 allosteric binding site",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.154,
+      "rank": 1,
+      "status_robust": "MISS",
+      "jaccard": 0.121,
+      "jaccard_rank": 1,
+      "n_pockets": 27,
+      "elapsed_s": 0.46
+    },
+    "lacuna": {
+      "status": "MISS",
+      "overlap": 0.192,
+      "rank": 1,
+      "status_robust": "MISS",
+      "jaccard": 0.057,
+      "jaccard_rank": 1,
+      "n_clusters": 72,
+      "elapsed_s": 1.73
+    }
+  },
+  {
+    "id": "BCL2_BH3",
+    "pdb": "1G5M",
+    "name": "BCL-2 BH3-binding groove (venetoclax/ABT-199)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.227,
+      "rank": 1,
+      "status_robust": "MISS",
+      "jaccard": 0.217,
+      "jaccard_rank": 1,
+      "n_pockets": 15,
+      "elapsed_s": 0.28
+    },
+    "lacuna": {
+      "status": "PASS",
+      "overlap": 0.591,
+      "rank": 2,
+      "status_robust": "PASS",
+      "jaccard": 0.48,
+      "jaccard_rank": 1,
+      "n_clusters": 42,
+      "elapsed_s": 0.96
+    }
+  },
+  {
+    "id": "IDH1_R132H",
+    "pdb": "3MAP",
+    "name": "IDH1 R132H allosteric dimer-interface (ivosidenib target)",
+    "fpocket": {
+      "status": "PASS",
+      "overlap": 0.571,
+      "rank": 5,
+      "status_robust": "PASS",
+      "jaccard": 0.267,
+      "jaccard_rank": 5,
+      "n_pockets": 23,
+      "elapsed_s": 0.6
+    },
+    "lacuna": {
+      "status": "PASS",
+      "overlap": 0.357,
+      "rank": 3,
+      "status_robust": "MISS",
+      "jaccard": 0.109,
+      "jaccard_rank": 3,
+      "n_clusters": 71,
+      "elapsed_s": 2.26
+    }
+  },
+  {
+    "id": "PKM2_activator",
+    "pdb": "1ZJH",
+    "name": "PKM2 allosteric activator pocket (TEPP-46 / subunit interface)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.0,
+      "rank": null,
+      "status_robust": "MISS",
+      "jaccard": 0.0,
+      "jaccard_rank": null,
+      "n_pockets": 35,
+      "elapsed_s": 0.71
+    },
+    "lacuna": {
+      "status": "MISS",
+      "overlap": 0.167,
+      "rank": 2,
+      "status_robust": "MISS",
+      "jaccard": 0.036,
+      "jaccard_rank": 2,
+      "n_clusters": 95,
+      "elapsed_s": 2.74
+    }
+  },
+  {
+    "id": "PPARG_allosteric",
+    "pdb": "2PRG",
+    "name": "PPAR\u03b3 LBD allosteric helix-12 site (metaglidasen/MBX-102)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.0,
+      "rank": null,
+      "status_robust": "MISS",
+      "jaccard": 0.0,
+      "jaccard_rank": null,
+      "n_pockets": 22,
+      "elapsed_s": 0.43
+    },
+    "lacuna": {
+      "status": "PASS",
+      "overlap": 0.353,
+      "rank": 2,
+      "status_robust": "MISS",
+      "jaccard": 0.111,
+      "jaccard_rank": 3,
+      "n_clusters": 58,
+      "elapsed_s": 1.07
+    }
+  },
+  {
+    "id": "MMP13_allosteric",
+    "pdb": "2OZR",
+    "name": "MMP-13 non-zinc allosteric S1\u2032 tunnel",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.188,
+      "rank": 2,
+      "status_robust": "MISS",
+      "jaccard": 0.13,
+      "jaccard_rank": 5,
+      "n_pockets": 10,
+      "elapsed_s": 0.31
+    },
+    "lacuna": {
+      "status": "MISS",
+      "overlap": 0.125,
+      "rank": 2,
+      "status_robust": "MISS",
+      "jaccard": 0.037,
+      "jaccard_rank": 3,
+      "n_clusters": 37,
+      "elapsed_s": 0.81
+    }
+  },
+  {
+    "id": "TEM1_allosteric",
+    "pdb": "1JWP",
+    "name": "TEM-1 \u03b2-lactamase cryptic allosteric site (CBT)",
+    "fpocket": {
+      "status": "PASS",
+      "overlap": 0.417,
+      "rank": 3,
+      "status_robust": "MISS",
+      "jaccard": 0.217,
+      "jaccard_rank": 3,
+      "n_pockets": 11,
+      "elapsed_s": 0.29
+    },
+    "lacuna": {
+      "status": "MISS",
+      "overlap": 0.167,
+      "rank": 1,
+      "status_robust": "MISS",
+      "jaccard": 0.022,
+      "jaccard_rank": 1,
+      "n_clusters": 60,
+      "elapsed_s": 1.1
+    }
+  },
+  {
+    "id": "RICIN_pterin",
+    "pdb": "1RTC",
+    "name": "Ricin A-chain cryptic specificity pocket (pteroic acid)",
+    "fpocket": {
+      "status": "MISS",
+      "overlap": 0.0,
+      "rank": null,
+      "status_robust": "MISS",
+      "jaccard": 0.0,
+      "jaccard_rank": null,
+      "n_pockets": 19,
+      "elapsed_s": 0.32
+    },
+    "lacuna": {
+      "status": "PASS",
+      "overlap": 0.5,
+      "rank": 4,
+      "status_robust": "MISS",
+      "jaccard": 0.184,
+      "jaccard_rank": 4,
+      "n_clusters": 55,
+      "elapsed_s": 1.21
+    }
+  }
+]
