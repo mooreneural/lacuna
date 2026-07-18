@@ -105,6 +105,17 @@ def main():
         "For best results, use the biological assembly download from RCSB."
     ),
 )
+@click.option(
+    "--detector",
+    type=click.Choice(["alpha", "p2rank", "fusion"]),
+    default="alpha", show_default=True,
+    help=(
+        "Pocket detector. 'alpha' is Lacuna's built-in geometric detector; "
+        "'p2rank' uses P2Rank's learned surface model; 'fusion' pools both per "
+        "conformer for complementary recall. 'p2rank'/'fusion' need P2Rank "
+        "installed (Java 11+; 'prank' on PATH or set LACUNA_P2RANK)."
+    ),
+)
 def discover(
     input_path: Path,
     backend: str,
@@ -120,6 +131,7 @@ def discover(
     min_crypticity: float,
     quiet: bool,
     homodimer: bool,
+    detector: str,
 ):
     """Discover cryptic binding pockets in a protein structure.
 
@@ -192,6 +204,26 @@ def discover(
         console.print(f"  [dim]Generated {len(coord_sets)} conformers.[/dim]")
         console.print("\n[dim]Detecting pockets across ensemble...[/dim]")
 
+    # Resolve the per-conformer detector (alpha | p2rank | fusion). p2rank/fusion
+    # require an external JVM tool; if it is missing, fall back to alpha rather
+    # than fail the run.
+    use_p2rank = detector in ("p2rank", "fusion")
+    if use_p2rank:
+        from lacuna.pockets.p2rank_detector import p2rank_available, detect_pockets_p2rank
+        if not p2rank_available():
+            console.print(
+                "  [yellow]--detector "
+                f"{detector}: P2Rank not found (install Java 11+ and put 'prank' on "
+                "PATH or set LACUNA_P2RANK). Falling back to the alpha detector.[/yellow]"
+            )
+            detector, use_p2rank = "alpha", False
+
+    def _detect(coords) -> list:
+        pockets = [] if detector == "p2rank" else detect_pockets(coords, structure)
+        if use_p2rank:
+            pockets = list(pockets) + detect_pockets_p2rank(coords, structure)
+        return pockets
+
     # Detect pockets in each conformer
     pocket_lists = []
     base_coords = coords_array(structure)
@@ -200,7 +232,7 @@ def discover(
     all_coord_sets = [base_coords] + list(coord_sets)
 
     for ci, coords in enumerate(all_coord_sets):
-        pockets = detect_pockets(coords, structure)
+        pockets = _detect(coords)
         for p in pockets:
             p.conformer_idx = ci
         pocket_lists.append(pockets)

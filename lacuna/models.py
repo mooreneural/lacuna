@@ -49,6 +49,13 @@ class Pocket:
     aromatic_count: int
     lining_residues: list[str]  # ["G12:A", "V29:A", ...]
     conformer_idx: int
+    # Detector provenance for detector-fusion runs. "alpha" is Lacuna's built-in
+    # alpha-sphere detector; other detectors (e.g. "p2rank") set their own tag so a
+    # fused cluster can report which detector(s) support it. ``score`` carries the
+    # source detector's own confidence (e.g. P2Rank probability) when available; it
+    # is not used by the crypticity ranking, only recorded for provenance.
+    source: str = "alpha"
+    score: float | None = None
 
 
 @dataclass
