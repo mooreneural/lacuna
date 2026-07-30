@@ -19,10 +19,12 @@ linear model to tell the correct cluster from the rest.
 
 Protocol
 --------
-Structures are split train/test by a hash of their id, the model is fitted on
-train only, and every reported number is on held-out test structures with a
-target-level bootstrap CI. A shuffled-label control is fitted identically to
-confirm the gain is signal and not an artifact of the evaluation.
+The split follows CryptoBench's OWN folds: fitted on train-0..train-3, reported
+on the designated test fold. Those folds exist to separate homologous proteins,
+so a naive random or hash split can place homologs on both sides and inflate the
+held-out estimate. Every reported number carries a target-level bootstrap CI, and
+a shuffled-label control is fitted identically to confirm the gain is signal
+rather than an artifact of the evaluation.
 
 Standardization is folded into the exported weights so Lacuna scores pockets with
 a plain dot product and needs no scikit-learn at runtime; scikit-learn is required
@@ -60,14 +62,30 @@ from lacuna.io.structure import load_structure  # noqa: E402
 from lacuna.pockets.clusterer import _RANKER_FEATURES, ranker_features  # noqa: E402
 
 JACCARD_THRESHOLD = 0.25
-TEST_FRACTION = 30  # percent of structures held out
+
+_FOLD_OF: dict[str, str] = {}
+
+
+def _fold_lookup() -> dict[str, str]:
+    """Map lowercase PDB id -> CryptoBench fold name."""
+    global _FOLD_OF
+    if not _FOLD_OF:
+        folds = json.loads(_fetch("folds.json").read_text())
+        _FOLD_OF = {pid.lower(): name for name, ids in folds.items() for pid in ids}
+    return _FOLD_OF
 
 
 def split_of(structure_id: str) -> str:
-    """Deterministic train/test assignment by structure, so no protein appears in
-    both splits."""
-    h = int(hashlib.md5(structure_id.encode()).hexdigest(), 16)
-    return "test" if h % 100 < TEST_FRACTION else "train"
+    """Train/test assignment from CryptoBench's own folds.
+
+    The dataset's folds separate homologous proteins; splitting on them keeps
+    homologs out of the held-out set, which a random or hash split would not.
+    ``structure_id`` is ``<pdb><chain>``.
+    """
+    fold = _fold_lookup().get(structure_id[:-1].lower())
+    if fold is None:
+        return "unmapped"
+    return "test" if fold == "test" else "train"
 
 
 def collect(dump_path: Path, limit: int, conformers: int) -> None:
@@ -183,6 +201,10 @@ def fit(dump_path: Path) -> None:
     from sklearn.preprocessing import StandardScaler
 
     data = _load(dump_path)
+    # Re-derive the split from the fold table rather than trusting the dump, so an
+    # older dump written under a different split rule is still evaluated correctly.
+    for s in data:
+        s["split"] = split_of(s["id"])
     train = [s for s in data if s["split"] == "train"]
     test = [s for s in data if s["split"] == "test"]
     Xtr, ytr = _matrix(train)

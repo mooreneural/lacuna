@@ -22,16 +22,16 @@ from lacuna.pockets.scorer import score_pocket
 _DBSCAN_EPS = 5.0    # Å - pockets within 5 Å centroid distance are the same pocket
 _CRYPTIC_THRESHOLD = 0.9  # persistence below this → cryptic
 
-# Ranking strategies. The default "crypticity" surfaces transiently-open cryptic
-# sites first - the tool's purpose - and scores best on the cryptic benchmark.
+# Ranking strategies. The default "learned" is a fitted model (see below) and
+# recovers roughly twice as many known sites as the analytic rules on CryptoBench
+# (32.2% vs 17.8% on the held-out test fold, n=180). "crypticity" is the previous
+# default and ranks purely by how much a site opens relative to the input;
 # "druggability" ranks by peak open-state druggability (preferable for always-open
 # / orthosteric sites); the legacy "persistence" strategy multiplies druggability
 # by persistence, demoting the very transient pockets the tool targets; "balanced"
-# keeps druggability primary with a mild persistence bonus. On the 20-protein
-# cryptic benchmark (NMA, 20 conformers, contact-based lining, top-5) these score
-# 12, 10, 7, and 8 of 20 respectively.
-RANK_STRATEGIES = ("crypticity", "druggability", "persistence", "balanced", "learned")
-_DEFAULT_RANK_BY = "crypticity"
+# keeps druggability primary with a mild persistence bonus.
+RANK_STRATEGIES = ("learned", "crypticity", "druggability", "persistence", "balanced")
+_DEFAULT_RANK_BY = "learned"
 
 # ── learned ranker ──────────────────────────────────────────────────────────────
 # A linear model over cluster features, fitted to predict whether a cluster is the
@@ -45,11 +45,13 @@ _DEFAULT_RANK_BY = "crypticity"
 # scores simply cannot find it among a median of 64 candidates (median 1 of which
 # is correct).
 #
-# Fitted with logistic regression on 273 CryptoBench structures (17595 clusters,
-# 404 positives) disjoint from the 127 structures used to measure it. Held-out
-# top-5 recovery 31.5% (95% CI 23.6-39.4) against 14.2% for crypticity and a
-# 13.6% random null; a model trained on shuffled labels scores 17.3%, confirming
-# the gain is signal rather than an artifact of the evaluation.
+# Fitted with logistic regression on the 322 available CryptoBench train-fold
+# structures (20839 clusters, 464 positives) and measured on the dataset's own
+# held-out test fold (180 structures). Splitting on CryptoBench's folds rather
+# than at random keeps homologous proteins out of the evaluation. Test-fold top-5
+# recovery 32.2% (95% CI 25.6-38.9) against 17.8% for crypticity and a 14.4%
+# random null; an identical fit on shuffled labels scores 12.8%, confirming the
+# gain is signal rather than an artifact of the evaluation.
 #
 # Standardization is folded into the weights so scoring is a dot product on raw
 # features: no scikit-learn or other runtime dependency, and the coefficients stay
@@ -59,22 +61,22 @@ _RANKER_FEATURES = (
     "pers", "n_lin", "vol_per_lin", "enc", "hyd", "aro", "n_mem",
 )
 _RANKER_WEIGHTS = (
-    0.006415552482281435,     # vol
-    0.0009062548865912288,    # vol_max
-    -0.0016999712048546677,   # vol_min
-    -0.0003096449497214893,   # apo_vol
-    3.29671327879319,         # drug
-    0.6432730038343563,       # max_drug
-    -0.17313868391896373,     # cryp
-    -3.2098563082551097,      # pers
-    -0.06243610990287512,     # n_lin
-    -0.07314674542006236,     # vol_per_lin
-    -2.3357226648236384,      # enc
-    -1.412811967606415,       # hyd
-    -0.012317030664301202,    # aro
-    0.08770374881606169,      # n_mem
+    0.0054610928119365534,    # vol
+    0.001000443151555848,     # vol_max
+    -0.0007162512347846649,   # vol_min
+    0.0001635217366979712,    # apo_vol
+    3.2045748644036958,       # drug
+    1.0083869415868223,       # max_drug
+    -0.1144220848072665,      # cryp
+    -5.434517954848764,       # pers
+    -0.06637447464600439,     # n_lin
+    -0.07240682820499411,     # vol_per_lin
+    -2.402750210437795,       # enc
+    -1.593739396310968,       # hyd
+    0.027505584308715823,     # aro
+    0.18838365771604712,      # n_mem
 )
-_RANKER_INTERCEPT = 1.1616645322395909
+_RANKER_INTERCEPT = 1.0588632130688596
 
 
 def ranker_features(c: PocketCluster) -> dict[str, float]:

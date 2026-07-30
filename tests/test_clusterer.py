@@ -192,6 +192,17 @@ class TestLearnedRanker:
             again = [c.centroid for c in cluster_pockets(pockets, 1, rank_by="learned")]
             assert again == first
 
+    def test_learned_is_the_default_strategy(self):
+        """The default must stay 'learned': it roughly doubles recovery over the
+        analytic rules on the held-out CryptoBench test fold."""
+        from lacuna.pockets.clusterer import _DEFAULT_RANK_BY
+        assert _DEFAULT_RANK_BY == "learned"
+        p = _make_pocket((0.0, 0.0, 0.0))
+        default_order = [c.centroid for c in cluster_pockets([[p]], n_conformers=1)]
+        explicit = [c.centroid for c in
+                    cluster_pockets([[p]], n_conformers=1, rank_by="learned")]
+        assert default_order == explicit
+
     def test_learned_is_a_valid_strategy(self):
         assert "learned" in RANK_STRATEGIES
         p = _make_pocket((0.0, 0.0, 0.0))

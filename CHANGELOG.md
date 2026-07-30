@@ -5,6 +5,58 @@ All notable changes to Lacuna are documented here. The project follows
 governs its benchmarks: reported numbers are the ones we can defend on held-out
 data, never the most flattering ones available.
 
+## [Unreleased]
+
+### Changed
+- **The default ranking strategy is now `learned`** (was `crypticity`). This is
+  the largest accuracy change in the project's history and it came from fixing
+  ranking, not sampling.
+
+  The diagnosis: on CryptoBench the detector was already producing a
+  well-localized pocket for about three quarters of structures, but top-5
+  recovery was 12.7% against a **13.0% random-selection null**. With a median of
+  64 candidate clusters per structure and typically exactly one correct, the
+  analytic scores were ordering at chance. The recorded conclusion that Lacuna
+  was sampling-limited came from a 22-target set too small to resolve anything
+  below roughly a 20-point effect.
+
+  On CryptoBench's held-out test fold (n=180, split on the dataset's own
+  homology-separated folds):
+
+  | | top-5 recovery |
+  |---|---|
+  | oracle over all clusters | 73.3% |
+  | random top-5 null | 14.4% |
+  | `crypticity` (previous default) | 17.8% (95% CI 12.2-23.3) |
+  | **`learned` (new default)** | **32.2% (95% CI 25.6-38.9)** |
+
+  The size-independent centroid criterion improved alongside Jaccard, so the gain
+  is genuine localization rather than a preference for smaller pockets that would
+  flatter an overlap metric. An identical fit on shuffled labels scores at the
+  null.
+
+  `crypticity` remains available via `--rank-by crypticity` and still scores
+  marginally better on the 22-target curated set (7/22 vs 6/22 at top-5, a
+  difference this sample size cannot resolve; at top-20 `learned` leads 14/22 to
+  10/22).
+
+### Added
+- **`rank_by="learned"` / `--rank-by learned`** - a linear ranker over 14 cluster
+  features, fitted to identify the true binding site. Standardization is folded
+  into the weights so scoring is a dot product on raw features: no new runtime
+  dependency, and the coefficients are readable in source.
+- **`benchmarks/train_ranker.py`** - collects features, fits the ranker, and
+  reports held-out recovery with bootstrap CIs and a shuffled-label control. It
+  regenerates the shipped constants exactly. Splits on CryptoBench's own folds so
+  homologous proteins stay out of the evaluation.
+- **`--rank-by` on the PocketMiner benchmark** (previously pinned to crypticity),
+  and a `lacuna_learned` column plus `--exclude-trained` in the multi-detector
+  comparison so no tool is ever scored on its own training data.
+
+### Notes
+- Benchmark scripts now take their strategy list from `RANK_STRATEGIES`, so a new
+  strategy is selectable everywhere without further edits.
+
 ## [0.3.1] - 2026-07-04
 
 **Honesty correction to v0.3.0.** The v0.3.0 notes claimed the OpenMM MD backend
