@@ -32,6 +32,9 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+# Sourced from the clusterer so a new strategy is selectable here automatically.
+from lacuna.pockets.clusterer import RANK_STRATEGIES  # noqa: E402
+
 # ── constants ─────────────────────────────────────────────────────────────────
 
 # When citing results produced by this benchmark, please use:
@@ -740,7 +743,7 @@ def main():
                         default="nma",
                         help="Ensemble backend (default: nma - the package default)")
     parser.add_argument("--rank-by", dest="rank_by",
-                        choices=["crypticity", "druggability", "persistence", "balanced"],
+                        choices=list(RANK_STRATEGIES),
                         default="crypticity",
                         help="Pocket ranking strategy (default: crypticity)")
     parser.add_argument("--only", default=None,

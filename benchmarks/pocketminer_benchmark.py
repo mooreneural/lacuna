@@ -79,13 +79,21 @@ def cryptic_residues(apo_path: Path, chain: str, label_arr: np.ndarray):
 
 
 def main():
+    import argparse
+    from lacuna.pockets.clusterer import RANK_STRATEGIES
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--rank-by", dest="rank_by", default="crypticity",
+                    choices=list(RANK_STRATEGIES),
+                    help="Pocket ranking strategy (default: crypticity)")
+    args = ap.parse_args()
+
     pdb_dir = Path(__file__).parent / "pdb_cache"
     pdb_dir.mkdir(exist_ok=True)
     _fetch_pm_data()
     entries = load_split("test") + load_split("val")
 
     print("=" * 70)
-    print(f"  POCKETMINER BENCHMARK  ({len(entries)} apo structures, NMA + crypticity)")
+    print(f"  POCKETMINER BENCHMARK  ({len(entries)} apo structures, NMA + {args.rank_by})")
     print("=" * 70)
 
     n_pass = n_run = n_pass_legacy = 0
@@ -113,7 +121,7 @@ def main():
         mism = "" if abs(n_res - n_lab) <= 5 else f"  [!] res/label len {n_res}/{n_lab}"
         ref = compute_known_site_centroid(apo, chain, cryptic)
         try:
-            clusters, elapsed = run_lacuna(apo, 20, chain=chain, rank_by="crypticity")
+            clusters, elapsed = run_lacuna(apo, 20, chain=chain, rank_by=args.rank_by)
         except Exception as e:
             print(f"  [err] {tag}: lacuna failed ({e})")
             continue

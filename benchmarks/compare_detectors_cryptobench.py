@@ -63,7 +63,7 @@ from compare_fpocket import run_fpocket, residue_overlap, residue_jaccard  # noq
 from metrics import paired_bootstrap_ci  # noqa: E402
 from lacuna.io.structure import load_structure  # noqa: E402
 
-ALL_TOOLS = ("lacuna_md", "lacuna_nma", "fpocket", "p2rank")
+ALL_TOOLS = ("lacuna_md", "lacuna_nma", "lacuna_learned", "fpocket", "p2rank")
 
 
 def _best_over_topk(residue_lists, known, k=5):
@@ -79,10 +79,11 @@ def _best_over_topk(residue_lists, known, k=5):
 def _run_tool(tool, cif, chain, n_conformers):
     """Run one detector on one structure; return (recall, jaccard, n_prop, elapsed)."""
     t0 = time.perf_counter()
-    if tool in ("lacuna_md", "lacuna_nma"):
+    if tool in ("lacuna_md", "lacuna_nma", "lacuna_learned"):
         backend = "openmm" if tool == "lacuna_md" else "nma"
+        rank_by = "learned" if tool == "lacuna_learned" else "crypticity"
         clusters, _ = run_lacuna(cif, n_conformers, chain=chain,
-                                 backend_name=backend, rank_by="crypticity")
+                                 backend_name=backend, rank_by=rank_by)
         residue_lists = [c.lining_residues for c in clusters[:5]]
         n_prop = len(clusters)
     elif tool == "fpocket":
@@ -227,6 +228,22 @@ def analyze(args):
             r = json.loads(line)
             rows_by_id.setdefault(r["id"], {})[r["tool"]] = r
 
+    # The learned ranker was fitted on specific structures; scoring it on those
+    # would inflate it. --exclude-trained drops them so every tool is compared on
+    # structures none of them were tuned on.
+    if args.exclude_trained:
+        trained = set()
+        p = Path(args.exclude_trained)
+        for line in p.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                rec = json.loads(line)
+                if rec.get("split") == "train":
+                    trained.add(rec["id"])
+        before = len(rows_by_id)
+        rows_by_id = {k: v for k, v in rows_by_id.items() if k not in trained}
+        print(f"excluded {before - len(rows_by_id)} structures used to fit the "
+              f"learned ranker; {len(rows_by_id)} remain")
+
     print("=" * 70)
     print("  COMPLEMENTARITY ANALYSIS (size-robust: Jaccard >= "
           f"{JACCARD_THRESHOLD:.0%}, legacy recall >= {OVERLAP_THRESHOLD:.0%})")
@@ -272,7 +289,8 @@ def analyze(args):
 
     # Three-way complementarity: Lacuna (primary) vs fpocket vs P2Rank, on the
     # structures where all three ran.
-    primary = "lacuna_md" if present.get("lacuna_md") else "lacuna_nma"
+    primary = next((t for t in ("lacuna_learned", "lacuna_nma", "lacuna_md")
+                    if present.get(t)), "lacuna_nma")
     triple = [d for d in rows_by_id.values()
               if primary in d and "fpocket" in d and "p2rank" in d]
     if triple:
@@ -322,6 +340,10 @@ def main():
     ap.add_argument("--max-residues", type=int, default=MAX_RESIDUES)
     ap.add_argument("--analyze", action="store_true",
                     help="merge all detectors_cb_*.jsonl and print the report")
+    ap.add_argument("--exclude-trained", default=None, metavar="DUMP",
+                    help="analyze only: path to the train_ranker feature dump; drops "
+                         "structures the learned ranker was fitted on so no tool is "
+                         "scored on its own training data")
     args = ap.parse_args()
 
     if args.analyze:
