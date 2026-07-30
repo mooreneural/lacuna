@@ -30,8 +30,91 @@ _CRYPTIC_THRESHOLD = 0.9  # persistence below this → cryptic
 # keeps druggability primary with a mild persistence bonus. On the 20-protein
 # cryptic benchmark (NMA, 20 conformers, contact-based lining, top-5) these score
 # 12, 10, 7, and 8 of 20 respectively.
-RANK_STRATEGIES = ("crypticity", "druggability", "persistence", "balanced")
+RANK_STRATEGIES = ("crypticity", "druggability", "persistence", "balanced", "learned")
 _DEFAULT_RANK_BY = "crypticity"
+
+# ── learned ranker ──────────────────────────────────────────────────────────────
+# A linear model over cluster features, fitted to predict whether a cluster is the
+# true binding site under the size-robust criterion (Jaccard >= 0.25).
+#
+# Why this exists: on CryptoBench the analytic strategies above rank at the
+# random-selection null. Measured on 150 shuffled structures, an oracle over all
+# clusters recovers 75.3% of sites, picking 5 clusters at random recovers 13.0%,
+# and ranking by crypticity recovers 12.7%. The detector already produces a
+# well-localized pocket for roughly three quarters of structures; the analytic
+# scores simply cannot find it among a median of 64 candidates (median 1 of which
+# is correct).
+#
+# Fitted with logistic regression on 273 CryptoBench structures (17595 clusters,
+# 404 positives) disjoint from the 127 structures used to measure it. Held-out
+# top-5 recovery 31.5% (95% CI 23.6-39.4) against 14.2% for crypticity and a
+# 13.6% random null; a model trained on shuffled labels scores 17.3%, confirming
+# the gain is signal rather than an artifact of the evaluation.
+#
+# Standardization is folded into the weights so scoring is a dot product on raw
+# features: no scikit-learn or other runtime dependency, and the coefficients stay
+# readable. Retrain with benchmarks/train_ranker.py.
+_RANKER_FEATURES = (
+    "vol", "vol_max", "vol_min", "apo_vol", "drug", "max_drug", "cryp",
+    "pers", "n_lin", "vol_per_lin", "enc", "hyd", "aro", "n_mem",
+)
+_RANKER_WEIGHTS = (
+    0.006415552482281435,     # vol
+    0.0009062548865912288,    # vol_max
+    -0.0016999712048546677,   # vol_min
+    -0.0003096449497214893,   # apo_vol
+    3.29671327879319,         # drug
+    0.6432730038343563,       # max_drug
+    -0.17313868391896373,     # cryp
+    -3.2098563082551097,      # pers
+    -0.06243610990287512,     # n_lin
+    -0.07314674542006236,     # vol_per_lin
+    -2.3357226648236384,      # enc
+    -1.412811967606415,       # hyd
+    -0.012317030664301202,    # aro
+    0.08770374881606169,      # n_mem
+)
+_RANKER_INTERCEPT = 1.1616645322395909
+
+
+def ranker_features(c: PocketCluster) -> dict[str, float]:
+    """Feature values the learned ranker consumes, keyed by ``_RANKER_FEATURES``.
+
+    Enclosure, hydrophobicity and aromatic count are averaged over the cluster's
+    member pockets so the ranker sees the pocket's typical character across the
+    ensemble rather than any single conformer.
+    """
+    mem = c.member_pockets
+    n_mem = max(len(mem), 1)
+    n_lin = len(c.lining_residues)
+    return {
+        "vol": c.volume_a3,
+        "vol_max": c.volume_max_a3,
+        "vol_min": c.volume_min_a3,
+        "apo_vol": c.apo_volume_a3,
+        "drug": c.druggability,
+        "max_drug": c.max_druggability,
+        "cryp": c.crypticity,
+        "pers": c.persistence,
+        "n_lin": float(n_lin),
+        "vol_per_lin": c.volume_a3 / max(n_lin, 1),
+        "enc": sum(getattr(p, "enclosure", 0.0) for p in mem) / n_mem,
+        "hyd": sum(getattr(p, "hydrophobic_fraction", 0.0) for p in mem) / n_mem,
+        "aro": sum(getattr(p, "aromatic_count", 0) for p in mem) / n_mem,
+        "n_mem": float(len(mem)),
+    }
+
+
+def learned_score(c: PocketCluster) -> float:
+    """Learned ranking score (higher is better).
+
+    The linear pre-activation of the fitted logistic model. Monotonic in the
+    predicted probability, so it orders identically without needing the sigmoid.
+    """
+    f = ranker_features(c)
+    return _RANKER_INTERCEPT + sum(
+        w * f[name] for name, w in zip(_RANKER_FEATURES, _RANKER_WEIGHTS)
+    )
 
 
 def compute_crypticity(apo_volume: float, max_volume: float, max_druggability: float) -> float:
@@ -65,6 +148,8 @@ def _rank_key(c: PocketCluster, rank_by: str) -> float:
         return c.max_druggability
     if rank_by == "crypticity":
         return c.crypticity
+    if rank_by == "learned":
+        return learned_score(c)
     raise ValueError(
         f"Unknown rank_by={rank_by!r}; choose from {RANK_STRATEGIES}"
     )
@@ -85,7 +170,9 @@ def cluster_pockets(
             ``"druggability"`` ranks by peak open-state druggability (better for
             always-open/orthosteric sites); ``"persistence"`` is the legacy
             persistence × druggability ranking; ``"balanced"`` keeps druggability
-            primary with a mild persistence bonus.
+            primary with a mild persistence bonus; ``"learned"`` uses the fitted
+            linear ranker, which substantially outperforms the analytic strategies
+            on CryptoBench (see ``_RANKER_WEIGHTS``).
 
     Returns:
         Ranked list of PocketCluster objects (rank 1 = best under ``rank_by``).

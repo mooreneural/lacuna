@@ -5,7 +5,10 @@ import numpy as np
 import pytest
 
 from lacuna.models import Atom, Residue, Structure, Pocket
-from lacuna.pockets.clusterer import cluster_pockets, compute_crypticity
+from lacuna.pockets.clusterer import (
+    cluster_pockets, compute_crypticity, learned_score, ranker_features,
+    RANK_STRATEGIES, _RANKER_FEATURES, _RANKER_WEIGHTS, _RANKER_INTERCEPT,
+)
 
 
 def _make_pocket(centroid, volume=200.0, conformer_idx=0, lining=None):
@@ -153,3 +156,62 @@ class TestCrypticityIntegration:
     def test_invalid_rank_by_raises(self):
         with pytest.raises(ValueError):
             cluster_pockets(self._scenario(), n_conformers=4, rank_by="nonsense")
+
+
+class TestLearnedRanker:
+    """The fitted linear ranker used by ``rank_by="learned"``."""
+
+    def test_feature_vector_is_complete_and_finite(self):
+        p = _make_pocket((0.0, 0.0, 0.0))
+        c = cluster_pockets([[p]], n_conformers=1)[0]
+        feats = ranker_features(c)
+        assert set(feats) == set(_RANKER_FEATURES)
+        assert all(np.isfinite(v) for v in feats.values())
+
+    def test_weights_align_with_features(self):
+        assert len(_RANKER_WEIGHTS) == len(_RANKER_FEATURES)
+
+    def test_score_matches_manual_dot_product(self):
+        """The score must be exactly intercept + w . x on raw features."""
+        p = _make_pocket((0.0, 0.0, 0.0))
+        c = cluster_pockets([[p]], n_conformers=1)[0]
+        feats = ranker_features(c)
+        expected = _RANKER_INTERCEPT + sum(
+            w * feats[name] for name, w in zip(_RANKER_FEATURES, _RANKER_WEIGHTS)
+        )
+        assert learned_score(c) == pytest.approx(expected)
+
+    def test_learned_ranking_is_deterministic(self):
+        """Same input must give the same order every time (committee requirement)."""
+        pockets = [
+            [_make_pocket((0.0, 0.0, 0.0), volume=300.0, conformer_idx=i) for i in range(1)]
+            + [_make_pocket((40.0, 0.0, 0.0), volume=150.0, conformer_idx=0)]
+        ]
+        first = [c.centroid for c in cluster_pockets(pockets, 1, rank_by="learned")]
+        for _ in range(3):
+            again = [c.centroid for c in cluster_pockets(pockets, 1, rank_by="learned")]
+            assert again == first
+
+    def test_learned_is_a_valid_strategy(self):
+        assert "learned" in RANK_STRATEGIES
+        p = _make_pocket((0.0, 0.0, 0.0))
+        clusters = cluster_pockets([[p]], n_conformers=1, rank_by="learned")
+        assert clusters and clusters[0].rank == 1
+
+    def test_learned_ranking_reorders_versus_crypticity(self):
+        """The learned score must be able to disagree with crypticity, otherwise
+        it could not have doubled recovery on the benchmark."""
+        big_constitutive = [
+            _make_pocket((0.0, 0.0, 0.0), volume=800.0, conformer_idx=i,
+                         lining=[f"ALA{i}:A" for i in range(40)])
+            for i in range(4)
+        ]
+        small_cryptic = [_make_pocket((40.0, 0.0, 0.0), volume=180.0, conformer_idx=3,
+                                      lining=["TRP9:A", "PHE10:A"])]
+        lists = [[big_constitutive[0], ], [big_constitutive[1]], [big_constitutive[2]],
+                 [big_constitutive[3], small_cryptic[0]]]
+        by_cryp = cluster_pockets(lists, 4, rank_by="crypticity")
+        by_learned = cluster_pockets(lists, 4, rank_by="learned")
+        # Both orders are valid rankings of the same clusters.
+        assert {c.centroid for c in by_cryp} == {c.centroid for c in by_learned}
+        assert all(c.rank == i + 1 for i, c in enumerate(by_learned))
