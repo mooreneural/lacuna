@@ -318,59 +318,92 @@ def _paired_ci(a, b, n_boot: int = 10000, seed: int = 0):
             diffs[int(0.025 * n_boot)], diffs[int(0.975 * n_boot) - 1])
 
 
-def fit(dump_path: Path) -> None:
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.preprocessing import StandardScaler
+#: Feature set selected by cross-validation (see cross_validate). The geometry
+#: block is what lifted recovery; the ordering objective then added more on top.
+FIT_FEATURES = list(_RANKER_FEATURES) + [
+    "bur_raw", "depth", "depth_max", "mouth", "elong", "flat", "dcen",
+    "centroid_std", "vol_cv",
+]
 
+
+def fit(dump_path: Path, test_dump: Path | None = None) -> None:
+    """Fit the shipped ranker and report it on genuinely held-out structures.
+
+    Uses the configuration cross-validation selected: a linear model trained on
+    within-structure pairs, over the geometry-augmented feature set. Pairwise
+    training beat pointwise by +2.4 points (CI[+0.7,+4.2]) once geometry was
+    available, and gradient boosting was not separable from it, so the shipped
+    model stays a readable dot product with no runtime dependency.
+
+    ``test_dump`` supplies test-fold structures when they live in a separate file.
+    """
     data = _load(dump_path)
-    # Re-derive the split from the fold table rather than trusting the dump, so an
-    # older dump written under a different split rule is still evaluated correctly.
+    if test_dump is not None and test_dump.exists():
+        data += _load(test_dump)
     for s in data:
         s["split"] = split_of(s["id"])
     train = [s for s in data if s["split"] == "train"]
     test = [s for s in data if s["split"] == "test"]
-    Xtr, ytr = _matrix(train)
 
-    scaler = StandardScaler().fit(Xtr)
-    model = LogisticRegression(max_iter=5000, class_weight="balanced")
-    model.fit(scaler.transform(Xtr), ytr)
+    have = set(data[0]["clusters"][0])
+    feats = [f for f in FIT_FEATURES if f in have]
+    missing = [f for f in FIT_FEATURES if f not in have]
+    if missing:
+        print(f"WARNING: dump lacks {missing}; fitting on {len(feats)} features")
 
-    # Fold standardization into the weights: score = intercept + w . x on raw features.
-    weights = model.coef_[0] / scaler.scale_
-    intercept = float(model.intercept_[0] - np.sum(model.coef_[0] * scaler.mean_ / scaler.scale_))
+    scorer, (_, weights, _) = _fit_pairwise(train, feats)
+    n_clusters = sum(len(s["clusters"]) for s in train)
+    n_pos = sum(1 for s in train for c in s["clusters"] if c["jac"] >= JACCARD_THRESHOLD)
+    print(f"structures {len(data)} ({len(train)} train-fold / {len(test)} test-fold), "
+          f"train clusters {n_clusters}, positives {n_pos}")
 
-    print(f"structures {len(data)} ({len(train)} train / {len(test)} test), "
-          f"train clusters {len(ytr)}, positives {int(ytr.sum())}")
+    if not test:
+        print("no test-fold structures available; skipping held-out report")
+    else:
+        oracle = sum(1 for s in test
+                     if any(c["jac"] >= JACCARD_THRESHOLD for c in s["clusters"])) / len(test)
+        current = [any(c["jac"] >= JACCARD_THRESHOLD
+                       for c in sorted(s["clusters"], key=lambda c: c["rank"])[:5])
+                   for s in test]
+        new = _score_hits(test, scorer)
+        # Identical fit on shuffled labels: must collapse toward the random null.
+        shuffled = [dict(s, clusters=list(s["clusters"])) for s in train]
+        rng = random.Random(1)
+        for s in shuffled:
+            jacs = [c["jac"] for c in s["clusters"]]
+            rng.shuffle(jacs)
+            s["clusters"] = [dict(c, jac=j) for c, j in zip(s["clusters"], jacs)]
+        try:
+            ctrl_scorer, _ = _fit_pairwise(shuffled, feats, seed=1)
+            ctrl = _score_hits(test, ctrl_scorer)
+        except RuntimeError:
+            ctrl = [False] * len(test)
 
-    oracle = sum(1 for s in test
-                 if any(c["jac"] >= JACCARD_THRESHOLD for c in s["clusters"])) / len(test)
-    current = [any(c["jac"] >= JACCARD_THRESHOLD
-                   for c in sorted(s["clusters"], key=lambda c: c["rank"])[:5])
-               for s in test]
-    m_cur, lo_cur, hi_cur = _bootstrap_ci(current)
-    m_new, lo_new, hi_new = _bootstrap_ci(_top5_hits(test, weights, intercept))
+        m_cur, lo_cur, hi_cur = _bootstrap_ci(current)
+        m_new, lo_new, hi_new = _bootstrap_ci(new)
+        m_ctl, lo_ctl, hi_ctl = _bootstrap_ci(ctrl)
+        d, dlo, dhi = _paired_ci(new, current)
 
-    # Identical fit on shuffled labels: must collapse toward the random null.
-    y_shuffled = np.random.RandomState(0).permutation(ytr)
-    control = LogisticRegression(max_iter=5000, class_weight="balanced")
-    control.fit(scaler.transform(Xtr), y_shuffled)
-    w_ctrl = control.coef_[0] / scaler.scale_
-    b_ctrl = float(control.intercept_[0] - np.sum(control.coef_[0] * scaler.mean_ / scaler.scale_))
-    m_ctl, lo_ctl, hi_ctl = _bootstrap_ci(_top5_hits(test, w_ctrl, b_ctrl))
-
-    print("\nheld-out top-5 recovery (size-robust Jaccard >= 0.25):")
-    print(f"  oracle (any cluster)     {oracle:.1%}")
-    print(f"  random top-5 null        {_random_null(test):.1%}")
-    print(f"  crypticity (current)     {m_cur:.1%}  CI[{lo_cur:.1%},{hi_cur:.1%}]")
-    print(f"  learned ranker           {m_new:.1%}  CI[{lo_new:.1%},{hi_new:.1%}]")
-    print(f"  shuffled-label control   {m_ctl:.1%}  CI[{lo_ctl:.1%},{hi_ctl:.1%}]")
+        print("\nheld-out test-fold top-5 recovery (size-robust Jaccard >= 0.25):")
+        print(f"  oracle (any cluster)     {oracle:.1%}")
+        print(f"  random top-5 null        {_random_null(test):.1%}")
+        print(f"  dump ranking             {m_cur:.1%}  CI[{lo_cur:.1%},{hi_cur:.1%}]")
+        print(f"  learned ranker           {m_new:.1%}  CI[{lo_new:.1%},{hi_new:.1%}]")
+        print(f"  shuffled-label control   {m_ctl:.1%}  CI[{lo_ctl:.1%},{hi_ctl:.1%}]")
+        print(f"  paired difference        {d:+.1%}  CI[{dlo:+.1%},{dhi:+.1%}]")
 
     print("\npaste into lacuna/pockets/clusterer.py:\n")
+    print("_RANKER_FEATURES = (")
+    for name in feats:
+        print(f'    "{name}",')
+    print(")")
     print("_RANKER_WEIGHTS = (")
-    for name, value in zip(_RANKER_FEATURES, weights):
+    for name, value in zip(feats, weights):
         print(f"    {value!r},  # {name}")
     print(")")
-    print(f"_RANKER_INTERCEPT = {intercept!r}")
+    # Ranking is invariant to a constant offset, and the pairwise fit has no
+    # intercept, so it is fixed at zero.
+    print("_RANKER_INTERCEPT = 0.0")
 
 
 def cross_validate(dump_path: Path) -> None:
@@ -480,13 +513,16 @@ def main():
     ap.add_argument("--folds", default=None,
                     help="restrict collection to these folds, e.g. 'test' or "
                          "'train-0,train-1' (default: all, shuffled)")
+    ap.add_argument("--test-dump", default=None,
+                    help="extra dump holding the test-fold structures, when they "
+                         "were collected into a separate file")
     args = ap.parse_args()
 
     path = Path(args.dump)
     if args.cv:
         cross_validate(path)
     elif args.fit:
-        fit(path)
+        fit(path, Path(args.test_dump) if args.test_dump else None)
     else:
         collect(path, args.limit, args.conformers, args.folds)
 

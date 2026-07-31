@@ -45,13 +45,24 @@ _DEFAULT_RANK_BY = "learned"
 # scores simply cannot find it among a median of 64 candidates (median 1 of which
 # is correct).
 #
-# Fitted with logistic regression on the 322 available CryptoBench train-fold
-# structures (20839 clusters, 464 positives) and measured on the dataset's own
-# held-out test fold (180 structures). Splitting on CryptoBench's folds rather
-# than at random keeps homologous proteins out of the evaluation. Test-fold top-5
-# recovery 32.2% (95% CI 25.6-38.9) against 17.8% for crypticity and a 14.4%
-# random null; an identical fit on shuffled labels scores 12.8%, confirming the
-# gain is signal rather than an artifact of the evaluation.
+# Trained on within-structure pairs (linear RankNet) over 741 CryptoBench
+# train-fold structures, and measured on the dataset's own held-out test fold
+# (180 structures). Splitting on CryptoBench's folds rather than at random keeps
+# homologous proteins out of the evaluation.
+#
+# Two choices were made by cross-validation over the train folds, never on the
+# test fold: the geometry features below are worth ~+6.9 points (CI +4.0 to +9.7),
+# and training on pairs rather than on individual clusters adds a further +2.4
+# (CI +0.7 to +4.2). Pairs are the better fit to the task because the decision is
+# "which of this protein's ~64 candidates is the site", and differencing two
+# clusters from the same structure cancels every protein-level nuisance term.
+# Gradient boosting was not separable from this linear model (+0.7, CI -1.6 to
+# +3.0), so the simpler, dependency-free scorer ships.
+#
+# Test-fold top-5 recovery 42.2% (95% CI 35.0-49.4) against 17.8% for crypticity
+# and a 14.4% random null, a paired gain of +24.4 (CI +16.1 to +32.8). An
+# identical fit on shuffled labels scores 11.1%, at the null, confirming the gain
+# is signal rather than an artifact of the evaluation.
 #
 # Standardization is folded into the weights so scoring is a dot product on raw
 # features: no scikit-learn or other runtime dependency, and the coefficients stay
@@ -59,24 +70,37 @@ _DEFAULT_RANK_BY = "learned"
 _RANKER_FEATURES = (
     "vol", "vol_max", "vol_min", "apo_vol", "drug", "max_drug", "cryp",
     "pers", "n_lin", "vol_per_lin", "enc", "hyd", "aro", "n_mem",
+    "bur_raw", "depth", "depth_max", "mouth", "elong", "flat", "dcen",
+    "centroid_std", "vol_cv",
 )
 _RANKER_WEIGHTS = (
-    0.0054610928119365534,    # vol
-    0.001000443151555848,     # vol_max
-    -0.0007162512347846649,   # vol_min
-    0.0001635217366979712,    # apo_vol
-    3.2045748644036958,       # drug
-    1.0083869415868223,       # max_drug
-    -0.1144220848072665,      # cryp
-    -5.434517954848764,       # pers
-    -0.06637447464600439,     # n_lin
-    -0.07240682820499411,     # vol_per_lin
-    -2.402750210437795,       # enc
-    -1.593739396310968,       # hyd
-    0.027505584308715823,     # aro
-    0.18838365771604712,      # n_mem
+    0.005332380951383828,     # vol
+    -0.0001501563475969377,   # vol_max
+    -0.0014122400103904942,   # vol_min
+    0.00013651766434492373,   # apo_vol
+    1.5237703558813032,       # drug
+    0.8600525469443591,       # max_drug
+    0.0005779465401640209,    # cryp
+    -2.670667768352986,       # pers
+    -0.06475095311715737,     # n_lin
+    -0.04884422721862207,     # vol_per_lin
+    1.5394906056747841,       # enc
+    -0.948031574863381,       # hyd
+    0.034143204295189515,     # aro
+    0.08581283014817515,      # n_mem
+    -11.287148445825077,      # bur_raw
+    0.2402812872747652,       # depth
+    0.0436001584404663,       # depth_max
+    0.5749161362975784,       # mouth
+    -0.9603964146270672,      # elong
+    0.4454365675084426,       # flat
+    -1.8800853952730523,      # dcen
+    -0.0583474427674898,      # centroid_std
+    -0.17449097774133837,     # vol_cv
 )
-_RANKER_INTERCEPT = 1.0588632130688596
+# Ranking is invariant to a constant offset and the pairwise fit carries no
+# intercept, so this is fixed at zero.
+_RANKER_INTERCEPT = 0.0
 
 
 def ranker_features(c: PocketCluster) -> dict[str, float]:

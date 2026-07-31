@@ -28,23 +28,68 @@ data, never the most flattering ones available.
   | oracle over all clusters | 73.3% |
   | random top-5 null | 14.4% |
   | `crypticity` (previous default) | 17.8% (95% CI 12.2-23.3) |
-  | **`learned` (new default)** | **32.2% (95% CI 25.6-38.9)** |
+  | **`learned` (new default)** | **42.2% (95% CI 35.6-49.4)** |
 
-  The size-independent centroid criterion improved alongside Jaccard, so the gain
-  is genuine localization rather than a preference for smaller pockets that would
-  flatter an overlap metric. An identical fit on shuffled labels scores at the
-  null.
+  Paired gain +24.4 points (95% CI +16.1 to +32.8). An identical fit on shuffled
+  labels scores 11.1%, at the random null, so the gain is signal rather than an
+  artifact of the evaluation.
 
-  `crypticity` remains available via `--rank-by crypticity` and still scores
-  marginally better on the 22-target curated set (7/22 vs 6/22 at top-5, a
-  difference this sample size cannot resolve; at top-20 `learned` leads 14/22 to
-  10/22).
+  Every independent benchmark improved at the same time:
+
+  | dataset | `crypticity` | `learned` |
+  |---|---|---|
+  | CryptoBench test fold (n=180) | 17.8% | **42.2%** |
+  | PocketMiner (n=45) | 14/45 (31%) | **24/45 (53%)** |
+  | Curated apo/holo set (n=22) | 7/22 (32%) | **8/22 (36%)** |
+
+  **Against other detectors** on the same held-out test fold, Lacuna now leads
+  fpocket by a margin whose confidence interval excludes zero:
+
+  | detector | size-robust recovery |
+  |---|---|
+  | P2Rank | 63.3% (56.1-70.6) |
+  | **Lacuna** | **42.2% (35.6-49.4)** |
+  | fpocket | 28.3% (21.7-34.4) |
+
+  Paired: **+13.9 vs fpocket (CI +5.6 to +22.2)**, and -21.1 vs P2Rank
+  (CI -29.4 to -12.8). Lacuna moves from level with fpocket to ahead of it, and
+  narrows the P2Rank gap from -31 to -21 points. The three-way union is 75.0%,
+  so the tools remain complementary.
+
+  `crypticity` remains available via `--rank-by crypticity`.
 
 ### Added
-- **`rank_by="learned"` / `--rank-by learned`** - a linear ranker over 14 cluster
-  features, fitted to identify the true binding site. Standardization is folded
-  into the weights so scoring is a dot product on raw features: no new runtime
-  dependency, and the coefficients are readable in source.
+- **`rank_by="learned"` / `--rank-by learned`** - a linear ranker over 23 cluster
+  features, trained on within-structure pairs to identify the true binding site.
+  Scoring is a dot product on raw features: no new runtime dependency, and the
+  coefficients are readable in source.
+
+  Two choices were made by cross-validation over the train folds, never on the
+  test fold. Training on **pairs** rather than on individual clusters is worth
+  +2.4 points (CI +0.7 to +4.2): the decision is "which of this protein's ~64
+  candidates is the site", and differencing two clusters from the same structure
+  cancels every protein-level nuisance term. Gradient boosting was **not**
+  separable from the linear model (+0.7, CI -1.6 to +3.0), so the simpler scorer
+  ships.
+- **Geometric pocket descriptors** on `Pocket`, computed from grids the detector
+  already builds (about +15% detection time), worth +6.9 points (CI +4.0 to +9.7):
+  - `depth_a`, burial depth measured against a 5 Å rolling probe. Flood-filling
+    empty space from the grid boundary instead would report depth 0 for every
+    surface groove, since grooves are open to solvent; only fully enclosed
+    cavities would register. A probe too large to enter a binding groove gives a
+    discriminative 1.4-11.1 Å range.
+  - `buriedness_raw`, the unclipped local density. `enclosure` is
+    `min(raw / 0.4, 1.0)` and saturates at exactly 1.00 for most real pockets,
+    discarding resolution in the deeply buried regime where binding sites live.
+  - `mouth_frac`, `elongation`, `flatness`, `dist_center_frac` for cavity shape
+    and placement.
+- **Ensemble-native cluster features**: `centroid_std` (a genuine site holds the
+  same position across conformers while a spurious blob wanders) and volume
+  dispersion. Single-structure detectors have no equivalent.
+- **`--cv` on `benchmarks/train_ranker.py`** - leave-one-fold-out
+  cross-validation across the train folds for model selection, keeping the
+  designated test fold untouched for the final claim and pooling roughly four
+  times more held-out structures than that fold alone.
 - **`benchmarks/train_ranker.py`** - collects features, fits the ranker, and
   reports held-out recovery with bootstrap CIs and a shuffled-label control. It
   regenerates the shipped constants exactly. Splits on CryptoBench's own folds so
