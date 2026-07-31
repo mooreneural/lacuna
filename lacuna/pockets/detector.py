@@ -47,8 +47,23 @@ MAX_VOLUME_A3 = 1500.0
 ALPHA_DIST_MIN = 1.6     # Å  - too small: inside VDW sphere
 ALPHA_DIST_MAX = 6.0     # Å  - too large: bulk solvent alpha sphere
 
-# Cluster radius: alpha points within this distance are merged into one pocket
-CLUSTER_RADIUS_A = 4.0   # Å
+# Cluster radius: alpha points within this distance are merged into one pocket.
+# Alpha points are dilated by this radius before connected components are labelled,
+# so two alpha points roughly twice this far apart still fuse. At 4 A that cascaded
+# across connected surface grooves into single mega-pockets: on CryptoBench, 21% of
+# structures had the true site fully covered (median recall 100%) by a pocket with
+# ~59 lining residues against ~8 known, too diffuse to score as localized.
+#
+# 2 A splits those apart. It also splits some genuine sites, which lowers the
+# best-achievable overlap, but it cuts candidates per structure from ~59 to ~16 and
+# the resulting ranking gain more than compensates: measured on the classes above,
+# top-5 recovery rose for BOTH the over-merged cases (0% -> 46%) and the cases that
+# already worked (62% -> 70%).
+#
+# Pooling several radii, and lowering MIN_VOLUME_A3 to retain the smaller fragments,
+# both recover more of that best-achievable overlap but lose at top-5, because each
+# adds candidates. Fewer, tighter candidates beat more, looser ones.
+CLUSTER_RADIUS_A = 2.0   # Å
 
 # Lining residues: a residue lines the pocket if any of its atoms is within this
 # distance of the detected cavity (the alpha-cluster void voxels). This is a true

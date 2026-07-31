@@ -320,10 +320,14 @@ def _paired_ci(a, b, n_boot: int = 10000, seed: int = 0):
 
 #: Feature set selected by cross-validation (see cross_validate). The geometry
 #: block is what lifted recovery; the ordering objective then added more on top.
-FIT_FEATURES = list(_RANKER_FEATURES) + [
-    "bur_raw", "depth", "depth_max", "mouth", "elong", "flat", "dcen",
-    "centroid_std", "vol_cv",
-]
+#: Deduplicated because the geometry columns became part of _RANKER_FEATURES once
+#: they shipped, and repeating a feature would give it a split, meaningless weight.
+FIT_FEATURES = list(dict.fromkeys(
+    list(_RANKER_FEATURES) + [
+        "bur_raw", "depth", "depth_max", "mouth", "elong", "flat", "dcen",
+        "centroid_std", "vol_cv",
+    ]
+))
 
 
 def fit(dump_path: Path, test_dump: Path | None = None) -> None:

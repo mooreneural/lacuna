@@ -10,6 +10,7 @@ import numpy as np
 import pytest
 
 from lacuna.models import Atom, Residue, Structure
+from lacuna.pockets import detector
 from lacuna.pockets.detector import detect_pockets
 
 
@@ -56,6 +57,39 @@ def _flat_slab(n: int = 60, width: float = 12.0) -> tuple[np.ndarray, Structure]
 
 
 # ── tests ─────────────────────────────────────────────────────────────────────
+
+class TestClusterRadius:
+    """The alpha-clustering radius controls pocket over-merging.
+
+    Alpha points are dilated by this radius before connected components are
+    labelled, so raising it fuses neighbouring sites into one diffuse pocket. On
+    CryptoBench that fusion was the single largest source of lost recovery, so
+    the value is load-bearing rather than cosmetic and a silent revert would undo
+    the gain without failing anything else.
+    """
+
+    def test_radius_is_the_calibrated_value(self):
+        assert detector.CLUSTER_RADIUS_A == 2.0
+
+    def test_larger_radius_merges_more(self):
+        """Two separated cavities must not fuse at the calibrated radius, and a
+        large radius must fuse them: the mechanism behind the over-merging."""
+        left = _box_pocket(inner=5.0)[0]
+        right = left + np.array([26.0, 0.0, 0.0], dtype=np.float32)
+        coords, structure = _make_structure(np.concatenate([left, right]))
+
+        original = detector.CLUSTER_RADIUS_A
+        try:
+            detector.CLUSTER_RADIUS_A = 2.0
+            fine = detect_pockets(coords, structure, min_volume_a3=50.0)
+            detector.CLUSTER_RADIUS_A = 12.0
+            coarse = detect_pockets(coords, structure, min_volume_a3=50.0)
+        finally:
+            detector.CLUSTER_RADIUS_A = original
+
+        assert len(fine) >= 2, "two separated cavities should stay separate at 2 A"
+        assert len(coarse) < len(fine), "a large radius should fuse them"
+
 
 class TestDetectPockets:
     def test_box_pocket_is_found(self):

@@ -59,10 +59,15 @@ _DEFAULT_RANK_BY = "learned"
 # Gradient boosting was not separable from this linear model (+0.7, CI -1.6 to
 # +3.0), so the simpler, dependency-free scorer ships.
 #
-# Test-fold top-5 recovery 42.2% (95% CI 35.0-49.4) against 17.8% for crypticity
-# and a 14.4% random null, a paired gain of +24.4 (CI +16.1 to +32.8). An
-# identical fit on shuffled labels scores 11.1%, at the null, confirming the gain
+# Test-fold top-5 recovery 57.0% (95% CI 49.7-64.2), a paired gain of +24.0
+# (CI +16.2 to +32.4) over the ranking the same pipeline produces without it. An
+# identical fit on shuffled labels scores 38.0%, well below, confirming the gain
 # is signal rather than an artifact of the evaluation.
+#
+# The weights are specific to the detector geometry they were fitted on. Halving
+# CLUSTER_RADIUS_A changed pocket sizes enough that the previous weights fell to
+# the random null on the new pockets, so any change to detection constants means
+# refitting via benchmarks/train_ranker.py --fit.
 #
 # Standardization is folded into the weights so scoring is a dot product on raw
 # features: no scikit-learn or other runtime dependency, and the coefficients stay
@@ -74,29 +79,29 @@ _RANKER_FEATURES = (
     "centroid_std", "vol_cv",
 )
 _RANKER_WEIGHTS = (
-    0.005332380951383828,     # vol
-    -0.0001501563475969377,   # vol_max
-    -0.0014122400103904942,   # vol_min
-    0.00013651766434492373,   # apo_vol
-    1.5237703558813032,       # drug
-    0.8600525469443591,       # max_drug
-    0.0005779465401640209,    # cryp
-    -2.670667768352986,       # pers
-    -0.06475095311715737,     # n_lin
-    -0.04884422721862207,     # vol_per_lin
-    1.5394906056747841,       # enc
-    -0.948031574863381,       # hyd
-    0.034143204295189515,     # aro
-    0.08581283014817515,      # n_mem
-    -11.287148445825077,      # bur_raw
-    0.2402812872747652,       # depth
-    0.0436001584404663,       # depth_max
-    0.5749161362975784,       # mouth
-    -0.9603964146270672,      # elong
-    0.4454365675084426,       # flat
-    -1.8800853952730523,      # dcen
-    -0.0583474427674898,      # centroid_std
-    -0.17449097774133837,     # vol_cv
+    0.0021058916300336922,    # vol
+    -0.0004395349995368121,   # vol_max
+    0.0017597092633876168,    # vol_min
+    0.0008452623407622693,    # apo_vol
+    0.9522001881935488,       # drug
+    1.0897348358917631,       # max_drug
+    0.7065755925087638,       # cryp
+    5.056160055742071,        # pers
+    -0.01762431018029651,     # n_lin
+    -0.10105522719987375,     # vol_per_lin
+    2.4157327324127422,       # enc
+    -2.2956645990906446,      # hyd
+    0.019367780922023622,     # aro
+    -0.2246354753465409,      # n_mem
+    -13.991403656872548,      # bur_raw
+    0.05564647131201399,      # depth
+    0.06300646132903952,      # depth_max
+    -0.3487358686293743,      # mouth
+    1.077822797873759,        # elong
+    -3.0491615892788557,      # flat
+    -2.49102543634838,        # dcen
+    0.04852135251917284,      # centroid_std
+    1.1505623344408817,       # vol_cv
 )
 # Ranking is invariant to a constant offset and the pairwise fit carries no
 # intercept, so this is fixed at zero.
