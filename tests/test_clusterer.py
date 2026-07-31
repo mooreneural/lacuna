@@ -161,12 +161,33 @@ class TestCrypticityIntegration:
 class TestLearnedRanker:
     """The fitted linear ranker used by ``rank_by="learned"``."""
 
-    def test_feature_vector_is_complete_and_finite(self):
+    def test_feature_vector_covers_the_scored_subset_and_is_finite(self):
+        """ranker_features returns a superset: every scored feature must be present
+        (a missing one would silently corrupt the score), and all values finite."""
         p = _make_pocket((0.0, 0.0, 0.0))
         c = cluster_pockets([[p]], n_conformers=1)[0]
         feats = ranker_features(c)
-        assert set(feats) == set(_RANKER_FEATURES)
-        assert all(np.isfinite(v) for v in feats.values())
+        assert set(_RANKER_FEATURES) <= set(feats)
+        assert all(np.isfinite(v) for v in feats.values()), feats
+
+    def test_candidate_geometry_features_are_exposed(self):
+        """The detector's geometric descriptors must reach the ranker layer, or
+        train_ranker.py cannot evaluate them."""
+        p = _make_pocket((0.0, 0.0, 0.0))
+        c = cluster_pockets([[p]], n_conformers=1)[0]
+        feats = ranker_features(c)
+        for name in ("bur_raw", "depth", "mouth", "elong", "dcen", "centroid_std"):
+            assert name in feats
+
+    def test_centroid_std_tracks_spatial_scatter(self):
+        """A site detected at the same place every conformer is stable; one that
+        moves is not. This is the ensemble-native signal."""
+        steady = [_make_pocket((0.0, 0.0, 0.0), conformer_idx=i) for i in range(4)]
+        drifty = [_make_pocket((float(i) * 1.2, 0.0, 0.0), conformer_idx=i) for i in range(4)]
+        c_steady = cluster_pockets([[p] for p in steady], n_conformers=4)[0]
+        c_drifty = cluster_pockets([[p] for p in drifty], n_conformers=4)[0]
+        assert ranker_features(c_steady)["centroid_std"] == pytest.approx(0.0)
+        assert ranker_features(c_drifty)["centroid_std"] > 0.5
 
     def test_weights_align_with_features(self):
         assert len(_RANKER_WEIGHTS) == len(_RANKER_FEATURES)

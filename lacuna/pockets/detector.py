@@ -56,6 +56,14 @@ CLUSTER_RADIUS_A = 4.0   # Å
 # swept in a large shell of non-lining residues and inflated residue overlap.
 LINING_CONTACT_A = 5.0   # Å from any cavity voxel
 
+# Rolling-probe radius defining open bulk solvent for the burial-depth field. Large
+# enough that it cannot enter a ligand-binding groove (so grooves register as
+# recessed) while still flooding the open exterior.
+BULK_PROBE_A = 5.0
+
+# A cavity voxel this close to bulk solvent counts as part of the pocket mouth.
+MOUTH_DEPTH_A = 2.0
+
 
 @dataclass
 class _GridContext:
@@ -79,6 +87,12 @@ class _GridContext:
     dist: np.ndarray
     local_density: np.ndarray
     atom_tree: cKDTree
+    # Å from every voxel to the nearest bulk-solvent voxel. Bulk solvent is the
+    # empty region connected to the grid boundary, so this measures how deeply a
+    # cavity is recessed into the protein rather than merely how wide it is.
+    bulk_depth: np.ndarray
+    protein_centroid: np.ndarray
+    radius_gyration: float
 
 
 def _build_grid_context(
@@ -102,6 +116,10 @@ def _build_grid_context(
     # hotspot-weighted centroid).
     local_density = uniform_filter(protein_mask.astype(np.float32), size=9)
     atom_tree = cKDTree(coords)
+    bulk_depth = _bulk_depth_field(dist, grid_spacing)
+
+    centre = coords.mean(axis=0)
+    rg = float(np.sqrt(((coords - centre) ** 2).sum(axis=1).mean()))
 
     return _GridContext(
         coords=coords,
@@ -115,7 +133,47 @@ def _build_grid_context(
         dist=dist,
         local_density=local_density,
         atom_tree=atom_tree,
+        bulk_depth=bulk_depth,
+        protein_centroid=centre,
+        radius_gyration=rg,
     )
+
+
+def _bulk_depth_field(dist: np.ndarray, grid_spacing: float) -> np.ndarray:
+    """Å from each voxel to the nearest point of open bulk solvent.
+
+    "Bulk" is defined with a large rolling probe rather than by simple emptiness.
+    Taking every empty voxel connected to the grid boundary would flood straight
+    into surface grooves, which are open to solvent, leaving depth ~0 for exactly
+    the pockets we care about; only fully enclosed cavities would ever register.
+
+    Instead, bulk is the region where a probe of radius ``BULK_PROBE_A`` fits
+    (``dist >= BULK_PROBE_A``) and which reaches the grid boundary. A probe that
+    large cannot enter a binding groove, so a shallow dimple sits close to bulk
+    while a deep cleft or enclosed cavity sits several Å inside it. This is the
+    usual definition of burial depth, and it reuses the distance transform that
+    detection already computes.
+    """
+    outside = dist >= BULK_PROBE_A
+    if not outside.any():
+        return np.zeros(dist.shape, dtype=np.float32)
+
+    labels, n = ndimage.label(outside)
+    if n == 0:
+        return np.zeros(dist.shape, dtype=np.float32)
+
+    # The grid is padded beyond the protein, so genuine bulk always reaches a face.
+    boundary = np.concatenate([
+        labels[0, :, :].ravel(), labels[-1, :, :].ravel(),
+        labels[:, 0, :].ravel(), labels[:, -1, :].ravel(),
+        labels[:, :, 0].ravel(), labels[:, :, -1].ravel(),
+    ])
+    bulk_ids = [int(v) for v in np.unique(boundary) if v != 0]
+    if not bulk_ids:
+        return np.zeros(dist.shape, dtype=np.float32)
+
+    bulk = np.isin(labels, bulk_ids)
+    return distance_transform_edt(~bulk).astype(np.float32) * grid_spacing
 
 
 def _pocket_from_cavity(
@@ -168,6 +226,35 @@ def _pocket_from_cavity(
     enclosure_raw = float(ctx.local_density[cluster_mask].mean())
     enclosure = min(enclosure_raw / 0.4, 1.0)
 
+    # Geometric descriptors of this cavity. All are read off grids already built
+    # for this conformer, so they cost a few array lookups rather than new geometry.
+    vi = vox_indices
+    depths = ctx.bulk_depth[vi[:, 0], vi[:, 1], vi[:, 2]]
+    depth_a = float(depths.mean())
+    # A voxel close to bulk solvent is part of the pocket mouth; a low fraction
+    # means most of the cavity is recessed rather than open to the surface.
+    mouth_frac = float((depths <= MOUTH_DEPTH_A).mean())
+
+    # Cavity shape from the spread of its voxels: a groove is elongated, a buried
+    # cavity is closer to isotropic. Ratios keep this independent of pocket size.
+    elongation, flatness = 1.0, 1.0
+    if len(vi) >= 3:
+        centred = (vi - vi.mean(axis=0)) * grid_spacing
+        # Singular values are the per-axis extents; guard the degenerate case.
+        try:
+            sv = np.linalg.svd(centred, compute_uv=False)
+            if sv[0] > 1e-6:
+                elongation = float(sv[1] / sv[0])
+                flatness = float(sv[2] / sv[0])
+        except np.linalg.LinAlgError:
+            pass
+
+    rg = ctx.radius_gyration
+    dist_center_frac = (
+        float(np.linalg.norm(np.asarray(centroid) - ctx.protein_centroid) / rg)
+        if rg > 1e-6 else 0.0
+    )
+
     lining_res_objs = [ctx.residues[ri] for ri in sorted(lining_res_set)]
     hyd_frac = (
         sum(1 for r in lining_res_objs if is_hydrophobic(r.name))
@@ -185,6 +272,12 @@ def _pocket_from_cavity(
         aromatic_count=arom_count,
         lining_residues=lining_residues,
         conformer_idx=-1,
+        buriedness_raw=enclosure_raw,
+        depth_a=depth_a,
+        mouth_frac=mouth_frac,
+        elongation=elongation,
+        flatness=flatness,
+        dist_center_frac=dist_center_frac,
     )
 
 

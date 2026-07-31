@@ -80,16 +80,41 @@ _RANKER_INTERCEPT = 1.0588632130688596
 
 
 def ranker_features(c: PocketCluster) -> dict[str, float]:
-    """Feature values the learned ranker consumes, keyed by ``_RANKER_FEATURES``.
+    """Feature values describing one cluster, for ranking.
 
-    Enclosure, hydrophobicity and aromatic count are averaged over the cluster's
-    member pockets so the ranker sees the pocket's typical character across the
-    ensemble rather than any single conformer.
+    Returns a superset of the features the shipped model uses: ``_RANKER_FEATURES``
+    names the subset actually scored, while the extra keys are candidates that
+    benchmarks/train_ranker.py can evaluate. Adding a key here is therefore safe;
+    it changes what can be fitted, not what is currently scored.
+
+    Per-conformer properties are averaged over the cluster's member pockets so the
+    ranker sees the site's typical character across the ensemble rather than any
+    single conformer.
     """
     mem = c.member_pockets
     n_mem = max(len(mem), 1)
     n_lin = len(c.lining_residues)
+
+    def avg(attr: str, default: float = 0.0) -> float:
+        return sum(getattr(p, attr, default) for p in mem) / n_mem
+
+    # Spatial stability across the ensemble: a real site keeps the same location
+    # while a spurious blob wanders between conformers. Single-structure detectors
+    # have no equivalent, so this is information unique to the ensemble approach.
+    if len(mem) > 1:
+        pts = np.asarray([p.centroid for p in mem], dtype=float)
+        centroid_std = float(np.sqrt(((pts - pts.mean(axis=0)) ** 2).sum(axis=1).mean()))
+    else:
+        centroid_std = 0.0
+
+    vols = [p.volume_a3 for p in mem] or [0.0]
+    vol_mean = sum(vols) / len(vols)
+    vol_cv = (
+        float(np.std(vols) / vol_mean) if vol_mean > 1e-6 and len(vols) > 1 else 0.0
+    )
+
     return {
+        # --- shipped subset -------------------------------------------------
         "vol": c.volume_a3,
         "vol_max": c.volume_max_a3,
         "vol_min": c.volume_min_a3,
@@ -100,10 +125,23 @@ def ranker_features(c: PocketCluster) -> dict[str, float]:
         "pers": c.persistence,
         "n_lin": float(n_lin),
         "vol_per_lin": c.volume_a3 / max(n_lin, 1),
-        "enc": sum(getattr(p, "enclosure", 0.0) for p in mem) / n_mem,
-        "hyd": sum(getattr(p, "hydrophobic_fraction", 0.0) for p in mem) / n_mem,
-        "aro": sum(getattr(p, "aromatic_count", 0) for p in mem) / n_mem,
+        "enc": avg("enclosure"),
+        "hyd": avg("hydrophobic_fraction"),
+        "aro": avg("aromatic_count"),
         "n_mem": float(len(mem)),
+        # --- candidate geometry (see detector._pocket_from_cavity) -----------
+        # `enc` above is clipped at a buriedness of 0.4 and saturates for deeply
+        # buried pockets; the raw value keeps that resolution.
+        "bur_raw": avg("buriedness_raw"),
+        "depth": avg("depth_a"),
+        "depth_max": max((getattr(p, "depth_a", 0.0) for p in mem), default=0.0),
+        "mouth": avg("mouth_frac"),
+        "elong": avg("elongation", 1.0),
+        "flat": avg("flatness", 1.0),
+        "dcen": avg("dist_center_frac"),
+        # --- candidate ensemble dynamics -------------------------------------
+        "centroid_std": centroid_std,
+        "vol_cv": vol_cv,
     }
 
 

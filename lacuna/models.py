@@ -56,6 +56,18 @@ class Pocket:
     # is not used by the crypticity ranking, only recorded for provenance.
     source: str = "alpha"
     score: float | None = None
+    # Geometric descriptors used by the learned ranker. These are cheap by-products
+    # of the detection grid (see detector._pocket_from_cavity) and describe *where*
+    # and *what shape* the cavity is, which the volume/druggability summaries above
+    # do not capture.
+    buriedness_raw: float = 0.0   # uncapped local protein density; `enclosure` is
+                                  # this value clipped at 0.4, which saturates for
+                                  # exactly the deeply buried pockets that matter
+    depth_a: float = 0.0          # Å from the cavity to bulk solvent
+    mouth_frac: float = 0.0       # 0-1, fraction of cavity voxels touching bulk
+    elongation: float = 1.0       # 0-1, second/first PCA extent of the cavity
+    flatness: float = 1.0         # 0-1, third/first PCA extent of the cavity
+    dist_center_frac: float = 0.0  # |centroid - protein centre| / radius of gyration
 
 
 @dataclass
