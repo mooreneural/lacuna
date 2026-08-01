@@ -35,6 +35,7 @@ from cryptic_benchmark import (  # noqa: E402
     CENTROID_THRESHOLD, OVERLAP_THRESHOLD, JACCARD_THRESHOLD,
 )
 from lacuna.io.structure import load_structure  # noqa: E402
+from lacuna.pockets.clusterer import DEFAULT_RANK_BY  # noqa: E402
 
 PM_DIR = Path(__file__).parent / "pm_data"
 MAX_RESIDUES = 700
@@ -82,7 +83,7 @@ def main():
     import argparse
     from lacuna.pockets.clusterer import RANK_STRATEGIES
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--rank-by", dest="rank_by", default="crypticity",
+    ap.add_argument("--rank-by", dest="rank_by", default=DEFAULT_RANK_BY,
                     choices=list(RANK_STRATEGIES),
                     help="Pocket ranking strategy (default: crypticity)")
     args = ap.parse_args()

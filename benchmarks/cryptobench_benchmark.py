@@ -38,6 +38,7 @@ from cryptic_benchmark import (  # noqa: E402
     CENTROID_THRESHOLD, OVERLAP_THRESHOLD, JACCARD_THRESHOLD,
 )
 from lacuna.io.structure import load_structure  # noqa: E402
+from lacuna.pockets.clusterer import DEFAULT_RANK_BY  # noqa: E402
 
 CB_DIR = Path(__file__).parent / "cb_data"
 CIF_DIR = CB_DIR / "cif"
@@ -145,7 +146,7 @@ def main():
                 continue
             ref = known_centroid(s, chain, known)
             clusters, elapsed = run_lacuna(cif, args.conformers, chain=chain,
-                                           rank_by="crypticity")
+                                           rank_by=DEFAULT_RANK_BY)
         except Exception as e:
             n_skip += 1
             print(f"  [skip] {tag}: {type(e).__name__}: {str(e)[:80]}", flush=True)

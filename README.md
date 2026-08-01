@@ -89,7 +89,7 @@ for c in clusters[:5]:
 2. **Pocket detection** - Grid-based alpha-point analysis per conformer: compute distance transform, find local maxima within the 1.4-5.5 Å interaction zone, cluster nearby alpha-points into pocket candidates
 3. **Cross-ensemble clustering** - Greedy centroid merging clusters corresponding pockets across all conformers
 4. **Druggability scoring** - Gaussian volume reward centered at 300 Å³ + enclosure + hydrophobicity + aromaticity (Halgren 2009), scored in each conformer
-5. **Crypticity scoring & ranking** - Each site gets a continuous crypticity score (how much it opens relative to the apo state × druggability when open) and is flagged `cryptic: true` if present in <90% of conformers. Pockets are ranked by crypticity by default; `--rank-by druggability` is available for always-open / orthosteric sites
+5. **Scoring & ranking** - Each site gets a continuous crypticity score (how much it opens relative to the apo state × druggability when open) and is flagged `cryptic: true` if present in <90% of conformers. Sites are then ordered by a **learned ranker** (default), a linear model over 23 geometric and ensemble features fitted to identify the true binding site; `--rank-by` selects an analytic rule instead
 
 ---
 
@@ -123,85 +123,69 @@ The `nma` backend samples physically meaningful collective motions - the same hi
 
 ## Benchmarks
 
-**7 / 22 cryptic pockets localized (32%, size-robust criterion; NMA backend, crypticity ranking, 20 conformers).**
+**56.7% of known cryptic sites recovered in the top 5** on CryptoBench's held-out test fold (102/180, 95% CI 48.9-63.9), under a size-robust criterion. On the same structures that is **twice fpocket's 28.3%** and statistically level with P2Rank's 63.3%.
 
-This curated result is cross-validated on two further independent datasets - **PocketMiner 31%** and **CryptoBench 18%** (the largest and hardest) - see [Independent validation](#independent-validation--three-benchmarks) below.
+**Size-robust success criterion (top-5 pockets):** a pocket whose lining residues reach a **Jaccard overlap ≥ 0.25** with the known ligand-contact site (Jaccard = |found ∩ known| / |found ∪ known|), **or** whose center is within 4 Å of the site centroid. Lining residues use a true atomic-contact definition (any residue with an atom within 5 Å of the detected cavity). Recall is *not* used as the headline: a large pocket can engulf a small known site and score high recall while sitting nowhere near it. Both numbers print side by side in every benchmark script.
 
-**Size-robust success criterion (top-5 pockets):** a pocket whose lining residues reach a **Jaccard overlap ≥ 0.25** with the known ligand-contact site (Jaccard = |found ∩ known| / |found ∪ known|), **or** whose center is within 4 Å of the site centroid. Lining residues use a true atomic-contact definition (any residue with an atom within 5 Å of the detected cavity). Reproduce with `python benchmarks/cryptic_benchmark.py --category cryptic`.
+### Head-to-head against other detectors
 
-> **Why the number is lower than you may have seen before - please read.** Earlier releases led with plain **recall** (|found ∩ known| / |known| ≥ 30%), which gave **13/22 (59%)** but is *size-gameable*: a large pocket engulfs a small known site and scores high recall while sitting nowhere near it. A learned re-ranker confirmed this by reaching 84% on recall purely by ranking pockets on raw volume. The headline now leads with **size-robust** Jaccard (or a ≤4 Å centroid hit) instead, which roughly halves the numbers but is the one we can defend on held-out data; only 2/22 pass the strict centroid test alone. Both criteria print side by side in every benchmark script.
+All four tools scored on CryptoBench's held-out test fold under the identical criterion. MDpocket is given the **same NMA ensemble Lacuna uses**, so that row compares the analysis pipelines rather than the samplers.
 
-### Cryptic pockets - 7 / 22 (32%)
+| Detector | Kind | Size-robust top-5 | Paired vs Lacuna |
+|----------|------|:-----------------:|------------------|
+| P2Rank | single-structure, learned | **63.3%** (114/180) | -6.7% [-14.4, +0.6] |
+| **Lacuna** | **ensemble** | **56.7%** (102/180) | - |
+| MDpocket | ensemble (same input ensemble) | 44.1% (79/179) | **+11.7% [+3.9, +19.6]** |
+| fpocket | single-structure, geometric | 28.3% (51/180) | **+28.3% [+20.0, +36.7]** |
 
-The remaining gap is mostly sampling, not ranking: at top-20 the size-robust score only rises to 10/22, so 12 of the misses are never localized at all rather than found-but-mis-ranked. The hard cases split into oligomeric-interface pockets (invisible to single-chain analysis, partly addressable with `--homodimer`) and large-rearrangement sites that need sampling beyond elastic-network modes.
+Lacuna beats both open ensemble and single-structure geometric detectors by margins whose confidence intervals exclude zero, and is **statistically indistinguishable from P2Rank** (the interval spans zero). The three-way union reaches 76.7%, so the tools remain complementary rather than redundant.
 
-**[Full 22-target breakdown, per-target Jaccard/recall/rank →](docs/BENCHMARKS.md#cryptic-pockets-full-22-target-breakdown)**
+MDpocket is the closest relative of this work and the fair ensemble baseline. Its best configuration out of ten (isovalue and ranking rule both swept in its favour) is reported; at its default isovalue it scores 40.2%.
 
-### Independent validation - three benchmarks
-
-Measured on three independent datasets (NMA + crypticity, top-5). Both criteria are reported: the **size-robust** headline (Jaccard ≥ 0.25 **or** ≤ 4 Å centroid) and the **legacy recall** number (≥ 30% recall **or** ≤ 4 Å centroid) that earlier releases led with.
+### Independent validation
 
 | Benchmark | N | Size-robust | Legacy recall | Notes |
 |-----------|--:|:-----------:|:-------------:|-------|
-| Curated apo/holo set (this repo) | 22 | **32%** | 59% | literature cryptic pairs |
-| PocketMiner | 45 | **31%** | 60% | per-residue cryptic labels |
-| CryptoBench (test fold) | 180 | **18%** | 49% | largest & most diverse |
-| CryptoBench (train, generalization) | 749 | **13%** | 50% | held out from all tuning |
+| CryptoBench (held-out test fold) | 180 | **56.7%** | 68% | largest & most diverse; the headline |
+| PocketMiner | 45 | **73%** (33/45) | 80% | per-residue cryptic labels |
+| Curated apo/holo set (this repo) | 22 | **41%** (9/22) | 64% | hand-picked literature cryptic pairs |
 
-Datasets: PocketMiner (Meller et al. 2023, *Nat. Commun.*); CryptoBench (Vavra et al. 2024, *Bioinformatics*).
+Datasets: PocketMiner (Meller et al. 2023, *Nat. Commun.*); CryptoBench (Vavra et al. 2024, *Bioinformatics*). The CryptoBench split follows the dataset's own homology-separated folds, and the ranker was fitted only on train folds, so the test fold is genuinely unseen.
 
-The two curated/field-standard sets converge at ~31-32% under the size-robust metric; **CryptoBench** - the field's largest cryptic set (1107 structures; 180 of its 222-structure held-out test fold evaluated here) - is harder at **18%**. The legacy recall column roughly doubles every number: that gap is the size-gaming headroom the recall metric leaves open (a large pocket covers a small known site without being localized on it), which is exactly why the size-robust number is the one we lead with.
-
-**Generalization.** To check that these numbers are not an artifact of the specific test fold, we scored all 749 CryptoBench *train*-fold structures, which were never used in any tuning: **13%** size-robust (95% CI 10-16%) and 50% legacy. Both are statistically consistent with the test fold (overlapping confidence intervals), so the honest headline holds up on genuinely unseen pockets. Reproduce (each script prints both criteria):
+The curated 22-target set is the hardest of the three despite being the smallest: it was assembled from published cryptic-pocket case studies and is deliberately enriched for the large-motion sites this pipeline handles worst.
 
 ```bash
-python benchmarks/pocketminer_benchmark.py    # PocketMiner (auto-downloads)
-python benchmarks/cryptobench_benchmark.py    # CryptoBench test fold (auto-downloads, ~10 min)
+python benchmarks/cryptic_benchmark.py --category cryptic     # curated set (~4 min)
+python benchmarks/pocketminer_benchmark.py                    # PocketMiner (auto-downloads)
+python benchmarks/cryptobench_benchmark.py                    # CryptoBench test fold (~10 min)
+python benchmarks/compare_detectors_cryptobench.py --analyze  # the head-to-head table
+python benchmarks/compare_mdpocket.py --folds test            # vs MDpocket (needs mdpocket on PATH)
 ```
 
-### Limitations and scaling (this ceiling is a compute problem)
+### Where the remaining gap is
 
-The honest ceiling above (about 32% on the curated set, 13 to 18% on CryptoBench under the size-robust metric) is set by **conformational sampling**, not by ranking or pocket detection. At a top-20 cutoff the numbers rise only slightly, which means the pocket is usually not found-but-mis-ranked; it is simply never sampled in an open state.
+Across the candidate set Lacuna generates, **some** cluster clears the criterion for 73.7% of structures, against the 56.7% that reach the top 5. That 17-point gap is a ranking problem, not a detection one: the site is usually found and then out-ranked. Most of it sits just outside the cutoff, with the correct cluster at rank 6-8 for 14 structures, and top-8 recovery is already 64.8%.
 
-The remaining misses concentrate in the **large-collective-motion classes**, hinge and oligomeric-interface openings. The default NMA backend is harmonic and cannot generate those motions. Molecular dynamics can in principle, but a cryptic opening is a **rare event**: in our tests, short trajectories (0.5 to 3 ns) essentially never caught one, and enhanced-temperature MD, metadynamics along an apo-derived collective variable, and SWISH scaled-water MD were all null at the sampling a single workstation affords (see `benchmarks/experiments/`).
+Several attempts to close it returned nothing measurable: spatial non-maximum suppression, merging adjacent sub-pockets, hard-negative mining, gradient boosting in place of the linear model, and importing P2Rank's own per-pocket confidence as a feature. That last one matters most: if per-point scoring were the missing ranking ingredient, handing the ranker P2Rank's opinion directly would have helped, and it did not (-1.1% on held-out data). P2Rank's advantage lies in proposing different candidates, not in ordering ours better.
 
-Raising this ceiling is a **compute problem, not a missing algorithm**. Reliably observing rare openings needs orders of magnitude more MD sampling: tens to hundreds of nanoseconds per trajectory across dozens of independent replicas, aggregating microseconds per target, the scale used by the successful literature (for example PocketMiner's ~940,000 simulation windows and Folding@home-style datasets). As an anchor, the development GPU runs a small protein at roughly 300 ns/day; sampling rare openings across the 22 to 885 benchmark targets, with the frontier proteins several times slower, is tens to hundreds of GPU-days. **That is cluster or cloud GPU scale.** With that budget, the same pipeline could be driven by long multi-replica MD (or cosolvent MD) to attack the hinge and interface classes that are out of reach on a single machine.
+The other limit is sampling. Stratifying the test fold by how far the pocket moves between apo and holo, Lacuna recovers 47% of the most-mobile quartile against P2Rank's 62%. The default NMA backend is harmonic and cannot generate large hinge or interface openings, and enhanced-temperature MD, metadynamics along an apo-derived collective variable, and SWISH scaled-water MD were each null against baseline at single-workstation sampling (see `benchmarks/experiments/`). Reliably catching those rare events needs tens to hundreds of nanoseconds across dozens of replicas per target, which is cluster scale, not a missing algorithm.
 
-Crypticity ranking (the default) intentionally de-prioritizes always-open sites; for orthosteric / general pocket finding use `--rank-by druggability` (orthosteric controls: [3/6 →](docs/BENCHMARKS.md#orthosteric--conformational-controls), a known relative weakness of this tight-contact pipeline).
+### Ranking
 
-### Crypticity score
+`--rank-by` selects how sites are ordered. The default `learned` is a linear model over 23 features (pocket geometry, druggability, and ensemble-derived terms such as how far a site's centroid wanders between conformers, which single-structure detectors cannot compute). It is trained on within-structure pairs, so it optimises ordering directly rather than classifying pockets in isolation.
 
-Every reported pocket carries a continuous **crypticity score** in [0, 1] - the conformational-selection signature of a cryptic site, defined as how much the pocket opens relative to the apo/input structure × how druggable it is once open:
+On CryptoBench's test fold it recovers 57.0% against 17.8% for the previous `crypticity` default. **On the curated 22-target set the ordering reverses**: `persistence` and `balanced` reach 13/22 where `learned` reaches 9/22, though at n=22 the intervals overlap heavily. If your targets resemble the classic literature case studies more than CryptoBench, the analytic strategies are worth trying. **[Full ablation →](docs/BENCHMARKS.md#ranking-strategies)**
+
+Every pocket also carries a continuous **crypticity score** in [0, 1], the conformational-selection signature of a cryptic site:
 
 ```
 opening    = (max_volume − apo_volume) / max_volume        # 1.0 if absent in the apo state
 crypticity = opening × peak_open_state_druggability
 ```
 
-A constitutive pocket already formed in the input structure scores ≈ 0; a pocket absent in the apo structure that opens into a druggable cavity scores near 1. Ranking by crypticity is the **default** and recovers the most cryptic targets. The JSON report also includes per-pocket volume dynamics (`apo_volume_A3`, `volume_range_A3`) and `max_druggability`.
+A constitutive pocket already formed in the input scores ≈ 0; one that is absent in the apo structure and opens into a druggable cavity scores near 1. The JSON report also includes per-pocket volume dynamics (`apo_volume_A3`, `volume_range_A3`) and `max_druggability`.
 
-`--rank-by` selects how pockets are ordered: `crypticity` (default, most cryptic sites first, 12/20 cryptic pass), `druggability`, `balanced`, or `persistence`. NMA runtime is sub-second to ~8s per protein on a laptop CPU, no GPU required. **[Full ranking-strategy ablation and per-size timing →](docs/BENCHMARKS.md#ranking-strategies)**
-
-### Head-to-head: Lacuna vs fpocket
-
-fpocket detects pockets on a single static structure. Lacuna generates a conformational ensemble to expose sites that only become visible once the protein moves. Run side by side on the same structures under the same size-robust criterion (top-5, Jaccard ≥ 0.25 or centroid ≤ 4 Å), the two tools catch largely different pockets:
-
-| Set | fpocket | Lacuna | **Combined (either)** |
-|-----|:-------:|:------:|:----------------------:|
-| CryptoBench test fold (n=180) | 28% (51/180) | 16% (29/180) | **38% (68/180)** |
-| Curated cryptic set (n=22) | 18% (4/22) | 18% (4/22) | **36% (8/22)** |
-
-On CryptoBench, Lacuna independently recovers **17 pockets that fpocket misses entirely**: sites invisible to single-structure geometric detection that only open once the ensemble samples them. On the curated set, the hit lists don't overlap at all: fpocket catches T4 lysozyme's buried cavity and PTP1B's allosteric site, while Lacuna catches the BCL-2/BCL-XL BH3 grooves, MDM2's p53-binding cleft, and IL-2's helix pocket, sites that open through conformational change rather than being present in one fixed geometry. Running both and taking the union beats either tool alone on both benchmarks.
-
-> **Reproduce:**
-> ```bash
-> python benchmarks/compare_fpocket.py                            # 22 curated cryptic targets vs fpocket
-> python benchmarks/compare_fpocket_cryptobench.py --folds test   # CryptoBench test fold vs fpocket (~7 min)
-> python benchmarks/cryptic_benchmark.py --category cryptic       # 22 cryptic targets, NMA (~4 min)
-> python benchmarks/cryptic_benchmark.py --quick                  # 10 conformers, faster
-> python benchmarks/cryptic_benchmark.py --category cryptic --rank-by druggability  # ablation
-> python benchmarks/cryptic_benchmark.py --category cryptic --top-n 20              # detection ceiling
-> ```
+NMA runtime is sub-second to ~7s per protein on a laptop CPU, no GPU required. **[Per-size timing →](docs/BENCHMARKS.md#speed-nma-backend-no-gpu)**
 
 ---
 

@@ -23,15 +23,16 @@ _DBSCAN_EPS = 5.0    # Å - pockets within 5 Å centroid distance are the same p
 _CRYPTIC_THRESHOLD = 0.9  # persistence below this → cryptic
 
 # Ranking strategies. The default "learned" is a fitted model (see below) and
-# recovers roughly twice as many known sites as the analytic rules on CryptoBench
-# (32.2% vs 17.8% on the held-out test fold, n=180). "crypticity" is the previous
+# recovers roughly three times as many known sites as the analytic rules on
+# CryptoBench (57.0% vs 17.8% on the held-out test fold, n=180). "crypticity" is the previous
 # default and ranks purely by how much a site opens relative to the input;
 # "druggability" ranks by peak open-state druggability (preferable for always-open
 # / orthosteric sites); the legacy "persistence" strategy multiplies druggability
 # by persistence, demoting the very transient pockets the tool targets; "balanced"
 # keeps druggability primary with a mild persistence bonus.
 RANK_STRATEGIES = ("learned", "crypticity", "druggability", "persistence", "balanced")
-_DEFAULT_RANK_BY = "learned"
+DEFAULT_RANK_BY = "learned"
+_DEFAULT_RANK_BY = DEFAULT_RANK_BY  # backwards-compatible alias
 
 # ── learned ranker ──────────────────────────────────────────────────────────────
 # A linear model over cluster features, fitted to predict whether a cluster is the

@@ -36,6 +36,7 @@ from cryptobench_benchmark import (  # noqa: E402
 )
 from compare_fpocket import run_fpocket, residue_overlap, residue_jaccard  # noqa: E402
 from lacuna.io.structure import load_structure  # noqa: E402
+from lacuna.pockets.clusterer import DEFAULT_RANK_BY  # noqa: E402
 
 
 def main():
@@ -102,7 +103,7 @@ def main():
         # Lacuna, same config as cryptobench_benchmark.py
         try:
             clusters, elapsed = run_lacuna(cif, args.conformers, chain=chain,
-                                           backend_name="nma", rank_by="crypticity")
+                                           backend_name="nma", rank_by=DEFAULT_RANK_BY)
         except Exception as e:
             n_skip += 1
             print(f"  [{i}/{len(ids)}] [skip] {tag}: lacuna {type(e).__name__}", flush=True)

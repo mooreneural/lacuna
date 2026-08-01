@@ -45,6 +45,7 @@ from cryptic_benchmark import (  # noqa: E402
     OVERLAP_THRESHOLD, JACCARD_THRESHOLD,
 )
 from lacuna.io.structure import load_structure  # noqa: E402
+from lacuna.pockets.clusterer import DEFAULT_RANK_BY  # noqa: E402
 from lacuna.io.writers import write_structure_pdb  # noqa: E402
 
 DEFAULT_CONFORMERS = 20
@@ -240,7 +241,7 @@ def main():
         try:
             clusters, lac_elapsed = run_lacuna(
                 pdb_path, args.conformers, chain=chain,
-                backend_name="nma", rank_by="crypticity")
+                backend_name="nma", rank_by=DEFAULT_RANK_BY)
         except Exception as e:
             print(f"error: {e}")
             continue

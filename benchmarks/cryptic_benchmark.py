@@ -33,7 +33,7 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 # Sourced from the clusterer so a new strategy is selectable here automatically.
-from lacuna.pockets.clusterer import RANK_STRATEGIES  # noqa: E402
+from lacuna.pockets.clusterer import RANK_STRATEGIES, DEFAULT_RANK_BY  # noqa: E402
 
 # ── constants ─────────────────────────────────────────────────────────────────
 
@@ -679,7 +679,7 @@ def run_lacuna(
     n_conformers: int,
     chain: str | None = None,
     backend_name: str = "nma",
-    rank_by: str = "druggability",
+    rank_by: str = DEFAULT_RANK_BY,
     homodimer: bool = False,
     nma_rmsd: float = 2.0,
     nma_modes: int = 10,
@@ -744,7 +744,7 @@ def main():
                         help="Ensemble backend (default: nma - the package default)")
     parser.add_argument("--rank-by", dest="rank_by",
                         choices=list(RANK_STRATEGIES),
-                        default="crypticity",
+                        default=DEFAULT_RANK_BY,
                         help="Pocket ranking strategy (default: crypticity)")
     parser.add_argument("--only", default=None,
                         help="Comma-separated entry IDs to run a subset "

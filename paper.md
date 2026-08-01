@@ -140,38 +140,43 @@ assembly construction (see Benchmark).
 
 ## Benchmark
 
-On a 22-protein benchmark of apo/holo cryptic-pocket pairs (targets drawn from
-the cryptic-pocket literature, including CryptoSite examples [@cimermancic2016]),
-Lacuna localizes 7/22 cryptic pockets (32%) using the NMA backend with 20
-conformers and crypticity ranking, under a size-robust success criterion. A pocket
-counts as detected if, among the top five ranked clusters, one's lining residues
-(true atomic contact, ≤5 Å from the detected cavity) reach a Jaccard overlap
-(intersection over union) of at least 0.25 with the known ligand-contact residues,
-or its center lies within 4 Å of the binding-site centroid. We use Jaccard rather
-than plain recall (|found ∩ known| / |known|) because recall is size-gameable: a
-large pocket engulfs most of a small known site without being localized on it, and
-we verified that a learned re-ranker can reach 84% on the recall metric purely by
-ranking pockets on volume. Under the legacy recall criterion (≥30% recall or ≤4 Å
-centroid) this benchmark scores 13/22 (59%); the size-robust number is roughly half
-that, and `cryptic_benchmark.py` prints both alongside a Jaccard threshold sweep
-(2/22 satisfy the strict centroid test alone). A diagnostic at a top-20 cutoff
-lifts the size-robust score only from 7/22 to 10/22, so the residual gap is
-dominated by sampling and localization rather than ranking. The remaining misses
-fall into oligomeric-interface pockets (Caspase-1, IDH1 R132H, PKM2) that form
-between subunits and large-rearrangement sites (p38 DFG-out, c-ABL myristate)
-beyond elastic-network sampling. Runtime on the NMA backend is 0.6–8 s per protein
-on a laptop CPU.
+Lacuna is evaluated on three independent datasets under one size-robust
+criterion. A pocket counts as detected if, among the top five ranked clusters,
+one's lining residues (true atomic contact, ≤5 Å from the detected cavity) reach
+a Jaccard overlap (intersection over union) of at least 0.25 with the known
+ligand-contact residues, or its center lies within 4 Å of the binding-site
+centroid. We use Jaccard rather than plain recall (|found ∩ known| / |known|)
+because recall is size-gameable: a large pocket engulfs most of a small known
+site without being localized on it, and we verified that a learned re-ranker can
+reach 84% on the recall metric purely by ranking pockets on volume.
 
-Independent validation on two further datasets is consistent: under the size-robust
-criterion Lacuna scores 14/45 (31%) on the PocketMiner cryptic-pocket set (Meller
-et al. 2023) and 32/180 (18%) on the held-out test fold of CryptoBench (Vavra et
-al. 2024), the largest and most diverse cryptic-site dataset (legacy recall: 60%
-and 49% respectively). The two curated/field-standard sets converge at ~31-32% and
-the hardest comprehensive set floors at 18%. As a generalization check, scoring all
-749 CryptoBench train-fold structures (never used in any tuning) gives 12.8%
-size-robust (95% CI 10.4-15.5%) and 50% legacy recall, statistically consistent
-with the test fold under overlapping confidence intervals, so the reported numbers
-hold up on genuinely unseen pockets.
+On the held-out test fold of CryptoBench [@vavra2024], the largest and most
+diverse cryptic-site dataset, Lacuna recovers 102/180 sites (56.7%, 95% CI
+48.9-63.9). Independent validation is consistent: 33/45 (73%) on the PocketMiner
+set [@meller2023] and 9/22 (41%) on a curated set of apo/holo pairs drawn from
+the cryptic-pocket literature [@cimermancic2016]. The CryptoBench split follows
+the dataset's own homology-separated folds, and the ranker is fitted only on
+train folds, so the test fold is genuinely unseen. Runtime on the NMA backend is
+0.7-7 s per protein on a laptop CPU.
+
+Scored against other detectors on the same test fold and the same criterion,
+Lacuna reaches 56.7% against 28.3% for fpocket [@leguiloux2009] and 44.1% for
+MDpocket [@schmidtke2011] given the identical NMA ensemble, and is statistically
+indistinguishable from P2Rank [@krivak2018] at 63.3% (paired difference -6.7%,
+95% CI -14.4 to +0.6). The paired margins over fpocket (+28.3%, CI +20.0 to
++36.7) and MDpocket (+11.7%, CI +3.9 to +19.6) exclude zero. The three-way union
+reaches 76.7%, so the tools remain complementary rather than redundant.
+
+Two limits are worth stating. Some cluster in the candidate set clears the
+criterion for 73.7% of test-fold structures against the 56.7% that reach the top
+five, so the site is often found and then out-ranked; several attempts to close
+that gap, including importing P2Rank's own per-pocket confidence as a ranking
+feature, produced no measurable gain. Second, stratifying by how far the pocket
+moves between apo and holo, Lacuna recovers 47% of the most-mobile quartile
+against P2Rank's 62%: the default elastic-network ensemble is harmonic and cannot
+generate large hinge or interface openings, and enhanced-temperature dynamics,
+metadynamics along an apo-derived collective variable, and scaled-water dynamics
+were each null against baseline at single-workstation sampling.
 
 The benchmark also uses a stricter atomic-contact lining definition than earlier
 revisions (which used a ~13 Å sphere around the pocket center); the stricter,

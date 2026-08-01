@@ -7,7 +7,31 @@ data, never the most flattering ones available.
 
 ## [Unreleased]
 
+Two changes account for essentially all of the accuracy gain in this release:
+the ranking function and the pocket-clustering radius. Together they take
+CryptoBench test-fold recovery from 17.8% to 56.7%, which moves Lacuna from
+behind fpocket to roughly twice its score and level with P2Rank. Neither came
+from better sampling.
+
 ### Changed
+- **`CLUSTER_RADIUS_A` is now 2.0 Å** (was 4.0). Alpha points were dilated by
+  4 Å before connected components were labelled, so points ~8 Å apart fused;
+  across connected surface grooves that cascaded into mega-pockets. On
+  CryptoBench 21% of structures had the true site *fully covered* (median recall
+  100%) by a pocket carrying ~59 lining residues against ~8 known, too diffuse
+  to count as localized, while only 1% missed the site outright.
+
+  Splitting those blobs also cuts some genuine sites apart, but candidates per
+  structure fall from ~59 to ~16 and the ranking gain more than compensates.
+  Every variant that restored the lost coverage by adding candidates scored
+  worse at top-5 (pooling scales, lowering the volume floor); see
+  [docs/BENCHMARKS.md](docs/BENCHMARKS.md#why-the-clustering-radius-is-2-å).
+
+  **The ranker weights are specific to the detector geometry.** After this
+  change the previous weights scored at the random null on the new pockets, so
+  any change to detection constants requires refitting with
+  `benchmarks/train_ranker.py --fit`.
+
 - **The default ranking strategy is now `learned`** (was `crypticity`). This is
   the largest accuracy change in the project's history and it came from fixing
   ranking, not sampling.
@@ -28,33 +52,40 @@ data, never the most flattering ones available.
   | oracle over all clusters | 73.3% |
   | random top-5 null | 14.4% |
   | `crypticity` (previous default) | 17.8% (95% CI 12.2-23.3) |
-  | **`learned` (new default)** | **42.2% (95% CI 35.6-49.4)** |
+  | **`learned` (new default)** | **57.0% (95% CI 49.7-64.2)** |
 
-  Paired gain +24.4 points (95% CI +16.1 to +32.8). An identical fit on shuffled
-  labels scores 11.1%, at the random null, so the gain is signal rather than an
-  artifact of the evaluation.
+  Paired gain +24.0 points (95% CI +16.2 to +32.4). An identical fit on shuffled
+  labels scores at the random null, so the gain is signal rather than an artifact
+  of the evaluation.
 
-  Every independent benchmark improved at the same time:
+  Every independent benchmark improved at the same time (each with the shipped
+  2 A clustering radius):
 
   | dataset | `crypticity` | `learned` |
   |---|---|---|
-  | CryptoBench test fold (n=180) | 17.8% | **42.2%** |
-  | PocketMiner (n=45) | 14/45 (31%) | **24/45 (53%)** |
-  | Curated apo/holo set (n=22) | 7/22 (32%) | **8/22 (36%)** |
+  | CryptoBench test fold (n=180) | 17.8% | **56.7%** |
+  | PocketMiner (n=45) | 14/45 (31%) | **33/45 (73%)** |
+  | Curated apo/holo set (n=22) | 7/22 (32%) | **9/22 (41%)** |
 
-  **Against other detectors** on the same held-out test fold, Lacuna now leads
-  fpocket by a margin whose confidence interval excludes zero:
+  On the curated set the analytic `persistence` and `balanced` strategies reach
+  13/22, above `learned`. At n=22 those intervals overlap heavily, but the honest
+  reading is that the learned ranker is tuned to CryptoBench's distribution;
+  see [docs/BENCHMARKS.md](docs/BENCHMARKS.md#ranking-strategies).
 
-  | detector | size-robust recovery |
-  |---|---|
-  | P2Rank | 63.3% (56.1-70.6) |
-  | **Lacuna** | **42.2% (35.6-49.4)** |
-  | fpocket | 28.3% (21.7-34.4) |
+  **Against other detectors** on the same held-out test fold:
 
-  Paired: **+13.9 vs fpocket (CI +5.6 to +22.2)**, and -21.1 vs P2Rank
-  (CI -29.4 to -12.8). Lacuna moves from level with fpocket to ahead of it, and
-  narrows the P2Rank gap from -31 to -21 points. The three-way union is 75.0%,
-  so the tools remain complementary.
+  | detector | kind | size-robust recovery |
+  |---|---|---|
+  | P2Rank | single-structure, learned | 63.3% (56.1-70.6) |
+  | **Lacuna** | **ensemble** | **56.7% (48.9-63.9)** |
+  | MDpocket | ensemble, same input ensemble | 44.1% (79/179) |
+  | fpocket | single-structure, geometric | 28.3% (21.7-34.4) |
+
+  Paired: **+28.3 vs fpocket (CI +20.0 to +36.7)**, **+11.7 vs MDpocket
+  (CI +3.9 to +19.6)**, and **-6.7 vs P2Rank (CI -14.4 to +0.6, includes zero)**.
+  Lacuna now beats both open baselines by interval-separated margins and is
+  statistically indistinguishable from P2Rank. The three-way union is 76.7%, so
+  the tools remain complementary.
 
   `crypticity` remains available via `--rank-by crypticity`.
 
@@ -94,13 +125,31 @@ data, never the most flattering ones available.
   reports held-out recovery with bootstrap CIs and a shuffled-label control. It
   regenerates the shipped constants exactly. Splits on CryptoBench's own folds so
   homologous proteins stay out of the evaluation.
-- **`--rank-by` on the PocketMiner benchmark** (previously pinned to crypticity),
-  and a `lacuna_learned` column plus `--exclude-trained` in the multi-detector
-  comparison so no tool is ever scored on its own training data.
+- **`benchmarks/compare_mdpocket.py`** - ensemble-to-ensemble comparison against
+  MDpocket, the closest prior art. Both tools receive the identical NMA ensemble
+  and the same lining-residue rule, so the comparison isolates detection,
+  aggregation and ranking rather than the sampler. MDpocket emits an occupancy
+  grid rather than a ranked list, so its isovalue and ranking rule are swept and
+  its best configuration is reported.
+- **`benchmarks/compare_detectors_cryptobench.py`** - scores Lacuna, fpocket and
+  P2Rank per structure under one criterion, with per-(structure, tool)
+  checkpointing and resume, and `--exclude-trained` so no tool is scored on its
+  own training data.
+- **`--rank-by` on the PocketMiner benchmark**, previously pinned to crypticity.
 
-### Notes
-- Benchmark scripts now take their strategy list from `RANK_STRATEGIES`, so a new
-  strategy is selectable everywhere without further edits.
+### Fixed
+- Benchmark scripts pinned `rank_by="crypticity"` and so silently reproduced the
+  old ranker after the default changed. They now take both the default and the
+  strategy list from the package, so a reproduction cannot drift from what users
+  actually get.
+- `paper.md` described MDpocket as requiring "microsecond molecular dynamics
+  trajectories" and being "out of reach for users without dedicated compute
+  infrastructure". Neither is true: it accepts any supplied conformational
+  ensemble, including crystal structures, and processed a 21-conformer ensemble
+  in 1.6 s on CPU here. The Statement of Need now separates single-structure,
+  learned and ensemble-based tools and states the actual distinction, that
+  MDpocket characterizes a site across an ensemble the user supplies while Lacuna
+  generates the ensemble and proposes which sites to look at.
 
 ## [0.3.1] - 2026-07-04
 

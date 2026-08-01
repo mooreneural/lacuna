@@ -51,6 +51,7 @@ from cryptic_benchmark import (  # noqa: E402
 from compare_fpocket import residue_overlap, residue_jaccard  # noqa: E402
 from metrics import paired_bootstrap_ci  # noqa: E402
 from lacuna.io.structure import load_structure  # noqa: E402
+from lacuna.pockets.clusterer import DEFAULT_RANK_BY  # noqa: E402
 from lacuna.pockets.p2rank_detector import (  # noqa: E402
     run_p2rank, p2rank_available, p2rank_executable,
 )
@@ -180,7 +181,7 @@ def main():
         try:
             clusters, lac_elapsed = run_lacuna(
                 pdb_path, args.conformers, chain=chain,
-                backend_name="nma", rank_by="crypticity")
+                backend_name="nma", rank_by=DEFAULT_RANK_BY)
         except Exception as e:
             print(f"error: {e}")
             continue
