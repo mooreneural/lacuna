@@ -30,7 +30,8 @@ _CRYPTIC_THRESHOLD = 0.9  # persistence below this → cryptic
 # / orthosteric sites); the legacy "persistence" strategy multiplies druggability
 # by persistence, demoting the very transient pockets the tool targets; "balanced"
 # keeps druggability primary with a mild persistence bonus.
-RANK_STRATEGIES = ("learned", "crypticity", "druggability", "persistence", "balanced")
+RANK_STRATEGIES = ("learned", "learned-plm", "crypticity", "druggability",
+                   "persistence", "balanced")
 DEFAULT_RANK_BY = "learned"
 _DEFAULT_RANK_BY = DEFAULT_RANK_BY  # backwards-compatible alias
 
@@ -107,6 +108,52 @@ _RANKER_WEIGHTS = (
 # Ranking is invariant to a constant offset and the pairwise fit carries no
 # intercept, so this is fixed at zero.
 _RANKER_INTERCEPT = 0.0
+
+# ── sequence-augmented ranker ("learned-plm") ───────────────────────────────────
+# The same linear form, refitted with four extra features summarizing what a
+# protein language model thinks of each pocket's lining residues (lacuna/pockets/
+# plm.py). Test-fold top-5 recovery 65.4% (95% CI 58.1-72.1) against 57.0% for the
+# geometry-only weights above, a paired gain of +8.4 (CI +4.5 to +12.8).
+#
+# Kept as a separate strategy rather than folded into "learned" so results never
+# depend on whether an optional dependency happens to be installed: the same
+# command gives the same ranking on every machine.
+#
+# Worth knowing before reading too much into the geometric terms: in this linear
+# form the sequence features carry most of the ordering (plm_mean's weight dwarfs
+# every geometric one, and a PLM-only fit ranks almost identically). Geometry is
+# what proposes the candidates in the first place, which no sequence model can
+# do; it just contributes little to ordering them once sequence signal is present.
+_PLM_RANKER_FEATURES = _RANKER_FEATURES + ("plm_mean", "plm_max", "plm_top3", "plm_frac")
+_PLM_RANKER_WEIGHTS = (
+    0.0010858937373982053,    # vol
+    -0.0005627733749473601,   # vol_max
+    0.001723367158754679,     # vol_min
+    0.0017001236242169975,    # apo_vol
+    1.4965206767275656,       # drug
+    -0.8171819690893769,      # max_drug
+    1.238390413478009,        # cryp
+    4.535348376392272,        # pers
+    0.011989718245105025,     # n_lin
+    -0.05140056972265015,     # vol_per_lin
+    1.1026412235902685,       # enc
+    0.32309731785983914,      # hyd
+    -0.03225144090049242,     # aro
+    -0.17963074081534938,     # n_mem
+    -4.725553439291813,       # bur_raw
+    0.008651974840830636,     # depth
+    -0.04095810705683565,     # depth_max
+    -1.3304989783025412,      # mouth
+    -0.0839137639992623,      # elong
+    -0.7920109880790633,      # flat
+    -0.4684936134234523,      # dcen
+    0.05827125507076521,      # centroid_std
+    0.8422089582169542,       # vol_cv
+    11.884641855958519,       # plm_mean
+    -2.5900668306274293,      # plm_max
+    0.9129034943213035,       # plm_top3
+    -1.619281395054233,       # plm_frac
+)
 
 
 def ranker_features(c: PocketCluster) -> dict[str, float]:
@@ -187,6 +234,18 @@ def learned_score(c: PocketCluster) -> float:
     )
 
 
+def learned_plm_score(c: PocketCluster, plm_features: dict[str, float]) -> float:
+    """Sequence-augmented ranking score (higher is better).
+
+    ``plm_features`` comes from ``lacuna.pockets.plm.pocket_features`` for this
+    cluster's lining residues. Missing keys score 0, which is what an absent
+    sequence signal should contribute rather than an error.
+    """
+    f = {**ranker_features(c), **plm_features}
+    return sum(w * f.get(name, 0.0)
+               for name, w in zip(_PLM_RANKER_FEATURES, _PLM_RANKER_WEIGHTS))
+
+
 def compute_crypticity(apo_volume: float, max_volume: float, max_druggability: float) -> float:
     """Continuous crypticity score in [0, 1].
 
@@ -220,6 +279,9 @@ def _rank_key(c: PocketCluster, rank_by: str) -> float:
         return c.crypticity
     if rank_by == "learned":
         return learned_score(c)
+    if rank_by == "learned-plm":
+        # Populated by cluster_pockets when residue probabilities are supplied.
+        return learned_plm_score(c, getattr(c, "_plm_features", {}) or {})
     raise ValueError(
         f"Unknown rank_by={rank_by!r}; choose from {RANK_STRATEGIES}"
     )
@@ -229,6 +291,7 @@ def cluster_pockets(
     pocket_lists: list[list[Pocket]],
     n_conformers: int,
     rank_by: str = _DEFAULT_RANK_BY,
+    plm_residue_probs: dict[int, float] | None = None,
 ) -> list[PocketCluster]:
     """Aggregate pockets across ensemble conformers into ranked clusters.
 
@@ -250,6 +313,14 @@ def cluster_pockets(
     if rank_by not in RANK_STRATEGIES:
         raise ValueError(
             f"Unknown rank_by={rank_by!r}; choose from {RANK_STRATEGIES}"
+        )
+    # Checked before any work: a caller who forgot the probabilities has a bug,
+    # and should hear about it immediately rather than after clustering, or not
+    # at all when the structure happens to yield no pockets.
+    if rank_by == "learned-plm" and not plm_residue_probs:
+        raise ValueError(
+            'rank_by="learned-plm" needs plm_residue_probs; compute them once per '
+            "structure with lacuna.pockets.plm.residue_probabilities"
         )
     all_pockets: list[Pocket] = []
     for ci, pockets in enumerate(pocket_lists):
@@ -330,6 +401,17 @@ def cluster_pockets(
             appears_in_conformers=conformer_set,
             member_pockets=members,
         ))
+
+    if rank_by == "learned-plm":
+        from lacuna.pockets.plm import pocket_features as _plm_pocket_features
+
+        for c in clusters:
+            nums = set()
+            for label in c.lining_residues:
+                digits = "".join(ch for ch in label.split(":")[0] if ch.isdigit())
+                if digits:
+                    nums.add(int(digits))
+            c._plm_features = _plm_pocket_features(nums, plm_residue_probs)
 
     # Rank by the chosen strategy (ties broken by peak druggability for stability)
     clusters.sort(key=lambda c: (_rank_key(c, rank_by), c.max_druggability), reverse=True)

@@ -30,8 +30,11 @@ dependencies = [
 
 [project.optional-dependencies]
 openmm = ["openmm>=8.0", "pdbfixer>=1.9"]
+# Sequence-augmented ranking (--rank-by learned-plm). Downloads an ESM-2
+# checkpoint on first use; the fitted head itself ships with the package.
+plm = ["torch>=2.0", "transformers>=4.30"]
 boltz = ["boltz>=0.4"]
-all = ["lacuna-pockets[openmm]", "lacuna-pockets[boltz]"]
+all = ["lacuna-pockets[openmm]", "lacuna-pockets[boltz]", "lacuna-pockets[plm]"]
 dev = [
     "pytest>=7.0",
     "pytest-cov",
@@ -49,6 +52,11 @@ Issues = "https://github.com/mooreneural/lacuna/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["lacuna"]
+
+# The fitted sequence head (5.8 KB) ships with the package; only the ESM-2
+# checkpoint it reads from is downloaded on demand.
+[tool.hatch.build.targets.wheel.force-include]
+"lacuna/pockets/plm_head.npz" = "lacuna/pockets/plm_head.npz"
 
 [tool.ruff]
 line-length = 100

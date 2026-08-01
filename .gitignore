@@ -10,6 +10,9 @@ venv/
 *_lacuna/
 *.npz
 *.npy
+# The fitted sequence-ranker head is a shipped artifact, not a scratch file: the
+# package is unusable with --rank-by learned-plm without it.
+!lacuna/pockets/plm_head.npz
 *.log
 benchmarks/pdb_cache/
 benchmarks/pm_data/

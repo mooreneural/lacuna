@@ -322,11 +322,16 @@ def _paired_ci(a, b, n_boot: int = 10000, seed: int = 0):
 #: block is what lifted recovery; the ordering objective then added more on top.
 #: Deduplicated because the geometry columns became part of _RANKER_FEATURES once
 #: they shipped, and repeating a feature would give it a split, meaningless weight.
+#: Sequence-side features from a protein language model head. Present only in
+#: dumps built with one; fit() filters to whatever the dump actually carries, so
+#: a geometry-only dump still fits the geometry-only model.
+PLM_FEATURES = ["plm_mean", "plm_max", "plm_top3", "plm_frac"]
+
 FIT_FEATURES = list(dict.fromkeys(
     list(_RANKER_FEATURES) + [
         "bur_raw", "depth", "depth_max", "mouth", "elong", "flat", "dcen",
         "centroid_std", "vol_cv",
-    ]
+    ] + PLM_FEATURES
 ))
 
 
@@ -441,6 +446,9 @@ def cross_validate(dump_path: Path) -> None:
     if missing:
         print(f"  note: dump lacks {missing}; re-dump to evaluate them")
         extra = [f for f in extra if f in available]
+    # Sequence-side signal, present only in dumps built with a protein language
+    # model head. Kept separate so its contribution is isolated from geometry.
+    plm = [f for f in PLM_FEATURES if f in available]
     full = base + extra
 
     configs = [
@@ -454,6 +462,12 @@ def cross_validate(dump_path: Path) -> None:
             ("pairwise linear, +geometry", lambda tr: _fit_pairwise(tr, full)),
             ("gbm, +geometry", lambda tr: _fit_gbm(tr, full)),
             ("gbm, geometry only", lambda tr: _fit_gbm(tr, extra)),
+        ]
+    if plm:
+        configs += [
+            ("pairwise linear, +PLM", lambda tr: _fit_pairwise(tr, full + plm)),
+            ("pairwise linear, PLM only", lambda tr: _fit_pairwise(tr, plm)),
+            ("gbm, +PLM", lambda tr: _fit_gbm(tr, full + plm)),
         ]
 
     # Reference: the currently shipped ranking, read off the dump's stored order.

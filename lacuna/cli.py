@@ -249,7 +249,32 @@ def discover(
         console.print("\n[dim]Clustering and ranking pockets...[/dim]")
 
     # Cluster across ensemble
-    clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coord_sets), rank_by=rank_by)
+    # The sequence ranker embeds the structure once and reuses it for every
+    # conformer: the sequence is invariant while the geometry is what moves.
+    plm_probs = None
+    if rank_by == "learned-plm":
+        from lacuna.pockets import plm as _plm
+
+        if not _plm.available():
+            console.print(
+                '  [yellow]--rank-by learned-plm needs the "plm" extra '
+                '(pip install "lacuna-pockets[plm]"). '
+                "Falling back to the geometry ranker.[/yellow]"
+            )
+            rank_by = "learned"
+        else:
+            if not quiet:
+                console.print("\n[dim]Embedding sequence for the ranker...[/dim]")
+            plm_probs = _plm.residue_probabilities(structure)
+            if not plm_probs:
+                console.print(
+                    "  [yellow]sequence embedding did not align with the residue "
+                    "list; falling back to the geometry ranker.[/yellow]"
+                )
+                rank_by = "learned"
+
+    clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coord_sets),
+                               rank_by=rank_by, plm_residue_probs=plm_probs)
 
     # Apply filters
     clusters = [
