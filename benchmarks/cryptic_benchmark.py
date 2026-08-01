@@ -724,7 +724,15 @@ def run_lacuna(
             p.conformer_idx = ci
         pocket_lists.append(pockets)
 
-    clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coords), rank_by=rank_by)
+    # Embedded once per structure, not per conformer: the sequence is what stays
+    # fixed while the geometry moves.
+    plm_probs = None
+    if rank_by == "learned-plm":
+        from lacuna.pockets import plm as _plm
+        plm_probs = _plm.residue_probabilities(structure)
+
+    clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coords),
+                               rank_by=rank_by, plm_residue_probs=plm_probs)
     elapsed = time.perf_counter() - t0
     return clusters, elapsed
 
