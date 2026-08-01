@@ -49,14 +49,24 @@ to the FDA-approved drugs sotorasib and adagrasib. More recently, cryptic
 pockets have been implicated in allosteric regulation of MDM2 [@kussie1996],
 BCL-2 family proteins, and IDH1 - all now drugged.
 
-Existing computational tools for cryptic pocket detection fall into two
+Existing computational tools for cryptic pocket detection fall into three
 categories. Structure-based tools like fpocket [@leguiloux2009] and CASTp
 analyze a single static conformation and entirely miss pockets that require
-structural rearrangement to open. Simulation-based approaches like MDpocket
-[@schmidtke2011] and CryptoSite [@cimermancic2016] require microsecond
-molecular dynamics trajectories or machine learning models trained on curated
-datasets, placing them out of reach for users without dedicated compute
-infrastructure or specialized expertise.
+structural rearrangement to open. Learned predictors such as CryptoSite
+[@cimermancic2016] and PocketMiner [@meller2023] score residues from a single
+structure using models trained on curated simulation datasets. Ensemble-based
+tools analyze many conformations: MDpocket [@schmidtke2011], the closest
+relative of this work, applies fpocket's detection across a trajectory or any
+supplied conformational ensemble and reports a grid of how often each region is
+part of a pocket, which is well suited to tracking a site whose location is
+already known.
+
+Lacuna differs from MDpocket in scope rather than in the idea of analyzing an
+ensemble. MDpocket consumes an ensemble the user supplies and returns
+occupancy grids that are interpreted visually at a chosen isovalue; Lacuna
+generates the ensemble itself, and returns a ranked shortlist of candidate sites
+with docking-ready outputs. The two are complementary: MDpocket characterizes a
+site across an ensemble, Lacuna proposes which sites to look at.
 
 Lacuna occupies the gap between these extremes. It requires no GPU, no
 simulation software, and no training data. Starting from any PDB or mmCIF
