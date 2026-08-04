@@ -326,16 +326,29 @@ def _paired_ci(a, b, n_boot: int = 10000, seed: int = 0):
 #: block is what lifted recovery; the ordering objective then added more on top.
 #: Deduplicated because the geometry columns became part of _RANKER_FEATURES once
 #: they shipped, and repeating a feature would give it a split, meaningless weight.
+#: Ensemble-size-dependent features and their invariant replacements. `n_mem`
+#: counts members so it scales with N; the other three are extreme-value
+#: statistics that drift into the tails as more conformers are drawn. A model
+#: fitted at one ensemble size misreads another (-17.5% at N=80 vs N=20).
+_INVARIANT_SWAP = {
+    "n_mem": "mem_per_conf",
+    "vol_max": "vol_p90",
+    "vol_min": "vol_p10",
+    "depth_max": "depth_p90",
+}
+
 #: Sequence-side features from a protein language model head. Present only in
 #: dumps built with one; fit() filters to whatever the dump actually carries, so
 #: a geometry-only dump still fits the geometry-only model.
 PLM_FEATURES = ["plm_mean", "plm_max", "plm_top3", "plm_frac"]
 
 FIT_FEATURES = list(dict.fromkeys(
-    list(_RANKER_FEATURES) + [
-        "bur_raw", "depth", "depth_max", "mouth", "elong", "flat", "dcen",
-        "centroid_std", "vol_cv",
-    ] + PLM_FEATURES
+    _INVARIANT_SWAP.get(f, f) for f in (
+        list(_RANKER_FEATURES) + [
+            "bur_raw", "depth", "depth_max", "mouth", "elong", "flat", "dcen",
+            "centroid_std", "vol_cv",
+        ] + PLM_FEATURES
+    )
 ))
 
 
@@ -473,6 +486,21 @@ def cross_validate(dump_path: Path) -> None:
             ("pairwise linear, PLM only", lambda tr: _fit_pairwise(tr, plm)),
             ("gbm, +PLM", lambda tr: _fit_gbm(tr, full + plm)),
         ]
+
+    # Swap the four ensemble-size-dependent features for their invariant
+    # equivalents. The gain is robustness to --conformers, not accuracy, so the
+    # bar here is "no regression at the fitted ensemble size" rather than an
+    # improvement; the payoff shows up only when N differs from the fit.
+    inv_full = [_INVARIANT_SWAP.get(f, f) for f in full]
+    if all(f in available for f in _INVARIANT_SWAP.values()):
+        configs.append(
+            ("pairwise linear, N-invariant", lambda tr: _fit_pairwise(tr, inv_full))
+        )
+        if plm:
+            configs.append(
+                ("pairwise linear, N-invariant +PLM",
+                 lambda tr: _fit_pairwise(tr, inv_full + plm))
+            )
 
     # Reference: the currently shipped ranking, read off the dump's stored order.
     pooled_ref, pooled_null, pooled_oracle = [], 0.0, []
