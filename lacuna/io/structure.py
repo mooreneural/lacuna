@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import warnings
+from collections.abc import Iterator
 from pathlib import Path
 
 import numpy as np
@@ -30,6 +31,45 @@ VDW_RADII: dict[str, float] = {
     "C": 1.7, "N": 1.55, "O": 1.52, "S": 1.8, "P": 1.8,
     "F": 1.47, "CL": 1.75, "BR": 1.85, "I": 1.98, "H": 1.2,
 }
+
+
+def iter_model_coords(
+    path: str | Path,
+    chain: str | None = None,
+) -> "Iterator[dict[tuple[str, int, str], tuple[float, float, float]]]":
+    """Yield one atom-keyed coordinate map per model in a structure file.
+
+    ``load_structure`` deliberately keeps only the first model, which is the right
+    default for a single conformation. This is the counterpart for files that hold
+    a genuine ensemble (NMR depositions, MD frames, generative model output): each
+    model is yielded separately, keyed on ``(chain_id, res_seq, atom_name)``.
+
+    Keying rather than positional indexing is what makes external ensembles usable:
+    a frame may be missing a disordered loop, or carry residues the reference does
+    not, and the caller can still place every atom it recognizes.
+    """
+    path = Path(path)
+    parser = (MMCIFParser(QUIET=True) if path.suffix.lower() in (".cif", ".mmcif")
+              else PDBParser(QUIET=True))
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", BiopythonWarning)
+        bio_struct = parser.get_structure(path.stem, str(path))
+
+    for model in bio_struct.get_models():
+        coords: dict[tuple[str, int, str], tuple[float, float, float]] = {}
+        for chain_obj in model.get_chains():
+            if chain is not None and chain_obj.get_id() != chain:
+                continue
+            for res in chain_obj.get_residues():
+                if res.get_id()[0] != " ":
+                    continue  # HETATM / water, as elsewhere in this module
+                for atom in res.get_atoms():
+                    key = (chain_obj.get_id(), res.get_id()[1], atom.get_name().strip())
+                    if key not in coords:  # first altloc wins
+                        x, y, z = atom.get_coord()
+                        coords[key] = (float(x), float(y), float(z))
+        if coords:
+            yield coords
 
 
 def load_structure(path: str | Path, chain: str | None = None) -> Structure:

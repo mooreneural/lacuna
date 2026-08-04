@@ -66,6 +66,16 @@ def main():
     show_default=True,
     help="Ensemble generation backend.",
 )
+@click.option(
+    "--ensemble", "ensemble_source",
+    type=click.Path(exists=True, path_type=Path), default=None,
+    help=(
+        "Use a conformational ensemble you already have instead of generating "
+        "one: a multi-model PDB/mmCIF, or a directory of structure files. "
+        "Overrides --backend. Frames are matched to the input by residue "
+        "numbering and atom name, so a frame missing a loop is still usable."
+    ),
+)
 @click.option("--conformers", "-n", default=20, show_default=True,
               help="Number of conformers to generate.")
 @click.option("--output", "-o", type=click.Path(path_type=Path), default=None,
@@ -84,8 +94,8 @@ def main():
               help="Maximum number of pockets to report.")
 @click.option(
     "--rank-by", "rank_by",
-    type=click.Choice(["learned", "crypticity", "druggability", "persistence",
-                       "balanced"]),
+    type=click.Choice(["learned", "learned-plm", "crypticity", "druggability",
+                       "persistence", "balanced"]),
     default="learned", show_default=True,
     help=(
         "Pocket ranking strategy. 'learned' (default) uses the fitted ranker and "
@@ -123,6 +133,7 @@ def main():
 def discover(
     input_path: Path,
     backend: str,
+    ensemble_source: Path | None,
     conformers: int,
     output: Path | None,
     min_druggability: float,
@@ -192,14 +203,22 @@ def discover(
             n_chains = len(structure.sequence)
             console.print(f"  [dim]{n_res} residues, {n_chains} chain(s)[/dim]")
 
-        # Resolve backend
-        if backend == "auto":
+        # Resolve backend. A supplied ensemble wins: the user already has the
+        # conformers, so generating more would be discarded work.
+        if ensemble_source is not None:
+            from lacuna.ensemble.external_backend import ExternalEnsembleBackend
+            be = ExternalEnsembleBackend(ensemble_source)
+            backend = "external"
+            if not quiet:
+                cap = f", first {conformers}" if conformers > 0 else ""
+                console.print(f"\n[dim]Reading ensemble from {ensemble_source}{cap}...[/dim]")
+        elif backend == "auto":
             be = _auto_backend()
             backend = be.name
         else:
             be = _resolve_backend(backend)
 
-        if not quiet:
+        if not quiet and ensemble_source is None:
             console.print(f"\n[dim]Generating {conformers} conformers with '{backend}' backend...[/dim]")
 
         coord_sets = be.generate(effective_path, conformers)
