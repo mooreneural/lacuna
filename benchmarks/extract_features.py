@@ -2,6 +2,16 @@
 # Copyright (C) 2026 Clayton Moore
 """Extract per-pocket-cluster features + labels for the learned re-ranker.
 
+SUPERSEDED by benchmarks/train_ranker.py, which collects the same rows plus the
+geometric and sequence features the shipped ranker actually uses, splits on
+CryptoBench's own homology-separated folds, and reports held-out recovery with
+confidence intervals and a shuffled-label control. This script labels on the
+legacy size-gameable overlap criterion (>=30% recall) rather than the size-robust
+Jaccard the project reports, so anything fitted from its output optimizes the
+wrong target. Kept only to reproduce the original re-ranker experiment, which was
+itself a negative result: it reached 84% on that criterion purely by ranking
+pockets on volume.
+
 Runs Lacuna (NMA, crypticity ranking, 20 conformers) over CryptoBench fold
 structures. For every detected pocket cluster it writes one row of POCKET-INTRINSIC
 features (nothing derived from the known answer) plus a binary label: 1 if the

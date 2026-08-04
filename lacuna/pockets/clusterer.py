@@ -13,6 +13,8 @@ Each conformer produces a list of Pocket objects. This module:
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 from scipy.spatial.distance import cdist
 
@@ -219,7 +221,72 @@ def ranker_features(c: PocketCluster) -> dict[str, float]:
         # --- candidate ensemble dynamics -------------------------------------
         "centroid_std": centroid_std,
         "vol_cv": vol_cv,
+        # --- conformer-count-invariant candidates ----------------------------
+        # Four of the features above drift with the size of the ensemble, which
+        # silently degrades ranking when a user changes --conformers: `n_mem`
+        # counts members so it scales with N outright, and `vol_max`, `vol_min`
+        # and `depth_max` are extreme-value statistics, so drawing more conformers
+        # pushes them further into the tails whatever the pocket is doing. A model
+        # fitted at one ensemble size therefore misreads another (measured: -17.5%
+        # at N=80 against N=20). Quantiles and per-conformer rates below are
+        # stable as N grows and carry the same information.
+        "vol_p90": _quantile(vols, 0.90),
+        "vol_p10": _quantile(vols, 0.10),
+        "depth_p90": _quantile([getattr(p, "depth_a", 0.0) for p in mem], 0.90),
+        # Members per occupied conformer: ~1.0 normally, higher when the site
+        # fragments into several pockets within a single conformer. `pers` already
+        # carries the "how many conformers" part, so this is the residual signal
+        # in `n_mem` with the ensemble size divided out.
+        "mem_per_conf": len(mem) / max(len(c.appears_in_conformers), 1),
     }
+
+
+def _quantile(values: list[float], q: float) -> float:
+    """Linear-interpolated quantile, robust to the tiny lists clusters produce."""
+    if not values:
+        return 0.0
+    return float(np.quantile(np.asarray(values, dtype=float), q))
+
+
+#: Detection geometry the shipped weights were fitted against. The ranker reads
+#: pocket size, burial and depth, so changing how pockets are carved changes what
+#: those numbers mean: after CLUSTER_RADIUS_A went 4.0 -> 2.0 the previous weights
+#: scored at the random null on the new pockets. That failure is silent, which is
+#: the dangerous part, so a mismatch is reported once rather than left to be
+#: discovered as an unexplained accuracy drop.
+_FITTED_GEOMETRY = {
+    "CLUSTER_RADIUS_A": 2.0,
+    "MIN_VOLUME_A3": 80.0,
+    "MAX_VOLUME_A3": 1500.0,
+    "GRID_SPACING": 1.0,
+    "LINING_CONTACT_A": 5.0,
+}
+
+_geometry_warned = False
+
+
+def _check_fitted_geometry() -> None:
+    """Warn once if detection constants no longer match the fitted model."""
+    global _geometry_warned
+    if _geometry_warned:
+        return
+    from lacuna.pockets import detector
+
+    drifted = {
+        name: (expected, getattr(detector, name))
+        for name, expected in _FITTED_GEOMETRY.items()
+        if getattr(detector, name, expected) != expected
+    }
+    if drifted:
+        detail = ", ".join(f"{k}={got} (fitted at {exp})"
+                           for k, (exp, got) in sorted(drifted.items()))
+        warnings.warn(
+            f"learned ranker was fitted on different detection geometry: {detail}. "
+            "Ranking quality is not guaranteed; refit with "
+            "benchmarks/train_ranker.py --fit or use an analytic --rank-by.",
+            RuntimeWarning, stacklevel=3,
+        )
+    _geometry_warned = True
 
 
 def learned_score(c: PocketCluster) -> float:
@@ -228,6 +295,7 @@ def learned_score(c: PocketCluster) -> float:
     The linear pre-activation of the fitted logistic model. Monotonic in the
     predicted probability, so it orders identically without needing the sigmoid.
     """
+    _check_fitted_geometry()
     f = ranker_features(c)
     return _RANKER_INTERCEPT + sum(
         w * f[name] for name, w in zip(_RANKER_FEATURES, _RANKER_WEIGHTS)

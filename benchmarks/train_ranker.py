@@ -126,6 +126,10 @@ def collect(dump_path: Path, limit: int, conformers: int,
                 s = load_structure(cif, chain=chain)
                 if not (10 <= len(s.residues) <= MAX_RESIDUES):
                     continue
+                # Deliberately the analytic score, not the package default: the
+                # stored `rank` becomes the "dump ranking" baseline the fitted
+                # model is measured against, and ranking with the learned model
+                # here would make that baseline the model's own output.
                 clusters, _ = run_lacuna(cif, conformers, chain=chain,
                                          backend_name="nma", rank_by="crypticity")
             except Exception:
