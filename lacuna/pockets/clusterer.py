@@ -76,36 +76,43 @@ _DEFAULT_RANK_BY = DEFAULT_RANK_BY  # backwards-compatible alias
 # Standardization is folded into the weights so scoring is a dot product on raw
 # features: no scikit-learn or other runtime dependency, and the coefficients stay
 # readable. Retrain with benchmarks/train_ranker.py.
+# Every feature here is invariant to the size of the ensemble. The obvious
+# alternatives are not: a raw member count scales with the conformer count
+# outright, and a max or min over members drifts into the tails as more conformers
+# are drawn. A model fitted at one ensemble size then misreads another, which cost
+# 17.5 points of recovery at 80 conformers against the 20 it was fitted on, with
+# no error and no warning. Quantiles and per-conformer rates carry the same
+# information and hold steady, so --conformers is safe to change.
 _RANKER_FEATURES = (
-    "vol", "vol_max", "vol_min", "apo_vol", "drug", "max_drug", "cryp",
-    "pers", "n_lin", "vol_per_lin", "enc", "hyd", "aro", "n_mem",
-    "bur_raw", "depth", "depth_max", "mouth", "elong", "flat", "dcen",
+    "vol", "vol_p90", "vol_p10", "apo_vol", "drug", "max_drug", "cryp",
+    "pers", "n_lin", "vol_per_lin", "enc", "hyd", "aro", "mem_per_conf",
+    "bur_raw", "depth", "depth_p90", "mouth", "elong", "flat", "dcen",
     "centroid_std", "vol_cv",
 )
 _RANKER_WEIGHTS = (
-    0.0021058916300336922,    # vol
-    -0.0004395349995368121,   # vol_max
-    0.0017597092633876168,    # vol_min
-    0.0008452623407622693,    # apo_vol
-    0.9522001881935488,       # drug
-    1.0897348358917631,       # max_drug
-    0.7065755925087638,       # cryp
-    5.056160055742071,        # pers
-    -0.01762431018029651,     # n_lin
-    -0.10105522719987375,     # vol_per_lin
-    2.4157327324127422,       # enc
-    -2.2956645990906446,      # hyd
-    0.019367780922023622,     # aro
-    -0.2246354753465409,      # n_mem
-    -13.991403656872548,      # bur_raw
-    0.05564647131201399,      # depth
-    0.06300646132903952,      # depth_max
-    -0.3487358686293743,      # mouth
-    1.077822797873759,        # elong
-    -3.0491615892788557,      # flat
-    -2.49102543634838,        # dcen
-    0.04852135251917284,      # centroid_std
-    1.1505623344408817,       # vol_cv
+    0.007219713575962337,     # vol
+    -0.0012338755899826907,   # vol_p90
+    0.0026710529864424257,    # vol_p10
+    -0.000557149448829811,    # apo_vol
+    1.0540817689452078,       # drug
+    2.5769849046013653,       # max_drug
+    0.1591183395382916,       # cryp
+    0.2927419226901292,       # pers
+    -0.055120263275148663,    # n_lin
+    -0.21437485823287503,     # vol_per_lin
+    2.0033981765375746,       # enc
+    -1.4132889715947423,      # hyd
+    -0.015890154046957816,    # aro
+    -2.5138826614863174,      # mem_per_conf
+    -15.465042150906225,      # bur_raw
+    0.035062052366515786,     # depth
+    0.06769307580639192,      # depth_p90
+    -0.1646410510807594,      # mouth
+    1.3051173515736778,       # elong
+    -4.741322319769843,       # flat
+    -2.470522607918055,       # dcen
+    -0.14961954545189457,     # centroid_std
+    2.5880019412575415,       # vol_cv
 )
 # Ranking is invariant to a constant offset and the pairwise fit carries no
 # intercept, so this is fixed at zero.
@@ -126,7 +133,20 @@ _RANKER_INTERCEPT = 0.0
 # every geometric one, and a PLM-only fit ranks almost identically). Geometry is
 # what proposes the candidates in the first place, which no sequence model can
 # do; it just contributes little to ordering them once sequence signal is present.
-_PLM_RANKER_FEATURES = _RANKER_FEATURES + ("plm_mean", "plm_max", "plm_top3", "plm_frac")
+# Named explicitly rather than derived from _RANKER_FEATURES. These weights were
+# fitted before the geometry-only set moved to conformer-invariant features, and
+# deriving the list would silently repoint them at different quantities the moment
+# that set changed: same length, so the alignment test still passes, but every
+# weight applied to the wrong feature. Pending a refit on the invariant set, this
+# strategy keeps the exact features it was fitted on. ranker_features returns a
+# superset, so both live side by side.
+_PLM_RANKER_FEATURES = (
+    "vol", "vol_max", "vol_min", "apo_vol", "drug", "max_drug", "cryp",
+    "pers", "n_lin", "vol_per_lin", "enc", "hyd", "aro", "n_mem",
+    "bur_raw", "depth", "depth_max", "mouth", "elong", "flat", "dcen",
+    "centroid_std", "vol_cv",
+    "plm_mean", "plm_max", "plm_top3", "plm_frac",
+)
 _PLM_RANKER_WEIGHTS = (
     0.0010858937373982053,    # vol
     -0.0005627733749473601,   # vol_max
