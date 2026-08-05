@@ -63,7 +63,8 @@ from compare_fpocket import run_fpocket, residue_overlap, residue_jaccard  # noq
 from metrics import paired_bootstrap_ci  # noqa: E402
 from lacuna.io.structure import load_structure  # noqa: E402
 
-ALL_TOOLS = ("lacuna_md", "lacuna_nma", "lacuna_learned", "fpocket", "p2rank")
+ALL_TOOLS = ("lacuna_md", "lacuna_nma", "lacuna_learned", "lacuna_plm",
+             "fpocket", "p2rank")
 
 
 def _best_over_topk(residue_lists, known, k=5):
@@ -79,9 +80,10 @@ def _best_over_topk(residue_lists, known, k=5):
 def _run_tool(tool, cif, chain, n_conformers):
     """Run one detector on one structure; return (recall, jaccard, n_prop, elapsed)."""
     t0 = time.perf_counter()
-    if tool in ("lacuna_md", "lacuna_nma", "lacuna_learned"):
+    if tool in ("lacuna_md", "lacuna_nma", "lacuna_learned", "lacuna_plm"):
         backend = "openmm" if tool == "lacuna_md" else "nma"
-        rank_by = "learned" if tool == "lacuna_learned" else "crypticity"
+        rank_by = {"lacuna_learned": "learned",
+                   "lacuna_plm": "learned-plm"}.get(tool, "crypticity")
         clusters, _ = run_lacuna(cif, n_conformers, chain=chain,
                                  backend_name=backend, rank_by=rank_by)
         residue_lists = [c.lining_residues for c in clusters[:5]]

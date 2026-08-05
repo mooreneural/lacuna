@@ -123,23 +123,29 @@ The `nma` backend samples physically meaningful collective motions - the same hi
 
 ## Benchmarks
 
-**56.7% of known cryptic sites recovered in the top 5** on CryptoBench's held-out test fold (102/180, 95% CI 48.9-63.9), under a size-robust criterion, rising to **66.5%** with the optional sequence ranker. On the same structures that is **twice fpocket's 28.3%** and statistically level with P2Rank's 63.3%.
+**66.1% of known cryptic sites recovered in the top 5** on CryptoBench's held-out test fold with the sequence ranker (119/180, 95% CI 58.9-72.8), under a size-robust criterion; **55.6%** with the zero-dependency default. On the same structures that is level with P2Rank's 63.3% and more than twice fpocket's 28.3%.
+
+Every number in this section comes from one code state, re-measured end to end after the last change to the ranker weights.
 
 **Size-robust success criterion (top-5 pockets):** a pocket whose lining residues reach a **Jaccard overlap ≥ 0.25** with the known ligand-contact site (Jaccard = |found ∩ known| / |found ∪ known|), **or** whose center is within 4 Å of the site centroid. Lining residues use a true atomic-contact definition (any residue with an atom within 5 Å of the detected cavity). Recall is *not* used as the headline: a large pocket can engulf a small known site and score high recall while sitting nowhere near it. Both numbers print side by side in every benchmark script.
 
 ### Head-to-head against other detectors
 
-All four tools scored on CryptoBench's held-out test fold under the identical criterion. MDpocket is given the **same NMA ensemble Lacuna uses**, so that row compares the analysis pipelines rather than the samplers.
+All five paired on the same 180 test-fold structures under the identical criterion. MDpocket is given the **same NMA ensemble Lacuna uses**, so that row compares analysis pipelines rather than samplers.
 
-| Detector | Kind | Size-robust top-5 | Paired vs Lacuna (geometry) |
+| Detector | Kind | Size-robust top-5 | Paired vs `learned-plm` |
 |----------|------|:-----------------:|------------------|
-| **Lacuna + sequence** (`learned-plm`) | ensemble + PLM | **66.5%** (119/179) | +10.6% [+6.1, +15.1] |
-| P2Rank | single-structure, learned | 63.3% (114/180) | -6.7% [-14.4, +0.6] |
-| **Lacuna** (`learned`, default) | ensemble | **56.7%** (102/180) | - |
-| MDpocket | ensemble (same input ensemble) | 44.1% (79/179) | **+11.7% [+3.9, +19.6]** |
-| fpocket | single-structure, geometric | 28.3% (51/180) | **+28.3% [+20.0, +36.7]** |
+| **Lacuna** (`learned-plm`) | ensemble + PLM | **66.1%** (119/180) | - |
+| P2Rank | single-structure, learned | 63.3% (114/180) | +2.8% [-4.4, +9.4] |
+| **Lacuna** (`learned`, default) | ensemble | **55.6%** (100/180) | +10.6% [+6.1, +15.0] |
+| MDpocket | ensemble (same input ensemble) | 43.9% (79/180) | +22.2% [+14.4, +30.0] |
+| fpocket | single-structure, geometric | 28.3% (51/180) | +37.8% [+29.4, +46.1] |
 
-The default is **statistically indistinguishable from P2Rank** (the interval spans zero) and beats both open ensemble and single-structure geometric detectors by margins whose intervals exclude zero. With `--rank-by learned-plm` Lacuna is nominally ahead of P2Rank by 2.8 points, which this sample size cannot resolve: treat it as parity, not a win. The three-way union reaches 76.7%, so the tools remain complementary rather than redundant.
+With the sequence ranker Lacuna is **level with P2Rank**: nominally ahead by 2.8 points, but the interval spans zero, so parity is the honest word rather than a win. It beats every other detector here by margins whose intervals exclude zero.
+
+**The zero-dependency default does not reach parity.** At 55.6% it trails P2Rank by 7.8 points (CI -15.0 to -0.6, excluding zero). An earlier version of this file called the default indistinguishable from P2Rank; that was measured before the conformer-invariant refit and is no longer accurate. The default still beats MDpocket by +11.7% (CI +3.9 to +19.4) and fpocket by a wide margin.
+
+Union with P2Rank reaches 76.1% and Lacuna alone catches 23 structures P2Rank misses, so the tools remain complementary rather than redundant.
 
 The sequence ranker is an **optional extra** (`pip install "lacuna-pockets[plm]"`) because it needs PyTorch and downloads an ESM-2 checkpoint. It is a separate strategy rather than the default so that identical commands give identical rankings on every machine, whether or not the extra is installed.
 
@@ -149,12 +155,14 @@ MDpocket is the closest relative of this work and the fair ensemble baseline. It
 
 Default `learned` strategy, with the optional sequence ranker in the last column.
 
-| Benchmark | N | Size-robust | Legacy recall | `learned-plm` | Notes |
+| Benchmark | N | `learned` (default) | Legacy recall | `learned-plm` | Notes |
 |-----------|--:|:-----------:|:-------------:|:-------------:|-------|
-| CryptoBench (held-out test fold) | 180 | **56.7%** | 68% | **66.5%** | largest & most diverse; the headline |
-| PocketMiner | 45 | **73%** (33/45) | 80% | **80%** (36/45) | per-residue cryptic labels |
-| Curated apo/holo set (this repo) | 22 | **41%** (9/22) | 64% | 41% (9/22) | hand-picked literature cryptic pairs |
+| CryptoBench (held-out test fold) | 180 | **55.6%** | 77% | **66.1%** | largest & most diverse; the headline |
+| PocketMiner | 45 | **73%** (33/45) | 84% | **80%** (36/45) | per-residue cryptic labels |
+| Curated apo/holo set (this repo) | 22 | **45%** (10/22) | 68% | 41% (9/22) | hand-picked literature cryptic pairs |
 | COACH420 | 144 | **87%** (125/144) | 93% | not measured | *general* holo sites, not cryptic; see below |
+
+On the curated 22 the default edges out the sequence ranker, 10/22 against 9/22. At that sample size the difference is one structure and means nothing on its own, but it is a reminder that the sequence ranker's advantage is established on CryptoBench and does not automatically transfer.
 
 **On general binding sites, a general-purpose tool is better.** COACH420 holds
 holo structures whose pocket is already open, which is an easier task and not the
@@ -179,7 +187,7 @@ python benchmarks/compare_mdpocket.py --folds test            # vs MDpocket (nee
 
 ### Where the remaining gap is
 
-Across the candidate set Lacuna generates, **some** cluster clears the criterion for 73.7% of structures, against the 56.7% that reach the top 5. That 17-point gap is a ranking problem, not a detection one: the site is usually found and then out-ranked. Most of it sits just outside the cutoff, with the correct cluster at rank 6-8 for 14 structures, and top-8 recovery is already 64.8%.
+Across the candidate set Lacuna generates, **some** cluster clears the criterion for 73.7% of structures, against the 66.1% `learned-plm` surfaces in the top 5. Ranking is therefore close to exhausted: it converts 89% of what detection makes available, and even perfect ordering would add only about 8 points. The remaining 26% is a detection gap, where no candidate clears the bar at any rank.
 
 Several attempts to close it returned nothing measurable: spatial non-maximum suppression, merging adjacent sub-pockets, hard-negative mining, gradient boosting in place of the linear model, and importing P2Rank's own per-pocket confidence as a feature. That last one matters most: if per-point scoring were the missing ranking ingredient, handing the ranker P2Rank's opinion directly would have helped, and it did not (-1.1% on held-out data). P2Rank's advantage lies in proposing different candidates, not in ordering ours better.
 
@@ -189,7 +197,7 @@ The other limit is sampling. Stratifying the test fold by how far the pocket mov
 
 `--rank-by` selects how sites are ordered. The default `learned` is a linear model over 23 features (pocket geometry, druggability, and ensemble-derived terms such as how far a site's centroid wanders between conformers, which single-structure detectors cannot compute). It is trained on within-structure pairs, so it optimises ordering directly rather than classifying pockets in isolation.
 
-On CryptoBench's test fold it recovers 57.0% against 17.8% for the previous `crypticity` default. **On the curated 22-target set the ordering reverses**: `persistence` and `balanced` reach 13/22 where `learned` reaches 9/22, though at n=22 the intervals overlap heavily. If your targets resemble the classic literature case studies more than CryptoBench, the analytic strategies are worth trying. **[Full ablation →](docs/BENCHMARKS.md#ranking-strategies)**
+On CryptoBench's test fold it recovers 55.6% against 17.8% for the previous `crypticity` default, rising to 66.1% with `learned-plm`. **On the curated 22-target set the ordering reverses**: `persistence` and `balanced` reach 13/22 where `learned` reaches 10/22, though at n=22 the intervals overlap heavily. If your targets resemble the classic literature case studies more than CryptoBench, the analytic strategies are worth trying. **[Full ablation →](docs/BENCHMARKS.md#ranking-strategies)**
 
 Every pocket also carries a continuous **crypticity score** in [0, 1], the conformational-selection signature of a cryptic site:
 

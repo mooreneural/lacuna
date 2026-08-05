@@ -16,15 +16,32 @@ Lacuna uses, so that row isolates detection, aggregation and ranking rather than
 the sampler. fpocket and P2Rank are single-structure tools and see the apo
 structure, which is their intended usage.
 
-| Detector | Size-robust top-5 | Legacy recall | Paired difference vs Lacuna |
-|----------|:-----------------:|:-------------:|-----------------------------|
-| P2Rank | 63.3% (114/180) | 82% | -6.7% CI[-14.4, +0.6], includes zero |
-| **Lacuna** | **56.7% (102/180)** | 68% | - |
-| MDpocket (best of 10 configs) | 44.1% (79/179) | - | +11.7% CI[+3.9, +19.6] |
-| fpocket | 28.3% (51/180) | 32% | +28.3% CI[+20.0, +36.7] |
+All rows paired on the same 180 structures, and every Lacuna number
+re-measured end to end after the last change to the ranker weights. An earlier
+revision of this table mixed measurements taken days apart, which is why the
+figures moved slightly.
 
-Three-way union (Lacuna ∪ fpocket ∪ P2Rank): 76.7%. The tools remain
-complementary; 11 structures on this fold are recovered by Lacuna alone.
+| Detector | Size-robust top-5 | Legacy recall | Paired vs `learned-plm` |
+|----------|:-----------------:|:-------------:|-----------------------------|
+| **Lacuna** (`learned-plm`) | **66.1% (119/180)** | 82% | - |
+| P2Rank | 63.3% (114/180) | 82% | +2.8% CI[-4.4, +9.4], includes zero |
+| **Lacuna** (`learned`, default) | **55.6% (100/180)** | 77% | +10.6% CI[+6.1, +15.0] |
+| MDpocket (best of 10 configs) | 43.9% (79/180) | - | +22.2% CI[+14.4, +30.0] |
+| fpocket | 28.3% (51/180) | 32% | +37.8% CI[+29.4, +46.1] |
+
+The sequence ranker is level with P2Rank: the interval on the difference spans
+zero, so parity is the claim, not a win.
+
+**The default trails P2Rank by 7.8 points (CI -15.0 to -0.6, excluding zero.)**
+That is a change from what this file said previously. Before the
+conformer-invariant refit the default scored 56.7% with a wider interval that
+included zero, and it was described as indistinguishable from P2Rank. Refitting
+cost about a point and tightened the interval, so the difference is now
+resolvable and the earlier description no longer holds. The default still beats
+MDpocket by +11.7% (CI +3.9 to +19.4).
+
+Union of `learned-plm` and P2Rank: 76.1%, with 23 structures recovered by Lacuna
+alone. Union of all five detectors: 79.4%. The tools remain complementary.
 
 MDpocket is the closest relative of this work and the fair ensemble baseline. It
 emits an occupancy grid rather than a ranked list, so its intended workflow is
@@ -42,19 +59,21 @@ python benchmarks/compare_detectors_cryptobench.py --analyze
 python benchmarks/compare_mdpocket.py --folds test     # needs mdpocket on PATH
 ```
 
-## Curated cryptic set: 9 / 22
+## Curated cryptic set: 10 / 22
 
 Hand-assembled from published cryptic-pocket case studies, and the hardest of
 the three benchmarks despite being the smallest: it is deliberately enriched for
 the large-motion sites this pipeline handles worst.
 
-| Metric | Result |
-|--------|--------|
-| Size-robust (Jaccard ≥ 0.25 or centroid ≤ 4 Å) | **9/22 (41%)** |
-| Legacy recall (≥ 30% or centroid ≤ 4 Å) | 14/22 (64%) |
+| Metric | `learned` (default) | `learned-plm` |
+|--------|--------|--------|
+| Size-robust (Jaccard ≥ 0.25 or centroid ≤ 4 Å) | **10/22 (45%)** | 9/22 (41%) |
+| Legacy recall (≥ 30% or centroid ≤ 4 Å) | 15/22 (68%) | - |
 
-Top-k curve (all 22): top-1 4/22, top-3 6/22, top-5 9/22, top-10 13/22,
-top-20 15/22.
+The default edges out the sequence ranker here by a single structure, the
+opposite ordering to CryptoBench. One structure at n=22 means nothing by itself,
+but it is worth stating that the sequence ranker's advantage is established on
+CryptoBench and does not automatically carry over.
 
 ### By opening mechanism
 
@@ -89,15 +108,15 @@ python benchmarks/cryptic_benchmark.py --category cryptic --top-n 20   # detecti
 | `persistence` | legacy persistence × druggability | **13/22 (59%)** |
 | `balanced` | druggability with a mild persistence bonus | **13/22 (59%)** |
 | `druggability` | peak open-state composite druggability | 11/22 (50%) |
-| `learned` (default) | fitted linear ranker over 23 features | 9/22 (41%) |
+| `learned` (default) | fitted linear ranker over 23 features | 10/22 (45%) |
 | `crypticity` | most cryptic sites first (previous default) | 7/22 (32%) |
 
 **The default is not the winner here, and that is worth stating plainly.** On
-CryptoBench's test fold (n=180) `learned` recovers 57.0% against 17.8% for
+CryptoBench's test fold (n=180) `learned` recovers 55.6% against 17.8% for
 `crypticity`, an interval-separated gap on the largest and most diverse
 benchmark, which is why it ships as the default. On this 22-target set the
 ordering reverses. At n=22 the confidence intervals overlap heavily
-(`persistence` [41%, 77%] vs `learned` [23%, 64%]), so the two results are not
+(`persistence` [41%, 77%] vs `learned` [23%, 68%]), so the two results are not
 formally in conflict, but the honest reading is that the learned ranker is tuned
 to CryptoBench's distribution while the analytic rules do better on the classic
 literature targets. If your proteins resemble the latter, try
@@ -129,16 +148,16 @@ tools are paired on the 144 structures each of them scored.
 
 | Detector | COACH420 (general, holo) | CryptoBench test fold (cryptic, apo) |
 |----------|:------------------------:|:------------------------------------:|
-| P2Rank | **93.8%** (135/144) | 63.7% |
-| Lacuna (`learned-plm`) | not measured | **66.5%** |
-| Lacuna (`learned`) | 86.8% (125/144) | 56.7% |
+| P2Rank | **93.8%** (135/144) | 63.3% |
+| Lacuna (`learned-plm`) | not measured | **66.1%** |
+| Lacuna (`learned`) | 86.8% (125/144) | 55.6% |
 | Lacuna (`druggability`) | 66.7% (96/144) | - |
 
 The COACH420 column was run with `learned`, the geometry-only strategy, so that
 is the row to compare against P2Rank here; `learned-plm` has not been run on this
 dataset. Paired on the 144 structures, `learned` trails P2Rank by **-6.9%
 (CI -12.5 to -1.4, excludes zero)**, while on cryptic sites `learned-plm` is
-nominally ahead (+2.8 points, an interval that spans zero at this sample size).
+nominally ahead of P2Rank (+2.8 points, an interval that spans zero).
 
 **Each tool wins or ties on the task it was built for.** P2Rank is a
 general-purpose predictor and is genuinely better at finding sites that are
@@ -147,7 +166,7 @@ open. The honest reading of "parity with P2Rank" is therefore that parity holds
 on cryptic sites specifically, and that a general-purpose detector should be
 preferred for general-purpose work. Union of the two is 95.8%.
 
-Absolute recovery is *higher* here than on CryptoBench (86.8% vs 56.7% for the
+Absolute recovery is *higher* here than on CryptoBench (86.8% vs 55.6% for the
 same strategy) simply because an open pocket is easier to find than a shut one.
 Cross-dataset comparisons of the headline number are not meaningful; only the
 within-dataset paired differences are.
@@ -196,7 +215,8 @@ change to detection constants requires refitting via
 ## Where the remaining gap is
 
 Some cluster in the candidate set clears the criterion for 73.7% of test-fold
-structures, against the 56.7% that reach the top 5. The site is usually found
+structures, against the 66.1% that `learned-plm` reaches in the top 5 (55.6%
+for the default). The site is usually found
 and then out-ranked, and most of the loss sits just outside the cutoff: the
 correct cluster is at rank 6-8 for 14 structures, and top-8 recovery is already
 64.8%.
