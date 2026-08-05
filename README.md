@@ -123,7 +123,7 @@ The `nma` backend samples physically meaningful collective motions - the same hi
 
 ## Benchmarks
 
-**56.7% of known cryptic sites recovered in the top 5** on CryptoBench's held-out test fold (102/180, 95% CI 48.9-63.9), under a size-robust criterion. On the same structures that is **twice fpocket's 28.3%** and statistically level with P2Rank's 63.3%.
+**56.7% of known cryptic sites recovered in the top 5** on CryptoBench's held-out test fold (102/180, 95% CI 48.9-63.9), under a size-robust criterion, rising to **66.5%** with the optional sequence ranker. On the same structures that is **twice fpocket's 28.3%** and statistically level with P2Rank's 63.3%.
 
 **Size-robust success criterion (top-5 pockets):** a pocket whose lining residues reach a **Jaccard overlap ≥ 0.25** with the known ligand-contact site (Jaccard = |found ∩ known| / |found ∪ known|), **or** whose center is within 4 Å of the site centroid. Lining residues use a true atomic-contact definition (any residue with an atom within 5 Å of the detected cavity). Recall is *not* used as the headline: a large pocket can engulf a small known site and score high recall while sitting nowhere near it. Both numbers print side by side in every benchmark script.
 
@@ -131,25 +131,30 @@ The `nma` backend samples physically meaningful collective motions - the same hi
 
 All four tools scored on CryptoBench's held-out test fold under the identical criterion. MDpocket is given the **same NMA ensemble Lacuna uses**, so that row compares the analysis pipelines rather than the samplers.
 
-| Detector | Kind | Size-robust top-5 | Paired vs Lacuna |
+| Detector | Kind | Size-robust top-5 | Paired vs Lacuna (geometry) |
 |----------|------|:-----------------:|------------------|
-| P2Rank | single-structure, learned | **63.3%** (114/180) | -6.7% [-14.4, +0.6] |
-| **Lacuna** | **ensemble** | **56.7%** (102/180) | - |
+| **Lacuna + sequence** (`learned-plm`) | ensemble + PLM | **66.5%** (119/179) | +10.6% [+6.1, +15.1] |
+| P2Rank | single-structure, learned | 63.3% (114/180) | -6.7% [-14.4, +0.6] |
+| **Lacuna** (`learned`, default) | ensemble | **56.7%** (102/180) | - |
 | MDpocket | ensemble (same input ensemble) | 44.1% (79/179) | **+11.7% [+3.9, +19.6]** |
 | fpocket | single-structure, geometric | 28.3% (51/180) | **+28.3% [+20.0, +36.7]** |
 
-Lacuna beats both open ensemble and single-structure geometric detectors by margins whose confidence intervals exclude zero, and is **statistically indistinguishable from P2Rank** (the interval spans zero). The three-way union reaches 76.7%, so the tools remain complementary rather than redundant.
+The default is **statistically indistinguishable from P2Rank** (the interval spans zero) and beats both open ensemble and single-structure geometric detectors by margins whose intervals exclude zero. With `--rank-by learned-plm` Lacuna is nominally ahead of P2Rank by 2.8 points, which this sample size cannot resolve: treat it as parity, not a win. The three-way union reaches 76.7%, so the tools remain complementary rather than redundant.
+
+The sequence ranker is an **optional extra** (`pip install "lacuna-pockets[plm]"`) because it needs PyTorch and downloads an ESM-2 checkpoint. It is a separate strategy rather than the default so that identical commands give identical rankings on every machine, whether or not the extra is installed.
 
 MDpocket is the closest relative of this work and the fair ensemble baseline. Its best configuration out of ten (isovalue and ranking rule both swept in its favour) is reported; at its default isovalue it scores 40.2%.
 
 ### Independent validation
 
-| Benchmark | N | Size-robust | Legacy recall | Notes |
-|-----------|--:|:-----------:|:-------------:|-------|
-| CryptoBench (held-out test fold) | 180 | **56.7%** | 68% | largest & most diverse; the headline |
-| PocketMiner | 45 | **73%** (33/45) | 80% | per-residue cryptic labels |
-| Curated apo/holo set (this repo) | 22 | **41%** (9/22) | 64% | hand-picked literature cryptic pairs |
-| COACH420 | 144 | **87%** (125/144) | 93% | *general* holo sites, not cryptic; see below |
+Default `learned` strategy, with the optional sequence ranker in the last column.
+
+| Benchmark | N | Size-robust | Legacy recall | `learned-plm` | Notes |
+|-----------|--:|:-----------:|:-------------:|:-------------:|-------|
+| CryptoBench (held-out test fold) | 180 | **56.7%** | 68% | **66.5%** | largest & most diverse; the headline |
+| PocketMiner | 45 | **73%** (33/45) | 80% | **80%** (36/45) | per-residue cryptic labels |
+| Curated apo/holo set (this repo) | 22 | **41%** (9/22) | 64% | 41% (9/22) | hand-picked literature cryptic pairs |
+| COACH420 | 144 | **87%** (125/144) | 93% | not measured | *general* holo sites, not cryptic; see below |
 
 **On general binding sites, a general-purpose tool is better.** COACH420 holds
 holo structures whose pocket is already open, which is an easier task and not the

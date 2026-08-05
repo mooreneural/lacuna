@@ -130,11 +130,15 @@ tools are paired on the 144 structures each of them scored.
 | Detector | COACH420 (general, holo) | CryptoBench test fold (cryptic, apo) |
 |----------|:------------------------:|:------------------------------------:|
 | P2Rank | **93.8%** (135/144) | 63.7% |
-| Lacuna (`learned`) | 86.8% (125/144) | **65.4%** |
+| Lacuna (`learned-plm`) | not measured | **66.5%** |
+| Lacuna (`learned`) | 86.8% (125/144) | 56.7% |
 | Lacuna (`druggability`) | 66.7% (96/144) | - |
 
-Paired differences: Lacuna trails P2Rank here by **-6.9% (CI -12.5 to -1.4,
-excludes zero)**, having tied it on cryptic sites (+1.7%, CI -5.0 to +8.4).
+The COACH420 column was run with `learned`, the geometry-only strategy, so that
+is the row to compare against P2Rank here; `learned-plm` has not been run on this
+dataset. Paired on the 144 structures, `learned` trails P2Rank by **-6.9%
+(CI -12.5 to -1.4, excludes zero)**, while on cryptic sites `learned-plm` is
+nominally ahead (+2.8 points, an interval that spans zero at this sample size).
 
 **Each tool wins or ties on the task it was built for.** P2Rank is a
 general-purpose predictor and is genuinely better at finding sites that are
@@ -143,10 +147,10 @@ open. The honest reading of "parity with P2Rank" is therefore that parity holds
 on cryptic sites specifically, and that a general-purpose detector should be
 preferred for general-purpose work. Union of the two is 95.8%.
 
-Absolute recovery is *higher* here than on CryptoBench (86.8% vs 65.4%) simply
-because an open pocket is easier to find than a shut one. Cross-dataset
-comparisons of the headline number are not meaningful; only the within-dataset
-paired differences are.
+Absolute recovery is *higher* here than on CryptoBench (86.8% vs 56.7% for the
+same strategy) simply because an open pocket is easier to find than a shut one.
+Cross-dataset comparisons of the headline number are not meaningful; only the
+within-dataset paired differences are.
 
 ### The `learned` ranker also wins on always-open sites
 

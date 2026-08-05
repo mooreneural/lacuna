@@ -24,7 +24,7 @@
     },
     "rank": 4,
     "n_clusters": 10,
-    "elapsed_s": 8.47,
+    "elapsed_s": 8.61,
     "n_known_residues": 8
   },
   {
@@ -52,7 +52,7 @@
     },
     "rank": 1,
     "n_clusters": 6,
-    "elapsed_s": 1.18,
+    "elapsed_s": 1.17,
     "n_known_residues": 14
   },
   {
@@ -80,7 +80,7 @@
     },
     "rank": 1,
     "n_clusters": 7,
-    "elapsed_s": 0.67,
+    "elapsed_s": 0.69,
     "n_known_residues": 14
   },
   {
@@ -108,7 +108,7 @@
     },
     "rank": null,
     "n_clusters": 38,
-    "elapsed_s": 3.53,
+    "elapsed_s": 3.61,
     "n_known_residues": 23
   },
   {
@@ -136,7 +136,7 @@
     },
     "rank": 2,
     "n_clusters": 40,
-    "elapsed_s": 2.68,
+    "elapsed_s": 2.77,
     "n_known_residues": 21
   },
   {
@@ -164,7 +164,7 @@
     },
     "rank": 5,
     "n_clusters": 50,
-    "elapsed_s": 7.2,
+    "elapsed_s": 7.23,
     "n_known_residues": 16
   },
   {
@@ -192,7 +192,7 @@
     },
     "rank": 3,
     "n_clusters": 35,
-    "elapsed_s": 3.99,
+    "elapsed_s": 4.04,
     "n_known_residues": 25
   },
   {
@@ -220,7 +220,7 @@
     },
     "rank": 2,
     "n_clusters": 4,
-    "elapsed_s": 1.6,
+    "elapsed_s": 1.61,
     "n_known_residues": 19
   },
   {
@@ -248,7 +248,7 @@
     },
     "rank": 4,
     "n_clusters": 32,
-    "elapsed_s": 4.7,
+    "elapsed_s": 4.82,
     "n_known_residues": 17
   },
   {
@@ -276,7 +276,7 @@
     },
     "rank": 2,
     "n_clusters": 22,
-    "elapsed_s": 1.93,
+    "elapsed_s": 2.12,
     "n_known_residues": 16
   },
   {
@@ -304,7 +304,7 @@
     },
     "rank": 1,
     "n_clusters": 9,
-    "elapsed_s": 1.63,
+    "elapsed_s": 1.73,
     "n_known_residues": 17
   },
   {
@@ -332,7 +332,7 @@
     },
     "rank": null,
     "n_clusters": 62,
-    "elapsed_s": 4.75,
+    "elapsed_s": 4.84,
     "n_known_residues": 15
   },
   {
@@ -349,7 +349,7 @@
     "overlap": 0.227,
     "overlap_found_size": 17,
     "jaccard": 0.147,
-    "jaccard_rank": 2,
+    "jaccard_rank": 3,
     "hotspot_core": 0.136,
     "topk_hit": {
       "1": false,
@@ -358,9 +358,9 @@
       "10": false,
       "20": false
     },
-    "rank": 2,
+    "rank": 3,
     "n_clusters": 6,
-    "elapsed_s": 2.66,
+    "elapsed_s": 2.99,
     "n_known_residues": 22
   },
   {
@@ -388,7 +388,7 @@
     },
     "rank": null,
     "n_clusters": 12,
-    "elapsed_s": 1.55,
+    "elapsed_s": 1.64,
     "n_known_residues": 12
   },
   {
@@ -416,7 +416,7 @@
     },
     "rank": 2,
     "n_clusters": 31,
-    "elapsed_s": 2.63,
+    "elapsed_s": 2.8,
     "n_known_residues": 26
   },
   {
@@ -444,7 +444,7 @@
     },
     "rank": 1,
     "n_clusters": 9,
-    "elapsed_s": 1.63,
+    "elapsed_s": 1.29,
     "n_known_residues": 22
   },
   {
@@ -472,7 +472,7 @@
     },
     "rank": 4,
     "n_clusters": 21,
-    "elapsed_s": 3.49,
+    "elapsed_s": 3.56,
     "n_known_residues": 14
   },
   {
@@ -484,8 +484,8 @@
     "status": "MISS",
     "status_legacy": "MISS",
     "pass_by": null,
-    "centroid_dist_A": 30.7,
-    "centroid_rank": 5,
+    "centroid_dist_A": 31.8,
+    "centroid_rank": 1,
     "overlap": 0.0,
     "overlap_found_size": 0,
     "jaccard": 0.0,
@@ -500,7 +500,7 @@
     },
     "rank": null,
     "n_clusters": 46,
-    "elapsed_s": 4.65,
+    "elapsed_s": 4.77,
     "n_known_residues": 12
   },
   {
@@ -528,7 +528,7 @@
     },
     "rank": 1,
     "n_clusters": 24,
-    "elapsed_s": 1.77,
+    "elapsed_s": 1.87,
     "n_known_residues": 17
   },
   {
@@ -556,7 +556,7 @@
     },
     "rank": 3,
     "n_clusters": 10,
-    "elapsed_s": 1.35,
+    "elapsed_s": 1.31,
     "n_known_residues": 16
   },
   {
@@ -584,7 +584,7 @@
     },
     "rank": 1,
     "n_clusters": 16,
-    "elapsed_s": 1.39,
+    "elapsed_s": 1.41,
     "n_known_residues": 12
   },
   {
@@ -597,11 +597,11 @@
     "status_legacy": "PASS",
     "pass_by": null,
     "centroid_dist_A": 9.2,
-    "centroid_rank": 4,
+    "centroid_rank": 5,
     "overlap": 0.357,
     "overlap_found_size": 23,
     "jaccard": 0.156,
-    "jaccard_rank": 4,
+    "jaccard_rank": 5,
     "hotspot_core": 0.143,
     "topk_hit": {
       "1": false,
@@ -610,9 +610,9 @@
       "10": false,
       "20": false
     },
-    "rank": 4,
+    "rank": 5,
     "n_clusters": 16,
-    "elapsed_s": 1.75,
+    "elapsed_s": 1.79,
     "n_known_residues": 14
   }
 ]
