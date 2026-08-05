@@ -74,14 +74,26 @@ def _fold_lookup() -> dict[str, str]:
     return _FOLD_OF
 
 
+def pdb_id_of(structure_id: str) -> str:
+    """The PDB id part of a ``<pdb><chain>`` structure id, lowercased.
+
+    The chain part is not always one character: author chain IDs like ``AAA``
+    occur. Stripping a fixed single character left six such structures unmapped,
+    and unmapped means excluded from both sides of every split, so they were
+    silently dropped from fitting and from cross-validation rather than
+    misassigned. PDB ids are always four characters, so index on that. The other
+    benchmark scripts already split these ids this way.
+    """
+    return structure_id[:4].lower()
+
+
 def split_of(structure_id: str) -> str:
     """Train/test assignment from CryptoBench's own folds.
 
     The dataset's folds separate homologous proteins; splitting on them keeps
     homologs out of the held-out set, which a random or hash split would not.
-    ``structure_id`` is ``<pdb><chain>``.
     """
-    fold = _fold_lookup().get(structure_id[:-1].lower())
+    fold = _fold_lookup().get(pdb_id_of(structure_id))
     if fold is None:
         return "unmapped"
     return "test" if fold == "test" else "train"
@@ -172,7 +184,7 @@ def _matrix(structs: list[dict], feats=None) -> tuple[np.ndarray, np.ndarray]:
 
 def _train_fold_of(structure_id: str) -> str | None:
     """Which train fold a structure belongs to (None for the test fold)."""
-    fold = _fold_lookup().get(structure_id[:-1].lower())
+    fold = _fold_lookup().get(pdb_id_of(structure_id))
     return None if fold in (None, "test") else fold
 
 
@@ -457,8 +469,16 @@ def cross_validate(dump_path: Path) -> None:
     print("  " + ", ".join(f"{f}={len(by_fold[f])}" for f in folds))
 
     base = list(_RANKER_FEATURES)
-    extra = ["bur_raw", "depth", "depth_max", "mouth", "elong", "flat", "dcen",
-             "centroid_std", "vol_cv"]
+    # Mapped through _INVARIANT_SWAP for the same reason FIT_FEATURES is: naming
+    # depth_max here put a drifting extreme-value statistic back into the scored
+    # set, which tripped the guard below and made --cv abort on any dump that
+    # carried the feature. Cross-validation has to select over the same features
+    # fit() will use, so both go through the swap.
+    extra = list(dict.fromkeys(
+        _INVARIANT_SWAP.get(f, f) for f in
+        ["bur_raw", "depth", "depth_max", "mouth", "elong", "flat", "dcen",
+         "centroid_std", "vol_cv"]
+    ))
     available = set(data[0]["clusters"][0])
     missing = [f for f in extra if f not in available]
     if missing:
@@ -467,20 +487,29 @@ def cross_validate(dump_path: Path) -> None:
     # Sequence-side signal, present only in dumps built with a protein language
     # model head. Kept separate so its contribution is isolated from geometry.
     plm = [f for f in PLM_FEATURES if f in available]
-    full = base + extra
+    # base already carries some of the swapped names (depth_p90 among them), and
+    # a repeated column is a second copy of the same evidence in the fit.
+    full = list(dict.fromkeys(base + extra))
 
     configs = [
         ("pointwise linear, base feats", lambda tr: _fit_pointwise(tr, base)),
         ("pairwise linear, base feats", lambda tr: _fit_pairwise(tr, base)),
         ("gbm, base feats", lambda tr: _fit_gbm(tr, base)),
     ]
-    if extra:  # only meaningful once the dump carries the geometry features
+    # The geometry block was folded into _RANKER_FEATURES once it proved itself,
+    # so on the current feature set "base" and "+geometry" name the same columns.
+    # Fitting both then prints two identical rows and invites reading a contrast
+    # that is not being drawn. Only offer the comparison while it is still one.
+    if [f for f in extra if f not in base]:
         configs += [
             ("pointwise linear, +geometry", lambda tr: _fit_pointwise(tr, full)),
             ("pairwise linear, +geometry", lambda tr: _fit_pairwise(tr, full)),
             ("gbm, +geometry", lambda tr: _fit_gbm(tr, full)),
             ("gbm, geometry only", lambda tr: _fit_gbm(tr, extra)),
         ]
+    elif extra:
+        print(f"  note: the {len(extra)} geometry features are already in the "
+              f"scored set; no base-vs-geometry contrast left to draw")
     if plm:
         configs += [
             ("pairwise linear, +PLM", lambda tr: _fit_pairwise(tr, full + plm)),
