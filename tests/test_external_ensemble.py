@@ -120,7 +120,6 @@ class TestAtomCorrespondence:
 
     def test_numbering_mismatch_warns_and_is_skipped(self, tmp_path, reference):
         """Wrong residue numbering is a mismatch, not a conformational change."""
-        ens = tmp_path / "shifted.pdb"
         good = _multi_model([0.5])
         # Second file: same atoms renumbered from 500, so nothing matches.
         bad = _multi_model([0.5], start=500)
@@ -164,3 +163,52 @@ class TestChainFiltering:
         ens.write_text(text)
         got = ExternalEnsembleBackend(ens, chain="A").generate(ref, 0, chain="A")
         assert got[0].shape[0] == 3  # chain A only
+
+
+class TestChainRelabelling:
+    """Structure predictors emit one chain and label it "A".
+
+    AlphaFlow, AlphaFold, ESMFold and Boltz all do this, so a reference whose
+    chain of interest is "B" would otherwise match nothing and the whole ensemble
+    would be discarded as a numbering mismatch. That is what happened on the first
+    real AlphaFlow target tried (BRAF, CryptoBench annotates chain B).
+    """
+
+    def _chain(self, text: str, chain: str) -> str:
+        return "\n".join(
+            line[:21] + chain + line[22:] if line.startswith("ATOM") else line
+            for line in text.splitlines()
+        ) + "\n"
+
+    def test_single_chain_frame_matches_a_differently_lettered_reference(
+            self, tmp_path):
+        ref = tmp_path / "ref_b.pdb"
+        ref.write_text(self._chain(_model(0.0) + "\nEND", "B"))
+        ens = tmp_path / "frames_a.pdb"
+        ens.write_text(_multi_model([0.5, 1.0]))          # chain A
+
+        got = ExternalEnsembleBackend(ens).generate(ref, 0, chain="B")
+        assert len(got) == 2, "single-chain frames should map onto any reference chain"
+        # Coordinates must actually come from the frame, not silently fall back
+        # to the reference, which would look like success while ignoring the input.
+        assert got[0][0][0] == pytest.approx(0.5)
+
+    def test_multi_chain_frame_still_requires_matching_chains(self, tmp_path):
+        """With more than one chain the letter is the only thing separating
+        residues that share a number, so it must not be dropped."""
+        ref = tmp_path / "ref_c.pdb"
+        ref.write_text(self._chain(_model(0.0) + "\nEND", "C"))
+
+        two = [_ATOM.format(serial=i + 1, res="ALA", seq=i + 1,
+                            x=i * 3.8 + 9.0, y=0.0, z=0.0) for i in range(4)]
+        two += [_ATOM.format(serial=i + 5, res="ALA", seq=i + 1,
+                             x=i * 3.8 + 9.0, y=30.0, z=0.0)[:21] + "B"
+                + _ATOM.format(serial=i + 5, res="ALA", seq=i + 1,
+                               x=i * 3.8 + 9.0, y=30.0, z=0.0)[22:]
+                for i in range(4)]
+        ens = tmp_path / "frames_ab.pdb"
+        ens.write_text("MODEL        1\n" + "\n".join(two) + "\nENDMDL\nEND\n")
+
+        with pytest.warns(RuntimeWarning, match="numbering"):
+            with pytest.raises(ValueError, match="no usable conformers"):
+                ExternalEnsembleBackend(ens).generate(ref, 0, chain="C")

@@ -108,13 +108,30 @@ class ExternalEnsembleBackend(EnsembleBackend):
         conformers: list[np.ndarray] = []
         self._skipped = []
         for path in self._frame_paths():
-            for model_i, frame in enumerate(iter_model_coords(path, chain=chain)):
+            # Read every chain rather than pre-filtering to the reference's chain
+            # letter. Structure predictors emit a single chain and almost always
+            # label it "A", so filtering on a reference chain of "B" would discard
+            # a frame that is in fact the right protein. Deciding per frame needs
+            # to see which chains it actually contains.
+            for model_i, frame in enumerate(iter_model_coords(path)):
                 if cap is not None and len(conformers) >= cap:
                     return conformers
+                frame_chains = {c for c, _, _ in frame}
+                if len(frame_chains) == 1 and frame_chains != {chain}:
+                    # One chain, and not the reference's letter: the mapping is
+                    # unambiguous, so match on residue and atom name alone. Doing
+                    # this only for single-chain frames keeps it safe, since with
+                    # two or more chains dropping the chain would silently merge
+                    # residues that share a number across them.
+                    by_res = {(r, n): xyz for (_, r, n), xyz in frame.items()}
+                    lookup = [(a.res_seq, a.name) for a in reference.atoms]
+                else:
+                    by_res = frame
+                    lookup = keys
                 out = base.copy()
                 matched = 0
-                for i, key in enumerate(keys):
-                    got = frame.get(key)
+                for i, key in enumerate(lookup):
+                    got = by_res.get(key)
                     if got is not None:
                         out[i] = got
                         matched += 1
