@@ -24,6 +24,14 @@ EXPECTED_GEOMETRY = (
 )
 EXPECTED_PLM_EXTRA = ("plm_mean", "plm_max", "plm_top3", "plm_frac")
 
+#: The sequence ranker's own list, pinned in full. It currently agrees with
+#: EXPECTED_GEOMETRY on the geometric block because both were fitted on the
+#: conformer-invariant features, and that is fine: what must not happen is one
+#: list being *computed* from the other, so that renaming a geometry feature
+#: repoints these weights at different quantities without anything failing.
+#: Pinning the literal is what forces a rename to be made deliberately here too.
+EXPECTED_PLM = EXPECTED_GEOMETRY + EXPECTED_PLM_EXTRA
+
 
 class TestFeatureIdentity:
     def test_geometry_features_are_exactly_what_the_weights_expect(self):
@@ -32,12 +40,18 @@ class TestFeatureIdentity:
     def test_plm_features_end_with_the_sequence_block(self):
         assert cl._PLM_RANKER_FEATURES[-4:] == EXPECTED_PLM_EXTRA
 
-    def test_plm_list_is_not_derived_from_the_geometry_list(self):
-        """Deriving it means a geometry rename silently corrupts the PLM model."""
-        assert cl._PLM_RANKER_FEATURES[:len(cl._RANKER_FEATURES)] != cl._RANKER_FEATURES, (
-            "the PLM feature list appears to track _RANKER_FEATURES; it must name "
-            "the features its own weights were fitted on"
-        )
+    def test_plm_features_are_exactly_what_its_weights_expect(self):
+        """Pinned in full, so a geometry rename cannot quietly follow through.
+
+        An earlier version of this test asserted the PLM list differed from the
+        geometry list, on the theory that equality implied it was derived. That
+        conflated a source-code property with a value one: both lists are now
+        legitimately fitted on the same invariant geometry block, and the
+        inequality assertion blocked a correct refit. Comparing against a literal
+        gives the protection that was actually wanted, because a rename changes
+        the module without changing this expectation.
+        """
+        assert cl._PLM_RANKER_FEATURES == EXPECTED_PLM
 
     @pytest.mark.parametrize("names,weights", [
         ("_RANKER_FEATURES", "_RANKER_WEIGHTS"),

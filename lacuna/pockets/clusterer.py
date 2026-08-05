@@ -16,7 +16,6 @@ from __future__ import annotations
 import warnings
 
 import numpy as np
-from scipy.spatial.distance import cdist
 
 from lacuna.models import Pocket, PocketCluster
 from lacuna.pockets.scorer import score_pocket
@@ -121,8 +120,10 @@ _RANKER_INTERCEPT = 0.0
 # ── sequence-augmented ranker ("learned-plm") ───────────────────────────────────
 # The same linear form, refitted with four extra features summarizing what a
 # protein language model thinks of each pocket's lining residues (lacuna/pockets/
-# plm.py). Test-fold top-5 recovery 65.4% (95% CI 58.1-72.1) against 57.0% for the
-# geometry-only weights above, a paired gain of +8.4 (CI +4.5 to +12.8).
+# plm.py). Test-fold top-5 recovery 66.5% (95% CI 59.2-73.2) against 55.9% for the
+# ranking the same pipeline produces without it, a paired gain of +10.6
+# (CI +6.1 to +15.1). Fitted on the same conformer-invariant geometry block as
+# the strategy above, so both are robust to --conformers.
 #
 # Kept as a separate strategy rather than folded into "learned" so results never
 # depend on whether an optional dependency happens to be installed: the same
@@ -133,48 +134,48 @@ _RANKER_INTERCEPT = 0.0
 # every geometric one, and a PLM-only fit ranks almost identically). Geometry is
 # what proposes the candidates in the first place, which no sequence model can
 # do; it just contributes little to ordering them once sequence signal is present.
-# Named explicitly rather than derived from _RANKER_FEATURES. These weights were
-# fitted before the geometry-only set moved to conformer-invariant features, and
-# deriving the list would silently repoint them at different quantities the moment
-# that set changed: same length, so the alignment test still passes, but every
-# weight applied to the wrong feature. Pending a refit on the invariant set, this
-# strategy keeps the exact features it was fitted on. ranker_features returns a
-# superset, so both live side by side.
+#
+# Named explicitly rather than derived from _RANKER_FEATURES, even though the two
+# lists currently agree on their geometric block. Deriving it once meant that
+# renaming a geometry feature silently repointed all 23 weights at different
+# quantities: identical length, so the alignment test still passed while every
+# weight applied to the wrong feature. Each list names what its own weights were
+# fitted on, and tests/test_ranker_integrity.py pins both.
 _PLM_RANKER_FEATURES = (
-    "vol", "vol_max", "vol_min", "apo_vol", "drug", "max_drug", "cryp",
-    "pers", "n_lin", "vol_per_lin", "enc", "hyd", "aro", "n_mem",
-    "bur_raw", "depth", "depth_max", "mouth", "elong", "flat", "dcen",
+    "vol", "vol_p90", "vol_p10", "apo_vol", "drug", "max_drug", "cryp",
+    "pers", "n_lin", "vol_per_lin", "enc", "hyd", "aro", "mem_per_conf",
+    "bur_raw", "depth", "depth_p90", "mouth", "elong", "flat", "dcen",
     "centroid_std", "vol_cv",
     "plm_mean", "plm_max", "plm_top3", "plm_frac",
 )
 _PLM_RANKER_WEIGHTS = (
-    0.0010858937373982053,    # vol
-    -0.0005627733749473601,   # vol_max
-    0.001723367158754679,     # vol_min
-    0.0017001236242169975,    # apo_vol
-    1.4965206767275656,       # drug
-    -0.8171819690893769,      # max_drug
-    1.238390413478009,        # cryp
-    4.535348376392272,        # pers
-    0.011989718245105025,     # n_lin
-    -0.05140056972265015,     # vol_per_lin
-    1.1026412235902685,       # enc
-    0.32309731785983914,      # hyd
-    -0.03225144090049242,     # aro
-    -0.17963074081534938,     # n_mem
-    -4.725553439291813,       # bur_raw
-    0.008651974840830636,     # depth
-    -0.04095810705683565,     # depth_max
-    -1.3304989783025412,      # mouth
-    -0.0839137639992623,      # elong
-    -0.7920109880790633,      # flat
-    -0.4684936134234523,      # dcen
-    0.05827125507076521,      # centroid_std
-    0.8422089582169542,       # vol_cv
-    11.884641855958519,       # plm_mean
-    -2.5900668306274293,      # plm_max
-    0.9129034943213035,       # plm_top3
-    -1.619281395054233,       # plm_frac
+    0.0008587964251764705,   # vol
+    -0.0008950110827481275,  # vol_p90
+    0.002358314137086671,    # vol_p10
+    0.0012741499866228824,   # apo_vol
+    2.1803621582813997,      # drug
+    -1.3452119229909634,     # max_drug
+    0.9413291819163585,      # cryp
+    0.5486897209489089,      # pers
+    0.009155839144294388,    # n_lin
+    -0.05304395351292021,    # vol_per_lin
+    0.8778124616615285,      # enc
+    0.41202655263874927,     # hyd
+    -0.03115027735553585,    # aro
+    -3.294394577013049,      # mem_per_conf
+    -3.945607394062707,      # bur_raw
+    -0.16095623004206333,    # depth
+    0.11926279855681517,     # depth_p90
+    -1.253317377193816,      # mouth
+    0.1364262706597425,      # elong
+    -1.1476449403961864,     # flat
+    -0.4515404362280174,     # dcen
+    0.007271336115707842,    # centroid_std
+    1.1711487359654862,      # vol_cv
+    10.929097322221535,      # plm_mean
+    -3.847526128710042,      # plm_max
+    2.502700611361364,       # plm_top3
+    -1.0999725348834386,     # plm_frac
 )
 
 

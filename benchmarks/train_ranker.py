@@ -39,7 +39,6 @@ Usage
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import random
 import sys
@@ -260,8 +259,10 @@ def _fit_pairwise(train, feats, max_pairs_per_structure: int = 40, seed: int = 0
             for q in picks:
                 qv = np.array([q[f] for f in feats], dtype=float)
                 # Both directions keep the problem balanced and the fit unbiased.
-                diffs.append(pv - qv); labels.append(1)
-                diffs.append(qv - pv); labels.append(0)
+                diffs.append(pv - qv)
+                labels.append(1)
+                diffs.append(qv - pv)
+                labels.append(0)
     if not diffs:
         raise RuntimeError("no usable positive/negative pairs")
     D = np.asarray(diffs, dtype=float)
@@ -487,20 +488,17 @@ def cross_validate(dump_path: Path) -> None:
             ("gbm, +PLM", lambda tr: _fit_gbm(tr, full + plm)),
         ]
 
-    # Swap the four ensemble-size-dependent features for their invariant
-    # equivalents. The gain is robustness to --conformers, not accuracy, so the
-    # bar here is "no regression at the fitted ensemble size" rather than an
-    # improvement; the payoff shows up only when N differs from the fit.
-    inv_full = [_INVARIANT_SWAP.get(f, f) for f in full]
-    if all(f in available for f in _INVARIANT_SWAP.values()):
-        configs.append(
-            ("pairwise linear, N-invariant", lambda tr: _fit_pairwise(tr, inv_full))
-        )
-        if plm:
-            configs.append(
-                ("pairwise linear, N-invariant +PLM",
-                 lambda tr: _fit_pairwise(tr, inv_full + plm))
-            )
+    # The ensemble-size-dependent features (raw member count, and max/min volume
+    # and depth, which are extreme-value statistics that drift as more conformers
+    # are drawn) have been replaced in _RANKER_FEATURES by invariant equivalents,
+    # so there is no longer a drifting variant to compare against here: the swap
+    # would be a no-op and would print a duplicate row. That substitution was
+    # validated separately by sweeping --conformers, where it recovered 13 points
+    # at N=80 and turned a significant penalty into a non-significant one.
+    assert not [f for f in full if f in _INVARIANT_SWAP], (
+        "drifting features are back in the scored set; re-run the --conformers "
+        "sweep before trusting any ranker fitted on them"
+    )
 
     # Reference: the currently shipped ranking, read off the dump's stored order.
     pooled_ref, pooled_null, pooled_oracle = [], 0.0, []
