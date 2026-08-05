@@ -149,6 +149,16 @@ MDpocket is the closest relative of this work and the fair ensemble baseline. It
 | CryptoBench (held-out test fold) | 180 | **56.7%** | 68% | largest & most diverse; the headline |
 | PocketMiner | 45 | **73%** (33/45) | 80% | per-residue cryptic labels |
 | Curated apo/holo set (this repo) | 22 | **41%** (9/22) | 64% | hand-picked literature cryptic pairs |
+| COACH420 | 144 | **87%** (125/144) | 93% | *general* holo sites, not cryptic; see below |
+
+**On general binding sites, a general-purpose tool is better.** COACH420 holds
+holo structures whose pocket is already open, which is an easier task and not the
+one Lacuna is built for. Paired on the same 144 structures P2Rank scores 93.8%
+against Lacuna's 86.8% (-6.9%, CI -12.5 to -1.4, excludes zero), having tied it
+on cryptic sites. Each tool wins or ties where it was designed to. The higher
+absolute number here reflects the easier task, not better performance:
+cross-dataset comparisons of the headline are not meaningful.
+**[Detail →](docs/BENCHMARKS.md#coach420-general-binding-sites-and-where-lacunas-specialisation-shows)**
 
 Datasets: PocketMiner (Meller et al. 2023, *Nat. Commun.*); CryptoBench (Vavra et al. 2024, *Bioinformatics*). The CryptoBench split follows the dataset's own homology-separated folds, and the ranker was fitted only on train folds, so the test fold is genuinely unseen.
 

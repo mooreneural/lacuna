@@ -115,6 +115,51 @@ Orthosteric recovery improved from 3/6. The single conformational target
 finer clustering radius now splits. With n=1 this is an anecdote rather than a
 trend, but it is reported rather than dropped.
 
+## COACH420: general binding sites, and where Lacuna's specialisation shows
+
+COACH420 is a **general** ligand binding-site set of **holo** structures: the
+ligand is present and the pocket is already open. It measures a different task
+from the rest of this suite, and it is the direct answer to the reasonable
+objection that Lacuna had only been measured on CryptoBench.
+
+Ground truth follows P2Rank's own evaluation (relevant ligands from the
+`coach420(mlig).ds` MOAD annotation, so ions and buffers do not count).
+Everything below is the same size-robust criterion used everywhere else, and both
+tools are paired on the 144 structures each of them scored.
+
+| Detector | COACH420 (general, holo) | CryptoBench test fold (cryptic, apo) |
+|----------|:------------------------:|:------------------------------------:|
+| P2Rank | **93.8%** (135/144) | 63.7% |
+| Lacuna (`learned`) | 86.8% (125/144) | **65.4%** |
+| Lacuna (`druggability`) | 66.7% (96/144) | - |
+
+Paired differences: Lacuna trails P2Rank here by **-6.9% (CI -12.5 to -1.4,
+excludes zero)**, having tied it on cryptic sites (+1.7%, CI -5.0 to +8.4).
+
+**Each tool wins or ties on the task it was built for.** P2Rank is a
+general-purpose predictor and is genuinely better at finding sites that are
+already open; Lacuna's ensemble machinery buys nothing when nothing needs to
+open. The honest reading of "parity with P2Rank" is therefore that parity holds
+on cryptic sites specifically, and that a general-purpose detector should be
+preferred for general-purpose work. Union of the two is 95.8%.
+
+Absolute recovery is *higher* here than on CryptoBench (86.8% vs 65.4%) simply
+because an open pocket is easier to find than a shut one. Cross-dataset
+comparisons of the headline number are not meaningful; only the within-dataset
+paired differences are.
+
+### The `learned` ranker also wins on always-open sites
+
+`learned` beats `druggability` by **+20.1% (CI +13.2 to +27.1)** on COACH420.
+Earlier documentation advised `--rank-by druggability` for orthosteric and
+general pocket finding. That advice predated the learned ranker and was wrong by
+20 points; `learned` is now the right default for both cryptic and general work.
+
+```bash
+python benchmarks/coach420_benchmark.py --limit 150
+python benchmarks/compare_p2rank_coach420.py --limit 150   # needs P2Rank on PATH
+```
+
 ## Why the clustering radius is 2 Å
 
 Alpha points are dilated before connected components are labelled, so points

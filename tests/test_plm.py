@@ -13,10 +13,10 @@ import pytest
 
 from lacuna.pockets import plm
 from lacuna.pockets.clusterer import (
-    RANK_STRATEGIES,
     _PLM_RANKER_FEATURES,
     _PLM_RANKER_WEIGHTS,
     _RANKER_FEATURES,
+    RANK_STRATEGIES,
     cluster_pockets,
     learned_plm_score,
 )
@@ -57,9 +57,16 @@ class TestWeightAlignment:
         added without a weight would be dropped from scoring unnoticed."""
         assert len(_PLM_RANKER_FEATURES) == len(_PLM_RANKER_WEIGHTS)
 
-    def test_plm_features_extend_the_geometry_set(self):
-        assert _PLM_RANKER_FEATURES[:len(_RANKER_FEATURES)] == _RANKER_FEATURES
-        assert tuple(_PLM_RANKER_FEATURES[len(_RANKER_FEATURES):]) == plm.FEATURES
+    def test_plm_features_end_with_the_sequence_block(self):
+        """The sequence features are appended, so they are the tail of the list.
+
+        This deliberately does NOT assert that the leading entries match
+        ``_RANKER_FEATURES``. They did once, and that coupling is what let a
+        rename of the geometry set silently repoint the PLM weights at different
+        quantities while every test still passed. Each list must name the
+        features its own weights were fitted on; see tests/test_ranker_integrity.py.
+        """
+        assert tuple(_PLM_RANKER_FEATURES[-len(plm.FEATURES):]) == plm.FEATURES
 
     def test_strategy_is_registered(self):
         assert "learned-plm" in RANK_STRATEGIES
