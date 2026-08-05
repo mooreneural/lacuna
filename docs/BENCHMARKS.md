@@ -232,6 +232,8 @@ are not repeated:
 | gradient boosting instead of linear | +0.7% CI[-1.6, +3.0], not separable |
 | P2Rank's per-pocket confidence as a feature | test fold -1.1% CI[-4.5, +2.2] |
 | pruning the candidate set before ranking | +0.4% CI[+0.0, +1.1] in-sample on the train folds, best of a full single-feature threshold sweep |
+| buriedness-weighted lining (buried core only) | monotonically negative; -9.9% CI[-17.4, -2.5] at the deepest 10% |
+| multi-crystal experimental ensembles | candidates per target 11.7 -> 27.2 at equal conformer count |
 
 Pruning deserves its own note, because the arithmetic looks so inviting: the
 median structure carries 19 candidates and top-5 is 26% of that, so shrinking
@@ -265,6 +267,88 @@ The P2Rank-confidence row is the informative one. If per-point scoring were the 
 *ranking* ingredient, handing the ranker P2Rank's own opinion of each cluster
 would have helped. It did not. P2Rank's advantage lies in proposing different
 candidates, not in ordering ours better.
+
+### Trimming a pocket is not the same as dividing it
+
+Four separate attempts have tried to fix the oversized-pocket class by making
+each pocket's residue set smaller: a cross-conformer consensus threshold, a
+hotspot-core radius, and now weighting lining residues by the burial of the
+cavity voxels they touch. All three trim. All three failed. Measured on 121
+train-fold structures, keeping only the most buried fraction of each cavity's
+voxels when deriving lining residues:
+
+| kept | mean lining | best Jaccard | oracle at Jaccard >= 0.30 |
+|------|------------:|-------------:|--------------------------:|
+| all (shipped) | 20.3 | 0.337 | 60.3% |
+| deepest 75% | 19.4 | 0.338 | -0.8% |
+| deepest 50% | 17.8 | 0.341 | +0.8% CI[-3.3, +5.0] |
+| deepest 25% | 15.1 | 0.321 | -5.0% |
+| deepest 10% | 12.2 | 0.301 | -9.9% CI[-17.4, -2.5] |
+
+Monotone: mild trimming is neutral, aggressive trimming does significant harm.
+An annotated site is the set of residues contacting a bound ligand, and a ligand
+is not confined to the deepest part of a cavity, so residues at the mouth are
+frequently in the true site. Trimming removes them from the intersection faster
+than it removes false ones from the union, and the Jaccard falls.
+
+Worth stating because a fourth attempt at the same class *did* work: watershed
+splitting, which raised CV recovery +2.1% CI[+0.7, +3.7]. The difference is that
+a split keeps every lining residue and reassigns it to the right sub-pocket,
+while trimming discards residues outright. The oversized-pocket problem is a
+boundary-placement problem, not a size problem, and the distinction predicts
+which attempts are worth making.
+
+First implementation of this used `MOUTH_DEPTH_A` as the core threshold, since
+that is the depth `mouth_frac` already uses. It is a no-op: 93% of cavity voxels
+lie deeper than it, so the "core" is the whole pocket and the lining sets come out
+identical to three significant figures. The quantile above is what actually bites.
+
+### Multi-crystal experimental ensembles
+
+Other PDB depositions of the same UniProt, used as the conformational ensemble in
+place of normal-mode sampling. This is the only source of genuinely different
+conformers available at no compute cost, and NMA's oracle asymptotes regardless of
+how many conformers are drawn, so it is the obvious thing to try.
+
+Both arms were run at the *same* conformer count, because adding conformers is
+the move that has failed every previous time. At equal budget, on 23 train-fold
+targets, real crystal ensembles more than double the candidate set:
+
+| | NMA | multi-crystal |
+|---|---:|---:|
+| candidates per target | 11.7 | 27.2 |
+| mean best Jaccard | 0.236 | 0.259 |
+| oracle at Jaccard >= 0.25 | 43.5% | 39.1% |
+
+Candidate inflation at fixed conformer count is the finding. Crystal structures
+of one protein differ enough in loop conformation and in which regions are
+resolved that their pockets do not cluster across the ensemble the way
+normal-mode conformers do, so each frame contributes its own candidates instead
+of reinforcing shared ones. Given that coverage bought by adding candidates has
+never converted here, that is disqualifying on its own. It survives restricting
+frames to those matching at least 90% of the reference atoms, so it is not an
+artifact of chimeric frames, which are a real hazard: unmatched atoms keep their
+*reference* coordinates, and the backend only warns below 50%.
+
+Two limits on this. n=23 makes the oracle comparison genuinely inconclusive
+rather than proven flat. And these are the PDB-richest targets in the train
+folds, so it is a best case rather than a typical one.
+
+Coverage is the other problem, independent of any of that. 99% of targets have
+another entry for the same UniProt and 90% have one that is not a CryptoBench
+holo partner, but excluding entries with anything bound near the annotated site
+leaves roughly 30% of targets with the five conformers this needs. For 1a4u it
+leaves none: every other deposition of that protein has a ligand at the site,
+which is the reason it is in a cryptic-pocket benchmark in the first place.
+
+The leakage screen is the reusable part, and it validates: told only the site
+residues, it independently flags all seven other depositions of 1a4u as bound at
+the site, rediscovering their holo status without being given it. It rejects
+entries whose residue-numbering correspondence cannot be established rather than
+trusting them, which costs coverage and is what makes the rest of the claim
+sound. Identifying the corresponding chain has to be part of that: for a
+ribosomal target, reading site residue numbers from whichever chain comes first
+returns rRNA nucleotides and rejects every entry for the wrong reason.
 
 ## Speed (NMA backend, no GPU)
 
