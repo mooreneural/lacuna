@@ -231,8 +231,37 @@ are not repeated:
 | hard-negative mining (added to uniform pairs) | CV +1.9% CI[-0.4, +4.2]; test fold -1.1% |
 | gradient boosting instead of linear | +0.7% CI[-1.6, +3.0], not separable |
 | P2Rank's per-pocket confidence as a feature | test fold -1.1% CI[-4.5, +2.2] |
+| pruning the candidate set before ranking | +0.4% CI[+0.0, +1.1] in-sample on the train folds, best of a full single-feature threshold sweep |
 
-That last row is the informative one. If per-point scoring were the missing
+Pruning deserves its own note, because the arithmetic looks so inviting: the
+median structure carries 19 candidates and top-5 is 26% of that, so shrinking
+the haystack ought to convert oracle into recovery. The candidate set really
+does compress. A `plm_mean >= 0.29` filter drops 45% of all candidates while
+losing 1.3% of true positives, and `plm_frac >= 0.15` drops 40% for 1.8%. The
+condition everyone hopes for is met, and it still buys nothing.
+
+The reason is that pruning and ranking read the same features. The candidates a
+filter removes are the ones the ranker had already pushed down: the median rank
+of a pruned candidate is 21, and only 2.7% of them sit in the top 5 at all.
+Removing the tail of a list cannot change its head. Of the 463 false positives
+that actually outrank a true site under `learned-plm`, that 45% prune removes
+14%. Converting every convertible miss would take 295 *specific* removals, 3.1%
+of the pool chosen exactly, which is a description of a better ranker rather
+than of a filter.
+
+Geometric filters are worse than useless: dropping the smallest 5% of candidates
+by volume costs 13.6% of the true positives, because true sites concentrate in
+the large-volume tail. This is the same fact that sinks a lower `MIN_VOLUME_A3`,
+seen from the other end, and it is consistent with STILL_BIG dominating the
+detection gap.
+
+One combination does gain: the geometry-only `learned` ranker improves +3.6%
+CI[+1.8, +5.6] under a `plm_mean` prune. That is sequence information reaching a
+ranker that lacks it, not a property of pruning, and the result is still no
+better than simply using the sequence-aware ranker (-0.4% CI[-2.4, +1.6] against
+`learned-plm`). Nothing to adopt.
+
+The P2Rank-confidence row is the informative one. If per-point scoring were the missing
 *ranking* ingredient, handing the ranker P2Rank's own opinion of each cluster
 would have helped. It did not. P2Rank's advantage lies in proposing different
 candidates, not in ordering ours better.
