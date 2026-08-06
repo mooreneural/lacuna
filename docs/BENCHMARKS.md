@@ -233,6 +233,7 @@ are not repeated:
 | P2Rank's per-pocket confidence as a feature | test fold -1.1% CI[-4.5, +2.2] |
 | pruning the candidate set before ranking | +0.4% CI[+0.0, +1.1] in-sample on the train folds, best of a full single-feature threshold sweep |
 | buriedness-weighted lining (buried core only) | monotonically negative; -9.9% CI[-17.4, -2.5] at the deepest 10% |
+| local energetic frustration as a site signal | residue-level AUC 0.51, chance (configurational variant untested) |
 | multi-crystal experimental ensembles | candidates per target 11.7 -> 27.2 at equal conformer count |
 
 Pruning deserves its own note, because the arithmetic looks so inviting: the
@@ -302,6 +303,43 @@ First implementation of this used `MOUTH_DEPTH_A` as the core threshold, since
 that is the depth `mouth_frac` already uses. It is a no-op: 93% of cavity voxels
 lie deeper than it, so the "core" is the whole pocket and the lining sets come out
 identical to three significant figures. The quantile above is what actually bites.
+
+### Local energetic frustration
+
+Energy landscape theory says a fold's minimally frustrated contacts form its
+stable core while frustrated ones are where the structure can rearrange, and a
+2026 kinase study reports orthosteric sites sitting in minimally frustrated
+regions against allosteric sites in neutrally frustrated ones, framing frustration
+as a determinant of which sites a predictor can see at all. If that holds, it
+would explain the UNCOVERED class rather than merely patch it, and it costs no
+extra candidates because it is a per-residue score.
+
+It does not hold here. Frustration was computed with `frustratometer` 0.3.2 on
+699 train-fold structures, 9760 annotated site residues against 197009 others:
+
+| variant | site mean | other mean | AUC |
+|---------|----------:|-----------:|----:|
+| single-residue | +0.069 | +0.097 | 0.509 |
+| mutational | +0.186 | +0.229 | 0.516 |
+
+That is chance. For scale, CryptoBench reports 0.68 for separating cryptic from
+non-cryptic residues using protein language model embeddings alone. Band
+enrichments are flat too: annotated site residues are 1.03x enriched for highly
+frustrated and 1.03x for neutrally frustrated, so there is nothing for a
+pocket-level aggregate to average over. The one non-null signal is mutational
+frustration's highly frustrated band at 1.86x, but that band holds 2.6% of site
+residues, far too few to move a ranking.
+
+Tested at the residue level deliberately, before building any pocket feature: if
+site residues do not separate from the rest of the protein, no aggregation of them
+into a pocket score can separate either. That gate cost about an hour and saved
+the full detection-change cycle.
+
+Scope of this negative, stated precisely. It covers the single-residue and
+mutational indices. **Configurational** frustration was not tested: it costs 22 to
+63 seconds per structure, six to thirteen hours across this set, and it is the
+variant most directly tied to conformational rearrangement, so it remains the one
+version of this idea still open.
 
 ### Multi-crystal experimental ensembles
 
