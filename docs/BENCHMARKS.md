@@ -266,6 +266,48 @@ raised coverage 21 points and converted none of it, for the same reason. The fie
 can already see roughly 89% of these sites and has no way to put them in the top
 five.
 
+### Where the headroom is, and what to do about it today
+
+Decomposing the gap between what is currently achieved and what is achievable,
+on the held-out test fold:
+
+| | recovery |
+|---|---:|
+| best single tool, top-5 | 66.5% |
+| perfect ranking of that tool's own candidates | 73.7% (+7.3) |
+| perfect ranking of three tools' candidates | 89.4% (+22.9) |
+| invisible to all three | 10.6% |
+
+Two thirds of the available headroom is not reachable by improving any one
+detector's ranking. It requires candidates that a single detector never proposes.
+
+That has a practical consequence, because consensus is free and available now. At
+a matched total candidate budget, splitting the budget across three detectors
+beats spending it all on the best single one, paired over the same structures:
+
+| candidates shown | union minus best single tool |
+|---|---:|
+| 3 | -1.7% CI[-6.7, +3.4] |
+| 6 | +1.7% CI[-2.8, +6.1] |
+| 15 | **+8.4% CI[+3.9, +12.8]** |
+| 30 | **+10.1% CI[+5.0, +15.1]** |
+| 60 | **+15.6% CI[+10.6, +21.2]** |
+
+Held-out test fold, n=179. The train folds replicate it: +6.4, +10.6 and +14.7 at
+15, 30 and 60 over n=748.
+
+The crossover sits between 6 and 15 candidates, and the reason is visible in the
+saturation. A single detector stops improving once it reaches its own coverage
+ceiling, 73.7% for Lacuna and 66.5% for P2Rank, both of which are hit by a budget
+of 15. The union keeps climbing to 89.4% because its ceiling is higher.
+
+So the recommendation is conditional rather than universal, which is why it is
+worth stating precisely. **Below roughly ten candidates, use the single best
+detector; the union splits the budget too thin to pay off. Above that, a consensus
+of detectors strictly dominates, because the single detector has already returned
+everything it can find.** Running all three costs about seven seconds per
+structure.
+
 ### Detection and ranking fail on the same structures
 
 This subfield reports residue-level AUC or AUPRC as its headline number:
