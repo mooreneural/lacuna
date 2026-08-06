@@ -78,7 +78,14 @@ def _best_over_topk(residue_lists, known, k=5):
 
 
 def _run_tool(tool, cif, chain, n_conformers):
-    """Run one detector on one structure; return (recall, jaccard, n_prop, elapsed)."""
+    """Run one detector on one structure.
+
+    Returns the *full* ranked list of proposals, not the top five. Truncating
+    here made the dumps unable to answer the question that matters most about a
+    detector: how much of its failure is that the site was never proposed, versus
+    proposed and then out-ranked. Separating those needs the whole list, and
+    keeping it costs only a Jaccard per candidate.
+    """
     t0 = time.perf_counter()
     if tool in ("lacuna_md", "lacuna_nma", "lacuna_learned", "lacuna_plm"):
         backend = "openmm" if tool == "lacuna_md" else "nma"
@@ -86,20 +93,15 @@ def _run_tool(tool, cif, chain, n_conformers):
                    "lacuna_plm": "learned-plm"}.get(tool, "crypticity")
         clusters, _ = run_lacuna(cif, n_conformers, chain=chain,
                                  backend_name=backend, rank_by=rank_by)
-        residue_lists = [c.lining_residues for c in clusters[:5]]
-        n_prop = len(clusters)
+        residue_lists = [c.lining_residues for c in clusters]
     elif tool == "fpocket":
-        pockets = run_fpocket(cif, chain)
-        residue_lists = [p["residues"] for p in pockets[:5]]
-        n_prop = len(pockets)
+        residue_lists = [p["residues"] for p in run_fpocket(cif, chain)]
     elif tool == "p2rank":
         from lacuna.pockets.p2rank_detector import run_p2rank
-        pockets = run_p2rank(cif, chain)
-        residue_lists = [p["residues"] for p in pockets[:5]]
-        n_prop = len(pockets)
+        residue_lists = [p["residues"] for p in run_p2rank(cif, chain)]
     else:
         raise ValueError(f"unknown tool {tool}")
-    return residue_lists, n_prop, time.perf_counter() - t0
+    return residue_lists, len(residue_lists), time.perf_counter() - t0
 
 
 def _load_done(out_path):
@@ -198,6 +200,12 @@ def run(args):
                     "id": tag_id, "pdb": apo, "chain": chain, "n_known": len(known),
                     "tool": tool, "recall": round(ov, 3), "jaccard": round(jac, 3),
                     "n_prop": n_prop, "elapsed_s": round(elapsed, 2),
+                    # Per-candidate overlap in rank order. `jaccard` above stays
+                    # the best over the top five so existing analyses are
+                    # unaffected; this is what lets the same dump answer top-k
+                    # for any k, and the oracle, without rerunning anything.
+                    "jac_by_rank": [round(residue_jaccard(r, known), 3)
+                                    for r in residue_lists],
                 }
                 fout.write(json.dumps(row) + "\n")
                 fout.flush()

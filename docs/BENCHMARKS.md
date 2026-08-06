@@ -221,6 +221,49 @@ and then out-ranked, and most of the loss sits just outside the cutoff: the
 correct cluster is at rank 6-8 for 14 structures, and top-8 recovery is already
 64.8%.
 
+### Detection and ranking fail on the same structures
+
+This subfield reports residue-level AUC or AUPRC as its headline number:
+CryptoBench, Seq2Pocket and CryptoBank all do. What a user needs is a short
+ranked list of pockets. Those are not the same quantity, and nothing published
+checks whether one predicts the other.
+
+It does. Scoring each structure's sequence map against its annotated site and
+comparing to whether the pipeline surfaced that site in the top 5, residue-level
+AUC predicts pocket-level success with a meta-AUC of 0.79 on the held-out test
+fold (0.81 on the train folds). The proxy is sound, which was not the expected
+result.
+
+The informative part is what happens to *detection* across the same range:
+
+| quartile by residue AUC | top-5 | oracle | ranking converts | site residues |
+|---|---:|---:|---:|---:|
+| Q1 (worst) | 20.0% | 42.2% | 47% | 9.6 |
+| Q2 | 72.7% | 79.5% | 91% | 14.0 |
+| Q3 | 91.1% | 91.1% | 100% | 16.3 |
+| Q4 (best) | 82.2% | 82.2% | 100% | 17.0 |
+
+Held-out test fold, n=179; the train folds give the same shape at n=748.
+
+The two failure modes coincide. Where the sequence model cannot localize the
+site, the geometric detector usually has not proposed it either: the oracle falls
+to 42%. Where sequence is confident, ranking is already solved, converting 96 to
+100% of what detection provides. **Between 53 and 60% of all remaining error sits
+in the bottom quartile alone**, and that quartile is characterized by small
+annotated sites, 9.6 lining residues against 17 in the top quartile.
+
+This bears directly on the current frontier. Combining sequence signal with
+geometry is what `learned-plm` does and what Seq2Pocket's P2Rank merge does, and
+the premise is that the two are complementary. On the structures where it would
+matter they fail together, so the combination improves ordering, worth +10.6%
+here, without touching the detection gap. The remaining problem is not cryptic
+sites in general; it is small sites that neither signal can place.
+
+One thing this is not: evidence that candidate count explains the hard class. Q1
+carries *fewer* candidates than Q4 (19.2 against 23.9). The candidate-count result
+elsewhere in this document is interventional, about what happens when a change
+adds candidates, and does not appear as a cross-sectional correlation.
+
 These attempts to close it produced no measurable gain, and are recorded so they
 are not repeated:
 
