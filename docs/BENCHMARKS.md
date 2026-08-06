@@ -392,6 +392,48 @@ that is the depth `mouth_frac` already uses. It is a no-op: 93% of cavity voxels
 lie deeper than it, so the "core" is the whole pocket and the lining sets come out
 identical to three significant figures. The quantile above is what actually bites.
 
+### Residue-level independence does not survive pocket-level aggregation
+
+Three per-residue signals were tested as ranker features, on the reasoning that a
+signal which fails on *different* structures from the sequence head would add
+where it matters. The reasoning was sound and the conclusion was still wrong, in
+a way worth recording because it applies to any future candidate.
+
+AlphaFold pLDDT is the clearest case. It separates annotated site residues at
+0.661 inverted, close to the 0.68 CryptoBench reports for pLM embeddings, and its
+per-structure AUC is uncorrelated with the sequence head's (Spearman -0.014). In
+the quartile where the sequence head collapses to 0.592 it holds at 0.630, which
+is exactly the complementarity the earlier analysis said was missing.
+
+Aggregated over lining residues it adds nothing: **-0.3% CI[-1.1, +0.4]** against
+the shipped feature set, leave-one-fold-out over 721 train-fold structures.
+
+The reason shows up in the pocket-level correlations. `plddt_mean` correlates
++0.358 with `bur_raw`, +0.322 with `enc` and +0.265 with `depth`, and those
+existing features discriminate positives just as well (`bur_raw` 0.677 inverted
+against `plddt_mean`'s 0.658). It also correlates -0.385 with `plm_mean` at the
+pocket level despite the per-structure independence. Averaging a per-residue
+quantity over a pocket's lining couples it to how big and how buried that pocket
+is, and the ranker already models both.
+
+So per-structure independence of two signals says nothing about the marginal value
+of the second once both are aggregated the same way. Any future per-residue
+feature should be checked for correlation against `bur_raw`, `enc` and `depth`
+*after* aggregation, before a pipeline run is spent on it.
+
+For the record, the other two:
+
+| signal | residue AUC | independence vs pLM | verdict |
+|---|---:|---:|---|
+| pLDDT | 0.661 | -0.014 | -0.3% CI[-1.1,+0.4] at pocket level |
+| ESSA (elastic-network essential sites) | 0.623 | +0.091 | flat across quartiles; ~7s/structure |
+| local frustration | 0.509 | n/a | chance, never reached pocket level |
+
+ESSA clears the residue-level gate that frustration failed, and it is close to
+independent, but it does not hold up where the sequence head fails, which was the
+whole reason to want it. Given pLDDT was both stronger and better placed and still
+converted nothing, ESSA was not taken to a pocket-level run.
+
 ### Local energetic frustration
 
 Energy landscape theory says a fold's minimally frustrated contacts form its
