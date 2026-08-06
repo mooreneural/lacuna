@@ -221,6 +221,51 @@ and then out-ranked, and most of the loss sits just outside the cutoff: the
 correct cluster is at rank 6-8 for 14 structures, and top-8 recovery is already
 64.8%.
 
+### The field can already see most cryptic sites; nobody can rank them
+
+Every tool here reports top-n recovery, which silently adds together two very
+different quantities: whether the site was ever proposed, and whether it survived
+ranking. Splitting them changes what the comparison means. Held-out test fold,
+n=179 to 180, same criterion throughout, per-candidate overlap recorded for every
+proposal rather than only the top five:
+
+| tool | candidates | coverage (oracle) | top-5 | of its coverage, converts |
+|------|-----------:|------------------:|------:|--------------------------:|
+| fpocket | 18.9 | 73.9% | 28.3% | 38% |
+| P2Rank | 6.7 | 66.1% | 63.3% | **96%** |
+| Lacuna (`learned`) | 20.5 | 73.7% | 55.9% | 76% |
+| Lacuna (`learned-plm`) | 20.5 | 73.7% | 66.5% | 90% |
+
+**fpocket finds the site as often as Lacuna does.** Its coverage is 73.9% against
+our 73.7%, statistically the same, and it proposes a similar number of candidates.
+The entire gap between 28.3% and 66.5% at top-5 is ranking, not detection. A
+geometric detector from 2009 has already solved the detection half of this problem
+about as well as we have.
+
+P2Rank gets to nearly the same place by the opposite route: the least coverage of
+the three, 66.1%, and almost perfect conversion of it. Its advantage was never
+finding more, it is proposing 6.7 candidates instead of 20 and ordering them well.
+
+The complementarity is the part that reframes the problem:
+
+| detectors unioned | coverage |
+|---|---:|
+| Lacuna | 73.7% |
+| Lacuna + fpocket | 84.9% |
+| Lacuna + fpocket + P2Rank | **89.4%** |
+| missed by all three | **10.6%** |
+
+The class of cryptic sites invisible to geometric detection is not the ~26% each
+tool sees; it is about 11%. The other 15 points are detector-specific: each tool
+misses a different set. So coverage is not the scarce resource. **Ranking is.**
+
+Which closes the loop with the pooling result recorded above. Taking the union is
+exactly how one would harvest that 89.4%, and taking the union means summing
+candidate sets: 20.5 plus 18.9 plus 6.7. Pooling detection scales inside Lacuna
+raised coverage 21 points and converted none of it, for the same reason. The field
+can already see roughly 89% of these sites and has no way to put them in the top
+five.
+
 ### Detection and ranking fail on the same structures
 
 This subfield reports residue-level AUC or AUPRC as its headline number:
