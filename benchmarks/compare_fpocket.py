@@ -120,7 +120,17 @@ def run_fpocket(pdb_path: Path, chain: str) -> list[dict]:
         if not out_dir.exists():
             return []
 
-        pocket_files = sorted(out_dir.glob("pockets/pocket*_atm.pdb"))
+        # Sort on the pocket INDEX, not the filename. fpocket names its output
+        # pocket1_atm.pdb .. pocketN_atm.pdb and orders them by its own score, so
+        # lexicographic sorting silently permutes the ranking as soon as there are
+        # ten or more pockets: "pocket10" sorts before "pocket1", handing rank 1 to
+        # fpocket's tenth-best site. fpocket proposes ~19 pockets on a typical
+        # structure, so this affected nearly every one, and it penalises fpocket
+        # specifically at the ranked metrics while leaving its coverage untouched.
+        pocket_files = sorted(
+            out_dir.glob("pockets/pocket*_atm.pdb"),
+            key=lambda p: int(re.search(r"pocket(\d+)_atm", p.name).group(1)),
+        )
         pockets = []
         for i, pf in enumerate(pocket_files, 1):
             residues = parse_fpocket_atoms(pf, chain)

@@ -130,6 +130,18 @@ def main():
         "installed (Java 11+; 'prank' on PATH or set LACUNA_P2RANK)."
     ),
 )
+@click.option(
+    "--seed-from-sequence",
+    is_flag=True, default=False,
+    help=(
+        "Also propose pockets at the sequence model's highest-scoring residues, "
+        "for sites too closed for the geometric detector to see. Needs the 'plm' "
+        "extra. Worth pairing with a smaller --conformers: it substitutes for "
+        "ensemble sampling rather than adding to it, and the added coverage stops "
+        "converting once candidates exceed roughly fifteen. Five conformers with "
+        "this flag matched twenty without it on CryptoBench, at a third the time."
+    ),
+)
 def discover(
     input_path: Path,
     backend: str,
@@ -147,6 +159,7 @@ def discover(
     quiet: bool,
     homodimer: bool,
     detector: str,
+    seed_from_sequence: bool,
 ):
     """Discover cryptic binding pockets in a protein structure.
 
@@ -241,10 +254,48 @@ def discover(
             )
             detector, use_p2rank = "alpha", False
 
+    # Sequence-seeded proposals need the residue probabilities *before* detection,
+    # while the ranker needs them after, so resolve them once here and reuse them
+    # below. The embedding is per structure, not per conformer: the sequence does
+    # not move.
+    plm_probs = None
+    if seed_from_sequence or rank_by == "learned-plm":
+        from lacuna.pockets import plm as _plm
+
+        if not _plm.available():
+            if rank_by == "learned-plm":
+                console.print(
+                    '  [yellow]--rank-by learned-plm needs the "plm" extra '
+                    '(pip install "lacuna-pockets[plm]"). '
+                    "Falling back to the geometry ranker.[/yellow]"
+                )
+                rank_by = "learned"
+            if seed_from_sequence:
+                console.print(
+                    '  [yellow]--seed-from-sequence needs the "plm" extra; '
+                    "continuing without sequence-seeded proposals.[/yellow]"
+                )
+                seed_from_sequence = False
+        else:
+            if not quiet:
+                console.print("\n[dim]Embedding sequence...[/dim]")
+            plm_probs = _plm.residue_probabilities(structure)
+            if not plm_probs:
+                console.print(
+                    "  [yellow]sequence embedding did not align with the residue "
+                    "list; falling back to the geometry ranker.[/yellow]"
+                )
+                if rank_by == "learned-plm":
+                    rank_by = "learned"
+                seed_from_sequence = False
+
     def _detect(coords) -> list:
         pockets = [] if detector == "p2rank" else detect_pockets(coords, structure)
         if use_p2rank:
             pockets = list(pockets) + detect_pockets_p2rank(coords, structure)
+        if seed_from_sequence and plm_probs:
+            from lacuna.pockets.seeding import seeded_pockets
+            pockets = list(pockets) + seeded_pockets(coords, structure, plm_probs)
         return pockets
 
     # Detect pockets in each conformer
@@ -267,31 +318,8 @@ def discover(
         console.print(f"  [dim]Found {total_pockets} raw pockets across ensemble.[/dim]")
         console.print("\n[dim]Clustering and ranking pockets...[/dim]")
 
-    # Cluster across ensemble
-    # The sequence ranker embeds the structure once and reuses it for every
-    # conformer: the sequence is invariant while the geometry is what moves.
-    plm_probs = None
-    if rank_by == "learned-plm":
-        from lacuna.pockets import plm as _plm
-
-        if not _plm.available():
-            console.print(
-                '  [yellow]--rank-by learned-plm needs the "plm" extra '
-                '(pip install "lacuna-pockets[plm]"). '
-                "Falling back to the geometry ranker.[/yellow]"
-            )
-            rank_by = "learned"
-        else:
-            if not quiet:
-                console.print("\n[dim]Embedding sequence for the ranker...[/dim]")
-            plm_probs = _plm.residue_probabilities(structure)
-            if not plm_probs:
-                console.print(
-                    "  [yellow]sequence embedding did not align with the residue "
-                    "list; falling back to the geometry ranker.[/yellow]"
-                )
-                rank_by = "learned"
-
+    # Cluster across ensemble. plm_probs was resolved before detection, since
+    # sequence-seeded proposals need it there; the ranker reuses the same values.
     clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coord_sets),
                                rank_by=rank_by, plm_residue_probs=plm_probs)
 
