@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: MIT
 # Copyright (C) 2026 Clayton Moore
 """Lacuna vs fpocket head-to-head on CryptoBench (larger sample than the 22-pair
 curated set, for tighter confidence intervals on the size-robust comparison).

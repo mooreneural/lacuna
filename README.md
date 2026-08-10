@@ -272,15 +272,11 @@ If you use Lacuna in published research, please cite:
 
 ## License
 
-**[GNU AGPL-3.0-or-later](LICENSE)** - free to use, study, modify, and share.
-The AGPL's copyleft requires that if you distribute a modified version, **or run
-a modified version as a network/hosted service**, you make the complete
-corresponding source available under the same license.
+**[MIT](LICENSE)** - free to use, study, modify, share, and embed in
+closed-source or commercial work, with no copyleft obligation.
 
-A separate **[commercial license](LICENSE_COMMERCIAL)** removes the AGPL
-copyleft obligation (for embedding Lacuna in closed-source products or hosted
-services without releasing your own source) and adds warranty, indemnification,
-support SLAs, and custom development.
-
-> Versions ≤ 0.1.2 were released under the MIT License and remain available
-> under those terms. AGPL-3.0 applies from version 0.2.0 onward.
+> Versions 0.2.0 through 0.3.1 were released under AGPL-3.0 and remain available
+> under those terms. MIT applies from version 1.0.0 onward. Lacuna moved back to
+> a permissive license because its central recommendation is to combine several
+> detectors, and a copyleft license makes that combination harder for exactly the
+> people the work is aimed at.

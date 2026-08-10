@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lacuna-pockets"
-version = "0.3.1"
+version = "1.0.0"
 description = "Cryptic binding pocket discovery via conformational ensemble analysis"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "AGPL-3.0-or-later"
+license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "Clayton Moore" }]
 keywords = ["drug-discovery", "protein-structure", "cryptic-pockets", "cheminformatics"]

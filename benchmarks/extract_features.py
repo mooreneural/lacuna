@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: MIT
 # Copyright (C) 2026 Clayton Moore
 """Extract per-pocket-cluster features + labels for the learned re-ranker.
 

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: MIT
 # Copyright (C) 2026 Clayton Moore
 """Fit and validate the learned pocket ranker used by ``rank_by="learned"``.
 
