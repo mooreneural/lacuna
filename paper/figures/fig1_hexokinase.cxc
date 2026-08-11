@@ -1,0 +1,89 @@
+# Figure 1 setup: a cryptic site every detector finds and only one ranks.
+#
+# KlHxk1 (Kluyveromyces lactis hexokinase 1). 4JAX is the open apo form, 3O8M the
+# closed form with beta-D-glucose bound. Domain closure on binding is what makes
+# the site cryptic.
+#
+# Chosen because all three detectors propose a qualifying candidate here and only
+# the ranking differs. fpocket puts its best-matching pocket of 35 (Jaccard 0.83)
+# at rank 35; P2Rank and Lacuna both rank the same site first.
+#
+# This script only sets the scene. Saving is deliberately a separate step, below,
+# because the two panels MUST share one camera: if the view changes between them
+# the reader sees a change of framing rather than a change of conformation, which
+# is the one thing the figure exists to show.
+#
+#   open C:/Users/clayt/Documents/GitHub/lacuna/paper/figures/fig1_hexokinase.cxc
+
+close all
+cd C:/Users/clayt/Documents/GitHub/lacuna/paper/figures
+
+set bgColor white
+lighting soft
+graphics silhouettes true width 1.2
+
+open 4jax
+delete #1 & ~/F
+open 3o8m
+delete #2 & ~/A
+
+# One frame of reference for both states.
+matchmaker #2 to #1
+
+hide cartoons
+hide atoms
+show #1,2 surfaces
+transparency #1,2 0 surfaces
+color #1,2 #D8D8D2
+
+# The fifteen residues CryptoBench annotates. Numbering is identical in both
+# entries, which is why one residue list serves both.
+color #1/F:157,158,159,174,175,209,210,211,230,234,235,236,268,298,301 #C8553D
+color #2/A:157,158,159,174,175,209,210,211,230,234,235,236,268,298,301 #C8553D
+
+# Glucose, large enough to read at figure scale.
+show #2/A:487 atoms
+style #2/A:487 sphere
+size #2/A:487 atomRadius 1.6
+color #2/A:487 #2E5E8E
+
+# Frame on the site, showing the holo state first so the open cleft is what you
+# orient against.
+hide #1 surfaces
+view #2/A:157,158,159,174,175,209,210,211,230,234,235,236,268,298,301
+zoom 0.55
+
+# A selection outline renders into saved images, so clear it.
+~select
+
+# ── Now rotate by hand until you are looking into the cleft. ──────────────────
+# Then paste the four lines below AS A BLOCK and do not touch the mouse between
+# them. Only the surface display toggles; the camera never moves.
+#
+# save panel_b.png width 2000 supersample 3 transparentBackground true
+# hide #2 surfaces
+# show #1 surfaces
+# save panel_a.png width 2000 supersample 3 transparentBackground true
+#
+# If the glucose is hidden inside the surface, add this before saving panel_b and
+# re-save only that panel:
+#
+#   transparency #2 35 surfaces
+#
+# ── Optional panel C: what fpocket proposed, and where it ranked it ───────────
+# Generate the pockets outside ChimeraX first:
+#
+#   fpocket -f 4jax.pdb
+#
+# then load its top proposal beside the true site:
+#
+#   open 4jax_out/pockets/pocket1_atm.pdb
+#   open 4jax_out/pockets/pocket35_atm.pdb
+#   style #3,4 sphere
+#   color #3 #7A7A7A
+#   color #4 #C8553D
+#
+# fpocket writes pocket files in rank order, but a directory listing sorts
+# pocket10 before pocket2. Reading that listing as a ranking is the bug that
+# understated fpocket by twelve points in our first pass, so check the numbering
+# rather than trusting the file order.

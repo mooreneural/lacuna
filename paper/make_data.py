@@ -1,0 +1,244 @@
+#!/usr/bin/env python3
+"""Assemble every number the paper's figures use into one JSON.
+
+Figures read this file and nothing else, so a figure can never silently disagree
+with the text: there is one place where an analysis choice is made, and one
+artefact that records what it produced.
+
+Inputs are the per-candidate overlap dumps. `detectors_cb_paper_baselines.jsonl`
+carries a Jaccard for every proposal fpocket and P2Rank make, not only the top
+five, which is what makes the coverage-versus-ranking split computable at all.
+Lacuna's side comes from the ranker feature dumps, which already record a Jaccard
+per cluster.
+
+    python paper/make_data.py --out paper/data/analysis.json
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+import numpy as np
+
+REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO / "benchmarks"))
+sys.path.insert(0, str(REPO))
+
+from train_ranker import _load, _train_fold_of, JACCARD_THRESHOLD  # noqa: E402
+from lacuna.pockets.clusterer import (  # noqa: E402
+    _PLM_RANKER_FEATURES, _PLM_RANKER_WEIGHTS,
+)
+
+#: Scratch dumps holding Lacuna's per-candidate overlaps.
+SCRATCH = Path(
+    r"C:\Users\clayt\AppData\Local\Temp\claude"
+    r"\C--Users-clayt-Documents-GitHub-lacuna"
+    r"\2030379c-f563-47aa-80e1-8e5b229f64df\scratchpad"
+)
+
+TOOL_LABELS = {"fpocket": "fpocket", "p2rank": "P2Rank",
+               "ifsitepred": "IF-SitePred", "lacuna": "Lacuna"}
+KS = (1, 2, 3, 5, 10, 20, 50)
+BUDGETS = (3, 6, 9, 15, 30, 60)
+N_BOOT = 20000
+
+
+def _boot_ci(values, seed=0, n_boot=N_BOOT):
+    v = np.asarray(values, dtype=float)
+    if not len(v):
+        return 0.0, 0.0, 0.0
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, len(v), size=(n_boot, len(v)))
+    m = np.sort(v[idx].mean(axis=1))
+    return float(v.mean()), float(m[int(0.025 * n_boot)]), float(m[int(0.975 * n_boot) - 1])
+
+
+def _paired_ci(a, b, seed=0, n_boot=N_BOOT):
+    d = np.asarray(a, dtype=float) - np.asarray(b, dtype=float)
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, len(d), size=(n_boot, len(d)))
+    m = np.sort(d[idx].mean(axis=1))
+    return float(d.mean()), float(m[int(0.025 * n_boot)]), float(m[int(0.975 * n_boot) - 1])
+
+
+def _hit(jaccards, k):
+    return any(j >= JACCARD_THRESHOLD for j in jaccards[:k])
+
+
+def collect(want_test: bool) -> dict[str, dict[str, list[float]]]:
+    """Per structure, per tool, the ranked list of per-candidate Jaccards."""
+    out: dict[str, dict[str, list[float]]] = {}
+    path = REPO / "benchmarks/detectors_cb_paper_baselines.jsonl"
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        r = json.loads(line)
+        if bool(_train_fold_of(r["id"])) == want_test:
+            continue
+        out.setdefault(r["id"], {})[r["tool"]] = r["jac_by_rank"]
+
+    # IF-SitePred was collected separately; its sites are point clouds converted
+    # to residue sets at 4.5 A, the radius its own cloud construction uses.
+    ifsp = REPO / "benchmarks/detectors_cb_paper_ifsitepred.jsonl"
+    if ifsp.exists():
+        for line in ifsp.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            r = json.loads(line)
+            if bool(_train_fold_of(r["id"])) == want_test:
+                continue
+            if r["id"] in out:
+                out[r["id"]]["ifsitepred"] = r["jac_by_rank"]
+
+    # fpocket's rows in the baseline file were collected before the rank-ordering
+    # fix, which had its proposals in the order the output directory happened to
+    # list them (pocket10 before pocket2) rather than by fpocket's own ranking.
+    # That understates its top-k by about twelve points and affects nothing else,
+    # since only fpocket was read from a directory listing.
+    fixed = REPO / "benchmarks/detectors_cb_paper_fpocket_fixed.jsonl"
+    n_fixed = 0
+    if fixed.exists():
+        for line in fixed.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            r = json.loads(line)
+            if bool(_train_fold_of(r["id"])) == want_test:
+                continue
+            if r["id"] in out:
+                out[r["id"]]["fpocket"] = r["jac_by_rank"]
+                n_fixed += 1
+    n_fp = sum(1 for d in out.values() if "fpocket" in d)
+    if n_fixed < n_fp:
+        raise SystemExit(
+            f"fpocket re-collection covers {n_fixed} of {n_fp} "
+            f"{'test' if want_test else 'train'}-fold structures. Finish the run "
+            "before generating paper numbers: a partial override would mix "
+            "corrected and uncorrected rankings in one column."
+        )
+
+    w = np.asarray(_PLM_RANKER_WEIGHTS)
+    feats = list(_PLM_RANKER_FEATURES)
+    dump = SCRATCH / ("test_off.jsonl" if want_test else "split_off.jsonl")
+    for s in _load(dump):
+        if want_test and _train_fold_of(s["id"]):
+            continue
+        if not want_test and not _train_fold_of(s["id"]):
+            continue
+        ranked = sorted(
+            s["clusters"],
+            key=lambda c: float(np.dot(w, [c.get(f, 0.0) for f in feats])),
+            reverse=True,
+        )
+        out.setdefault(s["id"], {})["lacuna"] = [c["jac"] for c in ranked]
+
+    # Only structures every tool ran on, so every comparison is paired.
+    return {i: d for i, d in out.items() if len(d) == len(TOOL_LABELS)}
+
+
+def analyse(data, split_name):
+    ids = sorted(data)
+    res = {"split": split_name, "n": len(ids), "tools": {}}
+
+    for tool in TOOL_LABELS:
+        lists = [data[i][tool] for i in ids]
+        oracle = [_hit(j, 10 ** 6) for j in lists]
+        entry = {
+            "label": TOOL_LABELS[tool],
+            "n_candidates_mean": float(np.mean([len(j) for j in lists])),
+            "n_candidates_median": float(np.median([len(j) for j in lists])),
+            "oracle": _boot_ci(oracle),
+            "topk": {},
+        }
+        for k in KS:
+            entry["topk"][str(k)] = _boot_ci([_hit(j, k) for j in lists])
+        top5 = float(np.mean([_hit(j, 5) for j in lists]))
+        orc = float(np.mean(oracle))
+        entry["conversion_at_5"] = top5 / orc if orc else float("nan")
+        entry["lost_to_ranking"] = orc - top5
+        entry["never_proposed"] = 1.0 - orc
+        res["tools"][tool] = entry
+
+    # Complementarity: coverage of every subset of detectors.
+    subsets = [
+        ('fpocket',),
+        ('p2rank',),
+        ('ifsitepred',),
+        ('lacuna',),
+        ('fpocket', 'p2rank'),
+        ('fpocket', 'ifsitepred'),
+        ('fpocket', 'lacuna'),
+        ('p2rank', 'ifsitepred'),
+        ('p2rank', 'lacuna'),
+        ('ifsitepred', 'lacuna'),
+        ('fpocket', 'p2rank', 'ifsitepred'),
+        ('fpocket', 'p2rank', 'lacuna'),
+        ('fpocket', 'ifsitepred', 'lacuna'),
+        ('p2rank', 'ifsitepred', 'lacuna'),
+        ('fpocket', 'p2rank', 'ifsitepred', 'lacuna'),
+    ]
+    res["union_oracle"] = {
+        "+".join(c): _boot_ci([any(_hit(data[i][t], 10 ** 6) for t in c) for i in ids])
+        for c in subsets
+    }
+    res["missed_by_all"] = float(
+        np.mean([not any(_hit(data[i][t], 10 ** 6) for t in TOOL_LABELS) for i in ids])
+    )
+
+    # Matched-budget curves: one tool spending the whole budget, against the
+    # budget split evenly across all four.
+    res["budget"] = {}
+    for total in BUDGETS:
+        per = max(1, total // len(TOOL_LABELS))
+        single = {t: [_hit(data[i][t], total) for i in ids] for t in TOOL_LABELS}
+        union = [any(_hit(data[i][t], per) for t in TOOL_LABELS) for i in ids]
+        best = max(TOOL_LABELS, key=lambda t: float(np.mean(single[t])))
+        res["budget"][str(total)] = {
+            "per_tool_share": per,
+            "single": {t: _boot_ci(v) for t, v in single.items()},
+            "union": _boot_ci(union),
+            "best_single_tool": best,
+            "union_minus_best": _paired_ci(union, single[best]),
+        }
+
+    best5 = max(float(np.mean([_hit(data[i][t], 5) for i in ids])) for t in TOOL_LABELS)
+    own = max(res["tools"][t]["oracle"][0] for t in TOOL_LABELS)
+    allo = res["union_oracle"]["+".join(TOOL_LABELS)][0]
+    res["headroom"] = {
+        "achieved_top5": best5,
+        "perfect_ranking_one_tool": own,
+        "perfect_ranking_union": allo,
+        "irreducible": 1.0 - allo,
+    }
+    return res
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--out", default=str(REPO / "paper/data/analysis.json"))
+    args = ap.parse_args()
+
+    payload = {
+        "jaccard_threshold": JACCARD_THRESHOLD,
+        "splits": {},
+    }
+    for name, want_test in (("test", True), ("train", False)):
+        d = collect(want_test)
+        payload["splits"][name] = analyse(d, name)
+        print(f"{name}: n={len(d)}")
+
+    out = Path(args.out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(payload, indent=1), encoding="utf-8")
+    print(f"wrote {out}")
+
+    t = payload["splits"]["test"]
+    for tool, e in t["tools"].items():
+        print(f"  {e['label']:9s} cands {e['n_candidates_mean']:5.1f}  "
+              f"coverage {e['oracle'][0]:.1%}  top5 {e['topk']['5'][0]:.1%}  "
+              f"converts {e['conversion_at_5']:.0%}")
+
+
+if __name__ == "__main__":
+    main()

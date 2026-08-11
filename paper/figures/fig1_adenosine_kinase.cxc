@@ -1,0 +1,78 @@
+# Figure 1 setup: a cryptic site every detector finds and only one ranks.
+#
+# Mycobacterium tuberculosis adenosine kinase. 2PKF is the apo form, 2PKK the same
+# protein and chain with 2-fluoroadenosine bound. Substrate binding moves the site
+# residues 2.8 A on average (3.65 A global CA RMSD after superposition), which is
+# the conformational change that makes the site cryptic.
+#
+# All three detectors propose a qualifying candidate here; only the ranking
+# differs. fpocket puts it at rank 13 of 17, P2Rank at rank 1, Lacuna at rank 2.
+# Under top-5 recovery fpocket is scored as having missed it entirely.
+#
+# Chosen over the hexokinase pair (4JAX/3O8M) after measuring both: hexokinase
+# moves only 1.86 A globally, which does not read at surface rendering scale, and
+# its apo cleft is wider than its holo one, which inverts the picture a reader
+# expects. This pair moves twice as far in the conventional direction.
+#
+# Saving is a separate step, below, because both panels must share one camera. If
+# the view changes between them the reader sees a change of framing rather than a
+# change of conformation, which is the one thing the figure exists to show.
+#
+#   open C:/Users/clayt/Documents/GitHub/lacuna/paper/figures/fig1_adenosine_kinase.cxc
+
+close all
+cd C:/Users/clayt/Documents/GitHub/lacuna/paper/figures
+
+set bgColor white
+lighting soft
+graphics silhouettes true width 1.2
+
+open 2pkf
+delete #1 & ~/A
+open 2pkk
+delete #2 & ~/A
+
+# One frame of reference for both states.
+matchmaker #2 to #1
+
+hide cartoons
+hide atoms
+show #1,2 surfaces
+transparency #1,2 0 surfaces
+color #1,2 #D8D8D2
+
+# The eighteen residues CryptoBench annotates. Numbering is identical in both
+# entries, so one list serves both.
+color #1/A:8,10,12,47,48,49,52,102,116,121,146,147,172,173,253,254,257,293 #C8553D
+color #2/A:8,10,12,47,48,49,52,102,116,121,146,147,172,173,253,254,257,293 #C8553D
+
+# 2-fluoroadenosine, sized to read at figure scale.
+show #2/A:501 atoms
+style #2/A:501 sphere
+size #2/A:501 atomRadius 1.5
+color #2/A:501 #2E5E8E
+
+# Frame on the site with the holo state showing, so the bound state is what you
+# orient against.
+hide #1 surfaces
+view #2/A:8,10,12,47,48,49,52,102,116,121,146,147,172,173,253,254,257,293
+zoom 0.6
+
+# A selection outline renders into saved images, so clear it.
+~select
+
+# ── Rotate by hand until you are looking into the site. ───────────────────────
+# Then paste the block below and do not touch the mouse between the two saves.
+# Only surface visibility and the ligand toggle; the camera never moves.
+#
+# transparency #2 40 surfaces
+# save panel_b.png width 2000 supersample 3 transparentBackground true
+# transparency #2 0 surfaces
+# hide #2/A:501 atoms
+# hide #2 surfaces
+# show #1 surfaces
+# save panel_a.png width 2000 supersample 3 transparentBackground true
+#
+# The ligand is drawn as atoms, not as part of the surface, so hiding the holo
+# surface alone leaves it floating in the apo panel. Hiding it explicitly is what
+# keeps the two panels honest.
