@@ -5,6 +5,42 @@ All notable changes to Lacuna are documented here. The project follows
 governs its benchmarks: reported numbers are the ones we can defend on held-out
 data, never the most flattering ones available.
 
+## [1.0.0] - 2026-08-07
+
+Relicensed to MIT, and the first release whose headline numbers come from a
+four-detector comparison rather than Lacuna alone.
+
+### Changed
+- **License: AGPL-3.0-or-later to MIT.** The dual-licensing model is retired.
+  A commercial license only has value when the buyer cannot get equivalent
+  capability free, and Lacuna sits at statistical parity with Apache-2.0 P2Rank.
+  More importantly it contradicted the finding below: the useful recommendation
+  is to run several detectors together, and copyleft makes that combination
+  awkward for the people best placed to act on it. `LICENSE_COMMERCIAL` removed.
+- Corrected fpocket's benchmark ranking. Its proposals were being read in the
+  order its output directory listed them, which sorts `pocket10` before
+  `pocket2`, rather than by fpocket's own rank. This understated its test-fold
+  top-5 by roughly twelve points, from a corrected 43.8% to 28.3%. Only fpocket
+  was affected; no other tool was read from a directory listing.
+
+### Added
+- `--seed-from-sequence`: proposes pockets at locations the sequence model scores
+  highly where geometry finds no concavity. Raises single-structure top-5 by
+  8.5% (95% CI +4.0 to +13.6) on the test fold, for at most three extra
+  candidates. Opt-in, because the gain is confined to small ensembles: at twenty
+  conformers it is not separable from zero.
+- `paper/`: the coverage-and-conversion study, its per-candidate data, and the
+  scripts that regenerate every number, figure and document from source.
+
+### Fixed
+- `train_ranker.py --cv` aborted on its own drifting-feature guard and had never
+  run on any dump carrying `depth_max`. It is the protocol's model-selection
+  instrument, so it needed to work.
+- The benchmark fold lookup stripped one trailing character to find a PDB id,
+  which silently dropped six structures with multi-character chain IDs from both
+  sides of every split. Nothing leaked into the test fold; the affected
+  structures were simply excluded from fitting and cross-validation.
+
 ## [Unreleased]
 
 Two changes account for essentially all of the accuracy gain in this release:

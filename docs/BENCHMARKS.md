@@ -27,7 +27,7 @@ figures moved slightly.
 | P2Rank | 63.3% (114/180) | 82% | +2.8% CI[-4.4, +9.4], includes zero |
 | **Lacuna** (`learned`, default) | **55.6% (100/180)** | 77% | +10.6% CI[+6.1, +15.0] |
 | MDpocket (best of 10 configs) | 43.9% (79/180) | - | +22.2% CI[+14.4, +30.0] |
-| fpocket | 28.3% (51/180) | 32% | +37.8% CI[+29.4, +46.1] |
+| fpocket | 43.6% (78/179) | 32% | +22.9% CI[+14.5, +31.3] |
 
 The sequence ranker is level with P2Rank: the interval on the difference spans
 zero, so parity is the claim, not a win.
@@ -231,20 +231,28 @@ proposal rather than only the top five:
 
 | tool | candidates | coverage (oracle) | top-5 | of its coverage, converts |
 |------|-----------:|------------------:|------:|--------------------------:|
-| fpocket | 18.9 | 73.9% | 28.3% | 38% |
-| P2Rank | 6.7 | 66.1% | 63.3% | **96%** |
-| Lacuna (`learned`) | 20.5 | 73.7% | 55.9% | 76% |
-| Lacuna (`learned-plm`) | 20.5 | 73.7% | 66.5% | 90% |
+| fpocket | 19.0 | 74.2% | 43.8% | 59% |
+| P2Rank | 6.7 | 66.3% | 63.5% | **96%** |
+| IF-SitePred | 23.4 | 70.8% | 61.8% | 87% |
+| Lacuna (`learned-plm`) | 20.5 | 73.6% | 66.3% | 90% |
 
-**fpocket finds the site as often as Lacuna does.** Its coverage is 73.9% against
-our 73.7%, statistically the same, and it proposes a similar number of candidates.
-The entire gap between 28.3% and 66.5% at top-5 is ranking, not detection. A
+**fpocket finds the site as often as Lacuna does.** Its coverage is 74.2% against
+our 73.6%, a one-structure difference, and it proposes a similar number of
+candidates. The gap between 43.8% and 66.3% at top-5 is ranking, not detection. A
 geometric detector from 2009 has already solved the detection half of this problem
 about as well as we have.
 
+An earlier version of this table put fpocket at 28.3%. That came from reading its
+proposals in the order its output directory listed them, which sorts `pocket10`
+before `pocket2`, rather than by fpocket's own rank. The error understated a
+competitor by fifteen points and inflated the apparent size of this finding; the
+finding survives at the corrected number, but it is smaller than first reported.
+
 P2Rank gets to nearly the same place by the opposite route: the least coverage of
-the three, 66.1%, and almost perfect conversion of it. Its advantage was never
+the four, 66.3%, and almost perfect conversion of it. Its advantage was never
 finding more, it is proposing 6.7 candidates instead of 20 and ordering them well.
+IF-SitePred, published in 2024 on protein language model embeddings, sits inside
+the same band on both axes.
 
 The complementarity is the part that reframes the problem:
 

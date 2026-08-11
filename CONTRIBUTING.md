@@ -74,7 +74,7 @@ PR changes a benchmark number:
 4. Open a PR describing what changed and why.
 
 By submitting a pull request, you agree your contribution is licensed under
-the project's AGPL-3.0-or-later license (see [LICENSE](LICENSE)).
+the project's MIT license (see [LICENSE](LICENSE)).
 
 ## Code of Conduct
 

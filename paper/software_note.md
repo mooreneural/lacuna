@@ -1,3 +1,11 @@
+<!--
+Software note describing Lacuna itself, submitted to MoML 2026. Superseded in
+part: its Table 1 carries CryptoBench numbers from an earlier code state, and its
+fpocket comparison predates the rank-ordering fix that raised fpocket's test-fold
+top-5 from 28.3% to 43.8%. Current numbers live in paper/manuscript.md and are
+regenerated from paper/data/analysis.json. Kept for the record rather than as a
+statement of present results.
+-->
 ---
 title: 'Lacuna: Cryptic Binding Pocket Discovery via Conformational Ensemble Analysis'
 tags:

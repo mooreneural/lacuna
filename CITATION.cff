@@ -5,23 +5,22 @@ title: "Lacuna: Cryptic Binding Pocket Discovery via Conformational Ensemble Ana
 authors:
   - family-names: Moore
     given-names: Clayton W.
-version: 0.3.1
-date-released: 2026-07-06
+version: 1.0.0
+date-released: 2026-08-07
 url: "https://github.com/mooreneural/lacuna"
 repository-code: "https://github.com/mooreneural/lacuna"
-license: "AGPL-3.0-or-later"
+license: "MIT"
 doi: "10.5281/zenodo.20533638"
 abstract: >
   Lacuna discovers cryptic binding pockets in proteins by generating a
   conformational ensemble, detecting pockets per conformer, clustering
   across the ensemble, and ranking the resulting sites with a learned
-  model. On CryptoBench's held-out test fold it recovers 55.6% of known
-  cryptic sites in its top 5 under a size-robust Jaccard-or-centroid
-  criterion, rising to 66.1% with an optional protein-language-model
-  ranker, against 28.3% for fpocket and 43.9% for MDpocket given the same
-  ensemble. With the sequence ranker it is statistically indistinguishable
-  from P2Rank (63.3%). Runs on CPU with an Anisotropic Network Model
-  backend.
+  model. On CryptoBench's designated test fold (n=178) it recovers 66.3%
+  of known cryptic sites in its top 5 with the protein-language-model
+  ranker, under a size-robust Jaccard criterion, against 63.5% for
+  P2Rank, 61.8% for IF-SitePred and 43.8% for fpocket. The difference
+  from P2Rank is not statistically separable. Runs on CPU with an
+  Anisotropic Network Model backend.
 keywords:
   - drug-discovery
   - cryptic-pockets

@@ -123,15 +123,24 @@ The `nma` backend samples physically meaningful collective motions - the same hi
 
 ## Benchmarks
 
-**66.1% of known cryptic sites recovered in the top 5** on CryptoBench's held-out test fold with the sequence ranker (119/180, 95% CI 58.9-72.8), under a size-robust criterion; **55.6%** with the zero-dependency default. On the same structures that is level with P2Rank's 63.3% and more than twice fpocket's 28.3%.
+**66.3% of known cryptic sites recovered in the top 5** on CryptoBench's designated test fold with the sequence ranker (118/178, 95% CI 59.0-73.0), under a size-robust criterion. On the same structures that is level with P2Rank's 63.5%, above IF-SitePred's 61.8% and fpocket's 43.8%. The difference from P2Rank is not statistically separable.
 
 Every number in this section comes from one code state, re-measured end to end after the last change to the ranker weights.
+
+> **Where the interesting result is.** Lacuna's own score is the least useful
+> number here. Across four detectors spanning 2009 to 2026, coverage (whether a
+> qualifying candidate is proposed at all) varies by 7.9 points while conversion
+> (whether it reaches the top five) varies by 37. fpocket has the highest
+> coverage of the four and the lowest top-5. Unioning all four covers 92.1% of
+> targets, leaving only 7.9% invisible to everything tested. The study, its
+> per-candidate data, and the scripts that regenerate every figure are in
+> [`paper/`](paper/).
 
 **Size-robust success criterion (top-5 pockets):** a pocket whose lining residues reach a **Jaccard overlap ≥ 0.25** with the known ligand-contact site (Jaccard = |found ∩ known| / |found ∪ known|), **or** whose center is within 4 Å of the site centroid. Lining residues use a true atomic-contact definition (any residue with an atom within 5 Å of the detected cavity). Recall is *not* used as the headline: a large pocket can engulf a small known site and score high recall while sitting nowhere near it. Both numbers print side by side in every benchmark script.
 
 ### Head-to-head against other detectors
 
-All five paired on the same 180 test-fold structures under the identical criterion. MDpocket is given the **same NMA ensemble Lacuna uses**, so that row compares analysis pipelines rather than samplers.
+All paired on test-fold structures under the identical criterion. MDpocket is given the **same NMA ensemble Lacuna uses**, so that row compares analysis pipelines rather than samplers. fpocket's row is paired on 179 structures rather than 180 because it was re-collected after a rank-ordering fix; its earlier figure of 28.3% came from reading its proposals in directory-listing order (`pocket10` before `pocket2`) instead of by fpocket's own rank, and understated it by about fifteen points.
 
 | Detector | Kind | Size-robust top-5 | Paired vs `learned-plm` |
 |----------|------|:-----------------:|------------------|
@@ -139,11 +148,11 @@ All five paired on the same 180 test-fold structures under the identical criteri
 | P2Rank | single-structure, learned | 63.3% (114/180) | +2.8% [-4.4, +9.4] |
 | **Lacuna** (`learned`, default) | ensemble | **55.6%** (100/180) | +10.6% [+6.1, +15.0] |
 | MDpocket | ensemble (same input ensemble) | 43.9% (79/180) | +22.2% [+14.4, +30.0] |
-| fpocket | single-structure, geometric | 28.3% (51/180) | +37.8% [+29.4, +46.1] |
+| fpocket | single-structure, geometric | 43.6% (78/179) | +22.9% [+14.5, +31.3] |
 
-With the sequence ranker Lacuna is **level with P2Rank**: nominally ahead by 2.8 points, but the interval spans zero, so parity is the honest word rather than a win. It beats every other detector here by margins whose intervals exclude zero.
+With the sequence ranker Lacuna is **level with P2Rank**: nominally ahead by 2.8 points, but the interval spans zero, so parity is the honest word rather than a win. It beats every other detector here by margins whose intervals exclude zero, though fpocket's true margin is far smaller than this repository previously reported.
 
-**The zero-dependency default does not reach parity.** At 55.6% it trails P2Rank by 7.8 points (CI -15.0 to -0.6, excluding zero). An earlier version of this file called the default indistinguishable from P2Rank; that was measured before the conformer-invariant refit and is no longer accurate. The default still beats MDpocket by +11.7% (CI +3.9 to +19.4) and fpocket by a wide margin.
+**The zero-dependency default does not reach parity.** At 55.6% it trails P2Rank by 7.8 points (CI -15.0 to -0.6, excluding zero). An earlier version of this file called the default indistinguishable from P2Rank; that was measured before the conformer-invariant refit and is no longer accurate. The default still beats MDpocket by +11.7% (CI +3.9 to +19.4) and fpocket by +12.3%.
 
 Union with P2Rank reaches 76.1% and Lacuna alone catches 23 structures P2Rank misses, so the tools remain complementary rather than redundant.
 
@@ -257,7 +266,7 @@ If you use Lacuna in published research, please cite:
              via Conformational Ensemble Analysis},
   year    = {2026},
   url     = {https://github.com/mooreneural/lacuna},
-  version = {0.3.1}
+  version = {1.0.0}
 }
 ```
 
