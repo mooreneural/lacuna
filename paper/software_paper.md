@@ -219,10 +219,15 @@ lacuna discover protein.pdb --emit-boltz-constraints --emit-vina-boxes
 Inputs are PDB or mmCIF and may come from the PDB, AlphaFold [14], Boltz or Chai.
 A `--homodimer` flag builds the biological assembly from BIOMT or
 `_pdbx_struct_oper_list` records, which is required for sites at dimer
-interfaces. The Python API exposes the same stages individually for users who
-want to substitute a component. Optional extras (`lacuna[openmm]`,
-`lacuna[boltz]`, `lacuna[plm]`) gate the heavier dependencies so that a base
-install stays small.
+interfaces. A second command, `lacuna dock-prep`, regenerates docking inputs from
+an existing pocket report, so a run does not have to be repeated to produce them.
+The Python API exposes the same stages individually for users who want to
+substitute a component.
+
+Lacuna requires Python 3.10 or later. Optional extras (`lacuna[openmm]`,
+`lacuna[boltz]`, `lacuna[plm]`, or `lacuna[all]`) gate the heavier dependencies,
+so a base install pulls only NumPy, SciPy, BioPython and two command-line
+libraries, and the default pipeline runs with no GPU and no compiled extensions.
 
 ## Validation
 
@@ -259,14 +264,32 @@ on a curated set of apo/holo pairs assembled from the cryptic-pocket literature
 the ranker was fitted on training folds only, so the test fold is genuinely
 unseen.
 
+The most informative comparison is against MDpocket [8], which is the
+established route to the same goal: detect pockets on an ensemble and aggregate
+across it. Handing MDpocket the identical normal-mode ensemble Lacuna generates
+isolates the analysis pipeline from the sampler, since both then see exactly the
+same conformations. On that footing MDpocket recovers 43.9% of the test fold,
+against 55.6% for Lacuna's default ranker (+11.7%, 95% CI +3.9 to +19.4) and
+66.1% with the sequence ranker (+22.2%, CI +14.4 to +30.0). MDpocket is reported
+at its best of ten configurations, with both isovalue and ranking rule swept in
+its favour; at its default isovalue it scores 40.2%. Because the sampling is held
+constant, the difference is attributable to the clustering and ranking stages,
+which is where this tool's contribution lies.
+
 The fourth dataset is a deliberate negative control. COACH420 contains holo
 structures whose pocket is already open, which is an easier task and not the one
-Lacuna is built for. Lacuna scores 86.8% there, but paired on the same 144
-structures P2Rank scores 93.8%, a difference of −6.9% (95% CI −12.5 to −1.4) that
-excludes zero, having tied Lacuna on cryptic sites. Each tool wins where it was
-designed to win, and the higher absolute number on COACH420 reflects the easier
-task rather than better performance. Cross-dataset comparison of these figures is
-not meaningful.
+Lacuna is built for. Lacuna scores 86.8% there with the default ranker, but
+paired on the same 144 structures P2Rank scores 93.8%, a difference of −6.9%
+(95% CI −12.5 to −1.4) that excludes zero.
+
+On cryptic sites the ordering against P2Rank depends on configuration, and it is
+worth stating precisely rather than summarising. The optional sequence ranker
+reaches parity, nominally ahead by 2.8 points but with an interval spanning zero
+(CI −4.4 to +9.4), so parity is the honest word and not a win. The
+zero-dependency default does not reach parity: at 55.6% it trails P2Rank by 7.8
+points, with an interval that excludes zero (CI −15.0 to −0.6). The higher
+absolute number on COACH420 reflects the easier task rather than better
+performance, and cross-dataset comparison of these figures is not meaningful.
 
 ![Figure 3](figures/software/fig3_benchmarks.png)
 
