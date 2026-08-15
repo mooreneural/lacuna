@@ -19,7 +19,7 @@ conformer, clusters the detections into persistent sites across the ensemble, an
 ranks those sites with a model fitted on within-structure pairs. Ensemble
 generation is pluggable: normal mode analysis by default, with implicit-solvent
 molecular dynamics, Boltz-2 diffusion sampling, or a user-supplied ensemble as
-alternatives. On the held-out test fold of CryptoBench, Lacuna recovers 55.6% of
+alternatives. On the designated test fold of CryptoBench, Lacuna recovers 55.6% of
 cryptic sites in its top five predictions, rising to 66.1% with an optional
 PLM-assisted ranker, and it recovers 73%, 45% and 87% on the PocketMiner set, a
 curated set of literature apo/holo pairs, and COACH420 respectively. The default
@@ -32,9 +32,9 @@ licensed and available at https://github.com/mooreneural/lacuna and on PyPI as
 
 ## Introduction
 
-Roughly 70% of disease-relevant human proteins have no obvious binding site in
-their experimentally determined structures and are classified as undruggable
-[1]. A substantial fraction of those are not truly featureless: they carry
+Many disease-relevant human proteins are classified as undruggable because their
+experimentally determined structures present no well-formed pocket for a small
+molecule to occupy [1]. A substantial fraction of those are not truly featureless: they carry
 cryptic sites, pockets that are closed in the apo structure and open on ligand
 binding or thermal fluctuation [2]. K-Ras was considered undruggable for three
 decades until a cryptic pocket beneath switch-II was identified, which led
@@ -116,8 +116,9 @@ P2Rank is better, and Section 3.5 reports that result rather than omitting it. O
 cryptic sites the zero-dependency default does not reach parity with P2Rank
 either: it trails by 7.8 points with an interval excluding zero, and only the
 optional PLM-assisted ranker reaches statistical parity. What the default buys
-instead is that it runs in seconds on a CPU with no model weights, no MSA and no
-GPU. The contribution is a modular ensemble-analysis system with ensemble-derived
+instead is that it runs in seconds on a CPU with no external neural-network
+checkpoint, no MSA and no GPU. Its 23 fitted coefficients ship in the source and
+add nothing to install size or runtime. The contribution is a modular ensemble-analysis system with ensemble-derived
 site properties and docking-ready output, not a detector that dominates all
 alternatives.
 
@@ -292,14 +293,17 @@ The PLM-assisted ranker therefore scores 66.1% (119/180) in this report and
 66.3% on that paired 178-structure cohort. The two are the same configuration
 measured on slightly different sets, not a change in the software.
 
-Figure 3 reports recovery on four datasets. On the held-out CryptoBench test
+Figure 3 reports recovery on four datasets. On the designated CryptoBench test
 fold [15], the largest and most diverse cryptic-site benchmark, the default
 ranker recovers 55.6% and the optional PLM-assisted ranker 66.1%. Independent
 validation is consistent: 73% (33/45) on the PocketMiner set [7] and 45% (10/22)
 on a curated set of apo/holo pairs assembled from the cryptic-pocket literature
-[2]. The CryptoBench split follows the dataset's own homology-separated folds and
-the ranker was fitted on training folds only, so the test fold is genuinely
-unseen.
+[2]. The split follows CryptoBench's own homology-separated folds, and the
+ranker's coefficients were fitted on the training folds only; no test-fold
+example entered that fit. The tool as a whole has been developed over many
+iterations during which test-fold performance was measured, so these numbers are
+a designated held-out result rather than a claim of full blindness, and the
+companion study [10] makes the same distinction for the same reason.
 
 How much of that comes from ordering rather than detection is separable, because
 the ranking strategy can be changed without touching the pipeline that produces

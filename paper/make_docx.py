@@ -192,14 +192,76 @@ def _add_table(doc: Document, rows: list[str]) -> None:
     doc.add_paragraph()
 
 
-def _title_block(doc, meta, journal: bool) -> None:
-    """Title and byline.
+def _left_rule(p, color: str = "8a8983", sz: int = 12) -> None:
+    """A thin rule down the left edge, the usual typographic mark for a callout."""
+    pPr = p._p.get_or_add_pPr()
+    pBdr = OxmlElement("w:pBdr")
+    left = OxmlElement("w:left")
+    left.set(qn("w:val"), "single")
+    left.set(qn("w:sz"), str(sz))
+    left.set(qn("w:space"), "10")
+    left.set(qn("w:color"), color)
+    pBdr.append(left)
+    pPr.append(pBdr)
 
-    Author name only. The affiliation, ORCID and date were rendered here at first
-    and removed by hand from the document; bioRxiv collects all three on the
-    submission form and prints them on the posted page, so repeating them in the
-    manuscript body is redundant. Kept in the YAML front matter as the record of
-    record.
+
+def _add_callout(doc, text: str) -> None:
+    """A Markdown blockquote.
+
+    Rendered as an indented paragraph with a left rule. Without this the '>'
+    markers reached the document as literal text, including the ones opening
+    each wrapped line, because the fallback path joins a paragraph's lines with
+    spaces and has no reason to treat them as syntax.
+    """
+    p = doc.add_paragraph()
+    pf = p.paragraph_format
+    pf.left_indent = Inches(0.28)
+    pf.right_indent = Inches(0.18)
+    pf.space_before = Pt(7)
+    pf.space_after = Pt(7)
+    _add_runs(p, text)
+    _left_rule(p)
+
+
+def _add_code(doc, code_lines: list[str], journal: bool) -> None:
+    """A fenced code block: monospace, one line per source line.
+
+    Line breaks are explicit rather than separate paragraphs so the block stays
+    together on the page, and the info string after the opening fence is dropped.
+    """
+    p = doc.add_paragraph()
+    pf = p.paragraph_format
+    pf.left_indent = Inches(0.28)
+    pf.space_before = Pt(6)
+    pf.space_after = Pt(6)
+    for n, line in enumerate(code_lines):
+        run = p.add_run(line)
+        run.font.name = "Consolas"
+        run.font.size = Pt(8.5 if journal else 9.5)
+        # python-docx sets only the Latin font; without this Word may substitute
+        # for the other script ranges and break the monospace alignment.
+        rPr = run._element.get_or_add_rPr()
+        rFonts = rPr.find(qn("w:rFonts"))
+        if rFonts is None:
+            rFonts = OxmlElement("w:rFonts")
+            rPr.append(rFonts)
+        for attr in ("w:ascii", "w:hAnsi", "w:cs"):
+            rFonts.set(qn(attr), "Consolas")
+        if n < len(code_lines) - 1:
+            run.add_break()
+
+
+def _title_block(doc, meta, journal: bool) -> None:
+    """Title, byline and affiliation.
+
+    The affiliation was originally omitted here, on the reasoning that bioRxiv
+    collects it on the submission form and reprints it on the posted page. That
+    holds for the posted preprint but not for the .docx read on its own, or for
+    a journal submission, so it is rendered. ORCID and date stay out: bioRxiv
+    does print those, and they are kept in the YAML as the record of record.
+
+    Both are driven from the front matter, so the rendered document cannot
+    disagree with the source about who wrote it or where.
     """
     if meta.get("title"):
         h = doc.add_heading(meta["title"], level=0)
@@ -211,6 +273,11 @@ def _title_block(doc, meta, journal: bool) -> None:
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p.add_run(meta["author"]).italic = True
+    if meta.get("affiliation"):
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        run = p.add_run(meta["affiliation"])
+        run.font.size = Pt(JOURNAL["body_pt"] if journal else 10)
 
 
 def build(journal: bool) -> Path:
@@ -312,10 +379,30 @@ def build(journal: bool) -> Path:
             n_tables += 1
             continue
 
+        if stripped.startswith("```"):
+            to_body()
+            i += 1
+            code = []
+            while i < len(lines) and not lines[i].strip().startswith("```"):
+                code.append(lines[i].rstrip())
+                i += 1
+            i += 1                      # closing fence
+            _add_code(doc, code, journal)
+            continue
+
+        if stripped.startswith(">"):
+            to_body()
+            quote = []
+            while i < len(lines) and lines[i].strip().startswith(">"):
+                quote.append(lines[i].strip().lstrip(">").strip())
+                i += 1
+            _add_callout(doc, " ".join(quote).strip())
+            continue
+
         to_body()
         buf = []
         while (i < len(lines) and lines[i].strip()
-               and not lines[i].strip().startswith(("#", "|", "!["))):
+               and not lines[i].strip().startswith(("#", "|", "![", "```", ">"))):
             buf.append(lines[i].strip())
             i += 1
         _add_runs(doc.add_paragraph(), " ".join(buf))
