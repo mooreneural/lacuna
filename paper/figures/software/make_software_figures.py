@@ -178,8 +178,22 @@ BENCH = [
 ]
 
 
+#: Ranking-strategy ablation on the CryptoBench test fold, n=180, same candidate
+#: set throughout so only the ordering changes. Sources: README.md "Ranking"
+#: (17.8% for the analytic crypticity rule that was the pre-1.0 default, 55.6%
+#: learned, 66.1% learned-plm). The point of the panel is that the candidates
+#: were always there and the ordering is what changed.
+ABLATION = [
+    ("crypticity\n(analytic)", 0.178, INK_MUTED),
+    ("learned\n(default)", 0.556, BLUE),
+    ("learned-plm\n(optional)", 0.661, ORANGE),
+]
+
+
 def fig_benchmarks(out: Path) -> None:
-    fig, ax = plt.subplots(figsize=(DOUBLE_COL * 0.62, 2.35))
+    fig, (ax, axb) = plt.subplots(
+        1, 2, figsize=(DOUBLE_COL, 2.45),
+        gridspec_kw={"width_ratios": [1.85, 1.0], "wspace": 0.34})
     x = np.arange(len(BENCH))
     w = 0.36
     base = [b[2] for b in BENCH]
@@ -204,6 +218,22 @@ def fig_benchmarks(out: Path) -> None:
     ax.legend(loc="upper left", fontsize=6.4)
     ax.grid(True, axis="y", alpha=0.5, linewidth=0.5)
     ax.set_axisbelow(True)
+    ax.set_title("a", loc="left", fontweight="bold", fontsize=8.5, pad=4)
+
+    xb = np.arange(len(ABLATION))
+    axb.bar(xb, [v for _l, v, _c in ABLATION], 0.62,
+            color=[c for _l, _v, c in ABLATION], edgecolor="none")
+    for xi, (_l, v, _c) in zip(xb, ABLATION):
+        axb.text(xi, v + 0.018, f"{100*v:.1f}", ha="center", fontsize=6.3,
+                 color=INK_2)
+    axb.set_xticks(xb)
+    axb.set_xticklabels([l for l, _v, _c in ABLATION], fontsize=6.4)
+    axb.set_ylabel("targets recovered in top 5")
+    axb.set_ylim(0, 1.0)
+    axb.yaxis.set_major_formatter(plt.FuncFormatter(lambda v, _: f"{v*100:.0f}%"))
+    axb.grid(True, axis="y", alpha=0.5, linewidth=0.5)
+    axb.set_axisbelow(True)
+    axb.set_title("b", loc="left", fontweight="bold", fontsize=8.5, pad=4)
     save(fig, str(out / "fig3_benchmarks"))
 
 

@@ -21,7 +21,7 @@ generation is pluggable: normal mode analysis by default, with implicit-solvent
 molecular dynamics, Boltz-2 diffusion sampling, or a user-supplied ensemble as
 alternatives. On the held-out test fold of CryptoBench, Lacuna recovers 55.6% of
 cryptic sites in its top five predictions, rising to 66.1% with an optional
-sequence ranker, and it recovers 73%, 45% and 87% on the PocketMiner set, a
+PLM-assisted ranker, and it recovers 73%, 45% and 87% on the PocketMiner set, a
 curated set of literature apo/holo pairs, and COACH420 respectively. The default
 backend completes in a median of 2.6 seconds per chain on one CPU core, so
 ensemble-based pocket finding does not require a simulation budget. Every site carries a continuous
@@ -59,6 +59,12 @@ in practice restricts it to targets already considered worth the investment. Tha
 cost is why ensemble-based pocket finding has not become routine tooling in the
 way single-structure detectors have.
 
+> **Key Problem.** A cryptic site is absent or poorly formed in the apo
+> structure, so a detector given one static structure is asked to find a cavity
+> that is not there. Molecular dynamics exposes the missing conformations but
+> puts a simulation budget between the user and an answer, which keeps
+> ensemble-based pocket finding off the default path for most targets.
+
 Lacuna is built on the observation that the ensemble does not have to be
 expensive to be useful. A cryptic pocket needs only to open somewhere in a set of
 plausible conformations for a geometric detector to see it, and the cheapest
@@ -89,8 +95,8 @@ single-structure detector and are what the ranker relies on most.
 
 **Ranking is fitted, not hand-tuned.** A linear model over 23 features, trained
 on within-structure pairs so that it optimises ordering directly, recovers
-roughly three times as many known sites on CryptoBench as the analytic
-crypticity rule it replaced.
+55.6% of CryptoBench test-fold sites against 17.8% for the analytic crypticity
+rule it replaced, a factor of three (Figure 3b).
 
 **Output is docking-ready.** Each site is emitted as a Boltz YAML constraint, an
 AutoDock Vina box, and a pseudoatom PDB, so a predicted pocket can be handed
@@ -102,6 +108,18 @@ A separate study uses Lacuna's per-candidate output, alongside three other
 detectors, to analyse how the field's standard evaluation metric conflates
 detection with ranking; that analysis is reported elsewhere [10] and is not
 restated here.
+
+**How to interpret these results.** Lacuna is built for cryptic-site discovery,
+not general binding-site prediction, and the results below should not be read as
+a claim of universal superiority. On general holo sites that are already open,
+P2Rank is better, and Section 3.5 reports that result rather than omitting it. On
+cryptic sites the zero-dependency default does not reach parity with P2Rank
+either: it trails by 7.8 points with an interval excluding zero, and only the
+optional PLM-assisted ranker reaches statistical parity. What the default buys
+instead is that it runs in seconds on a CPU with no model weights, no MSA and no
+GPU. The contribution is a modular ensemble-analysis system with ensemble-derived
+site properties and docking-ready output, not a detector that dominates all
+alternatives.
 
 ![Figure 1](figures/software/fig1_kras.png)
 
@@ -251,18 +269,47 @@ A site counts as recovered when, among the top five ranked clusters, one reaches
 a Jaccard overlap of at least 0.25 with the known ligand-contact residues, or its
 centre lies within 4 Å of the site centroid. Jaccard is used rather than plain
 recall because recall is size-gameable: a sufficiently large pocket engulfs most
-of a small known site without being localised on it, and we confirmed that a
-re-ranker can reach 84% on the recall metric purely by ordering pockets on
-volume. Jaccard penalises that directly.
+of a small known site without being localised on it.
+
+The size of that effect is worth stating, because it determines whether the
+criterion is doing any work. Ordering the same candidate set by pocket volume
+alone, using no learned model and no other feature, recovers 77.7% of test-fold
+structures under a recall threshold of 0.30 but only 52.0% under Jaccard at 0.25.
+The learned ranker scores 77.7% under recall as well: measured that way it is
+indistinguishable from sorting by size, and the two separate only under Jaccard,
+at 55.9% against 52.0%. A metric on which a trained model cannot be told apart
+from a volume sort is not measuring localisation, which is why every number below
+uses Jaccard. These figures come from `benchmarks/verify_recall_gaming.py`, which
+recovers recall exactly from the stored Jaccard and lining size; they cover the
+Jaccard term of the criterion only, on the 179 test-fold structures whose
+annotated site size is recoverable, so they sit slightly above the headline
+figures that also apply the centroid clause.
+
+**Cohort note.** Evaluation here uses all 180 CryptoBench test-fold structures.
+The companion detector-comparison study [10] uses the 178 on which all four
+methods it compares produced output, so that every comparison there is paired.
+The PLM-assisted ranker therefore scores 66.1% (119/180) in this report and
+66.3% on that paired 178-structure cohort. The two are the same configuration
+measured on slightly different sets, not a change in the software.
 
 Figure 3 reports recovery on four datasets. On the held-out CryptoBench test
 fold [15], the largest and most diverse cryptic-site benchmark, the default
-ranker recovers 55.6% and the optional sequence ranker 66.1%. Independent
+ranker recovers 55.6% and the optional PLM-assisted ranker 66.1%. Independent
 validation is consistent: 73% (33/45) on the PocketMiner set [7] and 45% (10/22)
 on a curated set of apo/holo pairs assembled from the cryptic-pocket literature
 [2]. The CryptoBench split follows the dataset's own homology-separated folds and
 the ranker was fitted on training folds only, so the test fold is genuinely
 unseen.
+
+How much of that comes from ordering rather than detection is separable, because
+the ranking strategy can be changed without touching the pipeline that produces
+the candidates. Figure 3b holds the candidate set fixed and varies only the
+ordering. The analytic crypticity rule that was the default before v1.0.0
+recovers 17.8% of the test fold; the fitted linear model recovers 55.6% from the
+same candidates, and the PLM-assisted variant 66.1%. The detector was already
+proposing the right pocket for most of the targets the analytic rule missed, and
+was burying it. This is the single largest effect measured in this report, and it
+required no change to sampling or detection.
 
 The most informative comparison is against MDpocket [8], which is the
 established route to the same goal: detect pockets on an ensemble and aggregate
@@ -270,7 +317,7 @@ across it. Handing MDpocket the identical normal-mode ensemble Lacuna generates
 isolates the analysis pipeline from the sampler, since both then see exactly the
 same conformations. On that footing MDpocket recovers 43.9% of the test fold,
 against 55.6% for Lacuna's default ranker (+11.7%, 95% CI +3.9 to +19.4) and
-66.1% with the sequence ranker (+22.2%, CI +14.4 to +30.0). MDpocket is reported
+66.1% with the PLM-assisted ranker (+22.2%, CI +14.4 to +30.0). MDpocket is reported
 at its best of ten configurations, with both isovalue and ranking rule swept in
 its favour; at its default isovalue it scores 40.2%. Because the sampling is held
 constant, the difference is attributable to the clustering and ranking stages,
@@ -283,7 +330,7 @@ paired on the same 144 structures P2Rank scores 93.8%, a difference of −6.9%
 (95% CI −12.5 to −1.4) that excludes zero.
 
 On cryptic sites the ordering against P2Rank depends on configuration, and it is
-worth stating precisely rather than summarising. The optional sequence ranker
+worth stating precisely rather than summarising. The optional PLM-assisted ranker
 reaches parity, nominally ahead by 2.8 points but with an interval spanning zero
 (CI −4.4 to +9.4), so parity is the honest word and not a win. The
 zero-dependency default does not reach parity: at 55.6% it trails P2Rank by 7.8
@@ -293,13 +340,19 @@ performance, and cross-dataset comparison of these figures is not meaningful.
 
 ![Figure 3](figures/software/fig3_benchmarks.png)
 
-**Figure 3: Recovery in the top five predictions across four datasets.** A site
-counts as recovered at Jaccard ≥ 0.25 against known ligand-contact residues, or a
-centroid within 4 Å. `learned` is the default ranker and needs only a base
-install; `learned-plm` additionally requires a protein language model and was not
-measured on COACH420. COACH420 holds general, already-open binding sites rather
-than cryptic ones and is included as a control, not as a headline: the task is
-easier, and a general-purpose detector beats Lacuna on it.
+**Figure 3: Recovery in the top five predictions, and what ordering contributes.**
+A site counts as recovered at Jaccard ≥ 0.25 against known ligand-contact
+residues, or a centroid within 4 Å. (a) Four datasets. `learned` is the default
+ranker and needs only a base install; `learned-plm` additionally requires a
+protein language model and was not measured on COACH420. COACH420 holds general,
+already-open binding sites rather than cryptic ones and is included as a control,
+not as a headline: the task is easier, and a general-purpose detector beats
+Lacuna on it. (b) Ranking-strategy ablation on the CryptoBench test fold, holding
+the candidate set fixed so that only the ordering changes. The analytic
+crypticity rule that served as the pre-1.0 default recovers 17.8%, the fitted
+linear model 55.6%, and the PLM-assisted variant 66.1%. Detection did not change
+between these three bars, which is the point: the candidates were already being
+generated and were being ordered badly.
 
 ### Runtime
 
