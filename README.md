@@ -123,7 +123,7 @@ The `nma` backend samples physically meaningful collective motions - the same hi
 
 ## Benchmarks
 
-**66.3% of known cryptic sites recovered in the top 5** on CryptoBench's designated test fold with the sequence ranker (118/178, 95% CI 59.0-73.0), under a size-robust criterion. On the same structures that is level with P2Rank's 63.5%, above IF-SitePred's 61.8% and fpocket's 43.8%. The difference from P2Rank is not statistically separable.
+**66.3% of known cryptic sites recovered in the top 5** on CryptoBench's designated test fold with the PLM-assisted ranker (118/178, 95% CI 59.0-73.0), under a size-robust criterion. On the same structures that is level with P2Rank's 63.5%, above IF-SitePred's 61.8% and fpocket's 43.8%. The difference from P2Rank is not statistically separable.
 
 Every number in this section comes from one code state, re-measured end to end after the last change to the ranker weights.
 
@@ -150,19 +150,19 @@ All paired on test-fold structures under the identical criterion. MDpocket is gi
 | MDpocket | ensemble (same input ensemble) | 43.9% (79/180) | +22.2% [+14.4, +30.0] |
 | fpocket | single-structure, geometric | 43.6% (78/179) | +22.9% [+14.5, +31.3] |
 
-With the sequence ranker Lacuna is **level with P2Rank**: nominally ahead by 2.8 points, but the interval spans zero, so parity is the honest word rather than a win. It beats every other detector here by margins whose intervals exclude zero, though fpocket's true margin is far smaller than this repository previously reported.
+With the PLM-assisted ranker Lacuna is **level with P2Rank**: nominally ahead by 2.8 points, but the interval spans zero, so parity is the honest word rather than a win. It beats every other detector here by margins whose intervals exclude zero, though fpocket's true margin is far smaller than this repository previously reported.
 
 **The zero-dependency default does not reach parity.** At 55.6% it trails P2Rank by 7.8 points (CI -15.0 to -0.6, excluding zero). An earlier version of this file called the default indistinguishable from P2Rank; that was measured before the conformer-invariant refit and is no longer accurate. The default still beats MDpocket by +11.7% (CI +3.9 to +19.4) and fpocket by +12.3%.
 
 Union with P2Rank reaches 76.1% and Lacuna alone catches 23 structures P2Rank misses, so the tools remain complementary rather than redundant.
 
-The sequence ranker is an **optional extra** (`pip install "lacuna-pockets[plm]"`) because it needs PyTorch and downloads an ESM-2 checkpoint. It is a separate strategy rather than the default so that identical commands give identical rankings on every machine, whether or not the extra is installed.
+The PLM-assisted ranker is an **optional extra** (`pip install "lacuna-pockets[plm]"`) because it needs PyTorch and downloads an ESM-2 checkpoint. It is a separate strategy rather than the default so that identical commands give identical rankings on every machine, whether or not the extra is installed.
 
 MDpocket is the closest relative of this work and the fair ensemble baseline. Its best configuration out of ten (isovalue and ranking rule both swept in its favour) is reported; at its default isovalue it scores 40.2%.
 
 ### Independent validation
 
-Default `learned` strategy, with the optional sequence ranker in the last column.
+Default `learned` strategy, with the optional PLM-assisted ranker in the last column.
 
 | Benchmark | N | `learned` (default) | Legacy recall | `learned-plm` | Notes |
 |-----------|--:|:-----------:|:-------------:|:-------------:|-------|
@@ -171,7 +171,7 @@ Default `learned` strategy, with the optional sequence ranker in the last column
 | Curated apo/holo set (this repo) | 22 | **45%** (10/22) | 68% | 41% (9/22) | hand-picked literature cryptic pairs |
 | COACH420 | 144 | **87%** (125/144) | 93% | not measured | *general* holo sites, not cryptic; see below |
 
-On the curated 22 the default edges out the sequence ranker, 10/22 against 9/22. At that sample size the difference is one structure and means nothing on its own, but it is a reminder that the sequence ranker's advantage is established on CryptoBench and does not automatically transfer.
+On the curated 22 the default edges out the PLM-assisted ranker, 10/22 against 9/22. At that sample size the difference is one structure and means nothing on its own, but it is a reminder that the PLM-assisted ranker's advantage is established on CryptoBench and does not automatically transfer.
 
 **On general binding sites, a general-purpose tool is better.** COACH420 holds
 holo structures whose pocket is already open, which is an easier task and not the

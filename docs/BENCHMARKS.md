@@ -29,7 +29,7 @@ figures moved slightly.
 | MDpocket (best of 10 configs) | 43.9% (79/180) | - | +22.2% CI[+14.4, +30.0] |
 | fpocket | 43.6% (78/179) | 32% | +22.9% CI[+14.5, +31.3] |
 
-The sequence ranker is level with P2Rank: the interval on the difference spans
+The PLM-assisted ranker is level with P2Rank: the interval on the difference spans
 zero, so parity is the claim, not a win.
 
 **The default trails P2Rank by 7.8 points (CI -15.0 to -0.6, excluding zero.)**
@@ -70,9 +70,9 @@ the large-motion sites this pipeline handles worst.
 | Size-robust (Jaccard ≥ 0.25 or centroid ≤ 4 Å) | **10/22 (45%)** | 9/22 (41%) |
 | Legacy recall (≥ 30% or centroid ≤ 4 Å) | 15/22 (68%) | - |
 
-The default edges out the sequence ranker here by a single structure, the
+The default edges out the PLM-assisted ranker here by a single structure, the
 opposite ordering to CryptoBench. One structure at n=22 means nothing by itself,
-but it is worth stating that the sequence ranker's advantage is established on
+but it is worth stating that the PLM-assisted ranker's advantage is established on
 CryptoBench and does not automatically carry over.
 
 ### By opening mechanism
