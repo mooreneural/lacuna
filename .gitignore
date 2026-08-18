@@ -16,7 +16,13 @@ venv/
 *.log
 benchmarks/pdb_cache/
 benchmarks/pm_data/
-benchmarks/cb_data/
+# CryptoBench working data is downloaded on demand and stays out of the
+# repository, except the fold assignments: every published split depends on
+# them, and leaving them to a download made reproduction contingent on an
+# external host staying up. Ignoring the directory itself would make the
+# negation below unreachable, hence the glob.
+benchmarks/cb_data/*
+!benchmarks/cb_data/folds.json
 benchmarks/coach420_data/
 .joss_review_venv/
 .joss_review_out/
