@@ -9,6 +9,61 @@ Unless stated otherwise: NMA backend, 20 conformers, the default `learned`
 ranker, top-5, and the size-robust criterion (Jaccard ≥ 0.25 **or** centroid
 ≤ 4 Å).
 
+## Independent validation
+
+Default `learned` strategy, with the optional PLM-assisted ranker in the last
+column.
+
+| Benchmark | N | `learned` (default) | Legacy recall | `learned-plm` | Notes |
+|-----------|--:|:-----------:|:-------------:|:-------------:|-------|
+| CryptoBench (designated test fold) | 180 | **55.6%** | 77% | **66.1%** | largest and most diverse; the headline |
+| PocketMiner | 45 | **73%** (33/45) | 84% | **80%** (36/45) | per-residue cryptic labels |
+| Curated apo/holo set (this repo) | 22 | **45%** (10/22) | 68% | 41% (9/22) | hand-picked literature cryptic pairs |
+| COACH420 | 144 | **87%** (125/144) | 93% | not measured | *general* holo sites, not cryptic |
+
+On the curated 22 the default edges out the PLM-assisted ranker, 10/22 against
+9/22. At that sample size the difference is one structure and means nothing on
+its own, but it is a reminder that the PLM-assisted ranker's advantage is
+established on CryptoBench and does not automatically transfer.
+
+Datasets: PocketMiner (Meller et al. 2023, *Nat. Commun.*); CryptoBench (Vavra
+et al. 2024, *Bioinformatics*). The CryptoBench split follows the dataset's own
+homology-separated folds, and the ranker's coefficients were fitted on the train
+folds only; no test-fold example entered that fit. The tool as a whole has been
+developed over many iterations during which test-fold performance was measured,
+so these are designated held-out numbers rather than a claim of full blindness.
+
+The curated 22-target set is the hardest of the three despite being the
+smallest: it was assembled from published cryptic-pocket case studies and is
+deliberately enriched for the large-motion sites this pipeline handles worst.
+
+### Reproducing these numbers
+
+```bash
+python benchmarks/cryptic_benchmark.py --category cryptic     # curated set (~4 min)
+python benchmarks/pocketminer_benchmark.py                    # PocketMiner (auto-downloads)
+python benchmarks/cryptobench_benchmark.py                    # CryptoBench test fold (~10 min)
+python benchmarks/compare_detectors_cryptobench.py --analyze  # the head-to-head table
+python benchmarks/compare_mdpocket.py --folds test            # vs MDpocket (needs mdpocket on PATH)
+python benchmarks/verify_recall_gaming.py                     # why Jaccard, not recall
+```
+
+## Success criterion
+
+A pocket counts as recovered if, among the top five ranked clusters, one's lining
+residues reach a **Jaccard overlap >= 0.25** with the known ligand-contact site
+(Jaccard = |found and known| / |found or known|), **or** its centre lies within
+4 A of the site centroid. Lining residues use a true atomic-contact definition:
+any residue with an atom within 5 A of the detected cavity.
+
+Recall is deliberately not the headline. It is size-gameable: a large pocket
+engulfs a small known site and scores high recall while sitting nowhere near it.
+Ordering candidates by volume alone reaches 77.7% under a recall threshold of
+0.30 but only 52.0% under Jaccard at 0.25, and the learned ranker scores 77.7%
+under recall as well, so measured that way it is indistinguishable from sorting
+by size (`benchmarks/verify_recall_gaming.py`). Both numbers print side by side
+in every benchmark script.
+
 ## Head-to-head: four detectors, one criterion
 
 CryptoBench's held-out test fold. MDpocket receives the **same NMA ensemble**
@@ -38,7 +93,17 @@ conformer-invariant refit the default scored 56.7% with a wider interval that
 included zero, and it was described as indistinguishable from P2Rank. Refitting
 cost about a point and tightened the interval, so the difference is now
 resolvable and the earlier description no longer holds. The default still beats
-MDpocket by +11.7% (CI +3.9 to +19.4).
+MDpocket by +11.7% (CI +3.9 to +19.4) and fpocket by +12.3%.
+
+### Cohort note: 180 here, 178 in the preprint
+
+Every figure on this page uses all 180 CryptoBench test-fold structures,
+which is the right cohort for evaluating the software on its own. The
+companion preprint compares four detectors and therefore keeps only the 178
+structures on which all four produced output, so that every comparison is
+paired. The PLM-assisted ranker scores **66.1% (119/180)** here and **66.3%
+(118/178, 95% CI 59.0-73.0)** there. Same configuration, slightly different
+set, not a change in the software.
 
 Union of `learned-plm` and P2Rank: 76.1%, with 23 structures recovered by Lacuna
 alone. Union of all five detectors: 79.4%. The tools remain complementary.
