@@ -20,3 +20,6 @@ benchmarks/cb_data/
 benchmarks/coach420_data/
 .joss_review_venv/
 .joss_review_out/
+
+# Figure generation scratch output; the canonical copies live one level up.
+paper/figures/software/out/
