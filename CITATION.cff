@@ -1,37 +1,73 @@
 cff-version: 1.2.0
-message: "If you use Lacuna in your research, please cite it as below."
+message: "If you use Lacuna in your research, please cite the paper below."
 type: software
 title: "Lacuna: Cryptic Binding Pocket Discovery via Conformational Ensemble Analysis"
 authors:
   - family-names: Moore
     given-names: Clayton W.
-version: 1.0.0
-date-released: 2026-08-07
+    orcid: "https://orcid.org/0009-0001-1033-6320"
+version: 1.0.1
+date-released: 2026-08-18
 url: "https://github.com/mooreneural/lacuna"
 repository-code: "https://github.com/mooreneural/lacuna"
-license: "MIT"
+repository-artifact: "https://pypi.org/project/lacuna-pockets/"
+license: MIT
 doi: "10.5281/zenodo.20533638"
 abstract: >
-  Lacuna discovers cryptic binding pockets in proteins by generating a
-  conformational ensemble, detecting pockets per conformer, clustering
-  across the ensemble, and ranking the resulting sites with a learned
-  model. On CryptoBench's designated test fold (n=178) it recovers 66.3%
-  of known cryptic sites in its top 5 with the protein-language-model
-  ranker, under a size-robust Jaccard criterion, against 63.5% for
-  P2Rank, 61.8% for IF-SitePred and 43.8% for fpocket. The difference
-  from P2Rank is not statistically separable. Runs on CPU with an
-  Anisotropic Network Model backend.
+  Lacuna discovers cryptic binding pockets: sites that are absent or too small
+  to detect in a protein's unbound structure and open only during
+  conformational fluctuation. It generates a conformational ensemble from any
+  input structure, detects pockets independently in every conformer, clusters
+  the detections into persistent sites, and ranks them with a model fitted on
+  within-structure pairs. Ensemble generation is pluggable: normal mode
+  analysis by default, with implicit-solvent molecular dynamics, Boltz-2
+  diffusion sampling, or a user-supplied ensemble as alternatives. On the
+  designated CryptoBench test fold it recovers 55.6% of cryptic sites in its
+  top five, rising to 66.1% with an optional PLM-assisted ranker, and 73%,
+  45% and 87% on the PocketMiner set, a curated set of literature apo/holo
+  pairs, and COACH420 respectively. The default backend completes in a median
+  of 2.6 seconds per chain on one CPU core. Outputs are docking-ready Boltz
+  YAML constraints, AutoDock Vina boxes and pseudoatom PDB files.
 keywords:
-  - drug-discovery
   - cryptic-pockets
+  - binding-site-prediction
+  - drug-discovery
   - protein-structure
   - conformational-ensemble
+  - structural-bioinformatics
   - computational-biology
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.20533638"
+    description: Concept DOI, always resolves to the latest archived release
+  - type: doi
+    value: "10.5281/zenodo.21997159"
+    description: Archived release v1.0.1
 preferred-citation:
-  type: software
+  type: article
   title: "Lacuna: Cryptic Binding Pocket Discovery via Conformational Ensemble Analysis"
   authors:
     - family-names: Moore
       given-names: Clayton W.
+      orcid: "https://orcid.org/0009-0001-1033-6320"
   year: 2026
-  url: "https://github.com/mooreneural/lacuna"
+  month: 8
+  journal: bioRxiv
+  doi: "10.64898/2026.08.14.744956"
+  url: "https://doi.org/10.64898/2026.08.14.744956"
+references:
+  - type: article
+    title: "Cryptic binding sites are detected but not ranked: coverage, conversion, and detector consensus"
+    authors:
+      - family-names: Moore
+        given-names: Clayton W.
+        orcid: "https://orcid.org/0009-0001-1033-6320"
+    year: 2026
+    month: 8
+    journal: bioRxiv
+    doi: "10.64898/2026.08.11.743381"
+    url: "https://doi.org/10.64898/2026.08.11.743381"
+    notes: >
+      The benchmarking analysis that uses Lacuna's per-candidate output
+      alongside three other detectors. Cite this if you use the benchmark
+      data or the coverage/conversion decomposition.

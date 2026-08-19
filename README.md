@@ -103,19 +103,36 @@ which isolates this pipeline from the sampler, the default gains +11.7%
 
 ## Citation
 
+If you use Lacuna, please cite the software paper:
+
 ```bibtex
-@software{moore2026lacuna,
+@article{moore2026lacuna,
   author  = {Moore, Clayton W.},
   title   = {Lacuna: Cryptic Binding Pocket Discovery
              via Conformational Ensemble Analysis},
+  journal = {bioRxiv},
   year    = {2026},
-  url     = {https://github.com/mooreneural/lacuna},
-  doi     = {10.5281/zenodo.20533638},
-  version = {1.0.1}
+  doi     = {10.64898/2026.08.14.744956}
 }
 ```
 
-If you use the benchmarking analysis, please also cite the preprint above.
+If you use the benchmark data or the coverage/conversion decomposition, please
+also cite the accompanying analysis:
+
+```bibtex
+@article{moore2026coverage,
+  author  = {Moore, Clayton W.},
+  title   = {Cryptic binding sites are detected but not ranked:
+             coverage, conversion, and detector consensus},
+  journal = {bioRxiv},
+  year    = {2026},
+  doi     = {10.64898/2026.08.11.743381}
+}
+```
+
+To cite a specific software version, the archived releases carry their own DOIs
+under the concept DOI [10.5281/zenodo.20533638](https://doi.org/10.5281/zenodo.20533638),
+which always resolves to the newest.
 
 ## Acknowledgements
 
