@@ -1,0 +1,60 @@
+{
+ "git_commit": "86085d1ba097f742b409d64641d53241aa7a8236",
+ "inputs": {
+  "data/test_off.jsonl": {
+   "sha256": "d344afc18415eaa630c5eab22b266310e72faccc7ddd115a6a0b3932d78f492b",
+   "bytes": 2725825,
+   "origin": "session scratchpad 2030379c"
+  },
+  "data/split_off.jsonl": {
+   "sha256": "608af1e285a29ed313679a09cfa01f8175d97f5bbb6c6b9a5a5a7117c7f0d32c",
+   "bytes": 11733344,
+   "origin": "session scratchpad 2030379c"
+  },
+  "data/conf_1.jsonl": {
+   "sha256": "e782829cf3354d16907b4021b33f963e62fb46ef7ea77b7606e41bf277d9c370",
+   "bytes": 3293600,
+   "origin": "session scratchpad 2030379c"
+  },
+  "data/conf_3.jsonl": {
+   "sha256": "ea37fc40c46bcfca4b2ec7ed637bf41944f991339d265ef7e1433353c53fcd91",
+   "bytes": 6094741,
+   "origin": "session scratchpad 2030379c"
+  },
+  "data/conf_5.jsonl": {
+   "sha256": "d9bcf71fa5bc232daac411d4639f8472c7ab1f2469f9e369ae434ad71aa24e14",
+   "bytes": 7564136,
+   "origin": "session scratchpad 2030379c"
+  },
+  "data/conf_10.jsonl": {
+   "sha256": "cdb630f7154e010a91c9d54c991b3f17beec0c5082fc8f77fa288dcf8eeff2dd",
+   "bytes": 9449295,
+   "origin": "session scratchpad 2030379c"
+  },
+  "benchmarks/detectors_cb_paper_baselines.jsonl": {
+   "sha256": "df0e27e78bc6ee90f9b40c41ad9096047474380023d1d22188a6d42b8ebb5a75",
+   "bytes": 429956,
+   "origin": "repository @ HEAD"
+  },
+  "benchmarks/detectors_cb_paper_fpocket_fixed.jsonl": {
+   "sha256": "c921bb8f52b3db1432de3b782ed91929b839ee8a31d3d0aeb54be6ec0f92820f",
+   "bytes": 245946,
+   "origin": "repository @ HEAD"
+  },
+  "benchmarks/detectors_cb_paper_ifsitepred.jsonl": {
+   "sha256": "3cc1eca6cdcb3f9652e7e47c9910b124223f649e8bd39c7d35282f60277fc2fb",
+   "bytes": 247742,
+   "origin": "repository @ HEAD"
+  },
+  "benchmarks/cb_data/folds.json": {
+   "sha256": "ced97a50b55504007216165167a1b3995312434ee50f7f93f8728fca3c6ac67d",
+   "bytes": 17826,
+   "origin": "repository @ HEAD"
+  },
+  "paper/data/analysis.json": {
+   "sha256": "9d6f6484dbef1e400904d1ce9bda052f82e9eeca19beee1bdc2386729c3ab157",
+   "bytes": 22790,
+   "origin": "repository @ HEAD"
+  }
+ }
+}
