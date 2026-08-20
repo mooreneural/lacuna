@@ -1,4 +1,7 @@
-<img width="1066" height="760" alt="bclxl_pocket" src="https://github.com/user-attachments/assets/995fcb60-91ed-4bfc-83b3-602731cbe2f5" />
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mooreneural/lacuna/main/docs/lacuna_logo.png"
+       alt="Lacuna" width="720">
+</p>
 
 # Lacuna
 
