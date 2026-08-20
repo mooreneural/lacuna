@@ -91,16 +91,25 @@ which isolates this pipeline from the sampler, the default gains +11.7%
 
 **[Full results, including where Lacuna loses →](docs/BENCHMARKS.md)**
 
-> **The more interesting result is not Lacuna's score.** Across four detectors
-> spanning 2009 to 2026, coverage (whether a qualifying candidate is proposed at
-> all) varies by 8 points while conversion (whether it reaches the top five)
-> varies by 37. fpocket has the highest coverage of the four and the lowest
-> top-5. Unioning all four covers 92.1% of targets, leaving only 7.9% invisible
-> to everything tested. The field's headroom is in ranking and combination, not
-> detection.
+> **The more interesting result is not Lacuna's score.** Across five
+> candidate-generation methods evaluated in six configurations, coverage
+> (whether a qualifying candidate is proposed at all) spans 14.5 points,
+> while conversion (whether a method's own coverage reaches the top five)
+> spans 36.7. fpocket has the highest coverage at 73.7% but the lowest
+> top-5 recovery at 43.6%, while P2Rank converts 95.8% of the sites it
+> covers. Two Lacuna rankers operating on the exact same candidate set
+> differ by 10.6 points of top-5 recovery, isolating ranking directly.
+>
+> Union coverage saturates at 92.2%, rising to 98.6% for annotated sites
+> containing at least eight residues. Candidate competition is also causal:
+> adding synthetic competitors while holding the true site, real candidate
+> set, and ranker fixed reduces top-5 recovery by 16.8 points on the
+> training folds and 17.0 points on the held-out test fold. Detector
+> consensus provides no measurable gain at a budget of five candidates,
+> but gains 11.8 points at a budget of twenty.
 >
 > Moore CW. *Cryptic binding sites are detected but not ranked: coverage,
-> conversion, and detector consensus.* bioRxiv 2026.
+> conversion, and the limits of detector consensus.* bioRxiv 2026.
 > [doi:10.64898/2026.08.11.743381](https://doi.org/10.64898/2026.08.11.743381)
 
 ## Citation
