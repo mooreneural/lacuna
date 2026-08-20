@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/mooreneural/lacuna/main/docs/lacuna_logo.png"
        alt="Lacuna" width="720">
 </p>
----
+
 **Cryptic binding pocket discovery via conformational ensemble analysis.**
 
 [![PyPI](https://img.shields.io/pypi/v/lacuna-pockets)](https://pypi.org/project/lacuna-pockets/)
