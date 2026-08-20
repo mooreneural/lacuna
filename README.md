@@ -134,7 +134,7 @@ also cite the accompanying analysis:
 @article{moore2026coverage,
   author  = {Moore, Clayton W.},
   title   = {Cryptic binding sites are detected but not ranked:
-             coverage, conversion, and detector consensus},
+             coverage, conversion, and the limits of detector consensus},
   journal = {bioRxiv},
   year    = {2026},
   doi     = {10.64898/2026.08.11.743381}
