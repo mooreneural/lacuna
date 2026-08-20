@@ -3,8 +3,6 @@
        alt="Lacuna" width="720">
 </p>
 
-# Lacuna
-
 **Cryptic binding pocket discovery via conformational ensemble analysis.**
 
 [![PyPI](https://img.shields.io/pypi/v/lacuna-pockets)](https://pypi.org/project/lacuna-pockets/)
