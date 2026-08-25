@@ -1,0 +1,38 @@
+[
+ {
+  "name": "four aggregates (production path)",
+  "dims": 4,
+  "conv_1": 0.5186567164179104,
+  "conv_5": 0.8582089552238806,
+  "conv_10": 0.9328358208955224,
+  "n_targets": 748,
+  "n_covered": 536
+ },
+ {
+  "name": "mean-pooled raw embeddings",
+  "dims": 1280,
+  "conv_1": 0.41044776119402987,
+  "conv_5": 0.792910447761194,
+  "conv_10": 0.8899253731343284,
+  "n_targets": 748,
+  "n_covered": 536
+ },
+ {
+  "name": "mean + max pooled",
+  "dims": 2560,
+  "conv_1": 0.4216417910447761,
+  "conv_5": 0.753731343283582,
+  "conv_10": 0.8824626865671642,
+  "n_targets": 748,
+  "n_covered": 536
+ },
+ {
+  "name": "aggregates + mean-pooled",
+  "dims": 1284,
+  "conv_1": 0.4141791044776119,
+  "conv_5": 0.8003731343283582,
+  "conv_10": 0.8955223880597015,
+  "n_targets": 748,
+  "n_covered": 536
+ }
+]

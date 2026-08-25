@@ -32,3 +32,6 @@ paper/figures/software/out/
 
 # Analysis scratch: regenerable caches, not results
 analysis/**/__pycache__/
+analysis/moores_pocket_law/data/plm_emb/
+analysis/moores_pocket_law/data/atom_feat/
+analysis/moores_pocket_law/data/esmif_emb/
