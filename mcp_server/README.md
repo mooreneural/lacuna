@@ -13,6 +13,23 @@ this is reasonable to run interactively during a conversation.
 pip install lacuna-pockets mcp
 ```
 
+Then get this server. It is not part of the pip package, so either clone the
+repository:
+
+```bash
+git clone https://github.com/mooreneural/lacuna.git
+```
+
+or download the single file it needs:
+
+```bash
+curl -O https://raw.githubusercontent.com/mooreneural/lacuna/main/mcp_server/lacuna_mcp.py
+```
+
+Updating means pulling or re-downloading this file. The science updates
+separately and does not need that: the server calls whichever `lacuna` is
+installed, so `pip install -U lacuna-pockets` is picked up on the next call.
+
 ## Register
 
 **Claude Code**
