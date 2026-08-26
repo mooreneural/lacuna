@@ -1,0 +1,8 @@
+{
+ "node": "beeboop",
+ "platform": "Windows-10-10.0.26100-SP0",
+ "python": "3.11.9",
+ "numpy": "1.26.4",
+ "blas": "openblas64",
+ "collected_utc": "2026-08-26T00:38:28Z"
+}
