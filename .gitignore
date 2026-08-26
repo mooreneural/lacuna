@@ -38,3 +38,7 @@ analysis/moores_pocket_law/data/esmif_emb/
 analysis/moores_pocket_law/data/atom_feat_v3/
 analysis/moores_pocket_law/data/candidates_v3/
 analysis/moores_pocket_law/data/candidates_ext/
+analysis/moores_pocket_law/data/ca_coords/
+analysis/moores_pocket_law/data/conf40/
+analysis/moores_pocket_law/data/test_conf20/
+analysis/moores_pocket_law/data/test_conf40/
