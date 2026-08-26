@@ -57,9 +57,10 @@ search boxes, or Boltz constraint files.
 
 ## Worth knowing
 
-**A cryptic pocket is open in a generated conformer, not in the deposited
-structure.** If you take a search box from this and dock against the original
-PDB file, the site will be closed. Dock against the conformer Lacuna wrote.
+**These are search regions, not receptors.** A cryptic site is closed in the
+deposited structure, and a generated conformer opens it only partly. Rigid
+docking against either file will fight the receptor. Use the region to focus
+flexible-receptor docking, or as a co-folding constraint.
 
 **Ranked sites are candidates, not validated binding sites.** On the CryptoBench
 test fold Lacuna's top five contain the annotated site for about 66% of targets.

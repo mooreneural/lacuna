@@ -239,9 +239,12 @@ def export_docking_region(
         "output_dir": str(out),
         "n_pockets": report.get("n_pockets_found"),
         "files": files,
-        "note": ("A cryptic pocket is open in a generated conformer, not in the "
-                 "deposited structure. Dock against the conformer Lacuna wrote, "
-                 "not the original file, or the site will be closed."),
+        "note": ("These are search regions, not receptors. A cryptic site is "
+                 "closed in the deposited structure and only partly opened in a "
+                 "generated conformer, so neither file is a reliable rigid "
+                 "receptor. Use the region to focus flexible-receptor docking, "
+                 "or to place a co-folding constraint, rather than docking "
+                 "rigidly against either structure."),
     }, indent=2)
 
 
