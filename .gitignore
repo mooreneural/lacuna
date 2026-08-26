@@ -42,3 +42,4 @@ analysis/moores_pocket_law/data/ca_coords/
 analysis/moores_pocket_law/data/conf40/
 analysis/moores_pocket_law/data/test_conf20/
 analysis/moores_pocket_law/data/test_conf40/
+benchmarks/holo_cache/
