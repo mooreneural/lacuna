@@ -46,7 +46,7 @@ four-character PDB id, which is fetched from RCSB and cached. Each site returns 
 centroid, lining residues, volume across the ensemble and in the starting
 structure, persistence, crypticity, and druggability.
 
-Options: `conformers` (default 20, the validated value), `top`, `min_crypticity`,
+Options: `conformers` (default 20), `top`, `min_crypticity`,
 `min_druggability`, and `rank_by` (`learned`, or `learned-plm` which ranks better
 but downloads a 2.5 GB model on first use).
 

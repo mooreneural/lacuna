@@ -144,8 +144,9 @@ def find_cryptic_pockets(
 
     Args:
         structure: Path to a .pdb or .cif file, or a 4-character PDB id (e.g. "1A4U").
-        conformers: Ensemble size. 20 is the validated default; more raises coverage
-            but crowds the ranking, and is not recommended.
+        conformers: Ensemble size, 20 by default. Larger ensembles find more sites
+            but return more candidates, which pushes the true site further down the
+            ranking; the default balances the two.
         top: Maximum sites to return.
         min_crypticity: Keep only sites opening at least this much, 0 to 1. Use ~0.3
             to restrict to genuinely cryptic sites rather than already-open ones.
