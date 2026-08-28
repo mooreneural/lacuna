@@ -312,7 +312,24 @@ def detect_pockets(
 
     Returns:
         List of Pocket objects, unsorted.
+
+    Raises:
+        ValueError: if ``coords`` contains non-finite values.
     """
+    # A single NaN or inf makes coords.max() non-finite, so the grid shape
+    # computed in _build_grid_context is non-finite too, casts to a large
+    # negative int, and numpy raises on a negative dimension inside
+    # _build_protein_mask. That error names neither the coordinates nor the
+    # conformer, so the cause is hard to recover from the traceback. Fail here
+    # instead, where it is obvious. Ensemble backends can emit non-finite frames
+    # when a simulation diverges.
+    if not np.all(np.isfinite(coords)):
+        bad = int((~np.isfinite(coords)).any(axis=1).sum())
+        raise ValueError(
+            "conformer has %d of %d atoms with non-finite coordinates; a "
+            "simulation or sampling step diverged, so this conformer cannot be "
+            "gridded" % (bad, len(coords)))
+
     ctx = _build_grid_context(coords, structure, grid_spacing)
 
     # Alpha points: local maxima of the distance field in the interaction zone.
