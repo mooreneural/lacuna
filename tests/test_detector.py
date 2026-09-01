@@ -148,3 +148,37 @@ class TestDetectPockets:
         pockets = detect_pockets(coords, structure, min_volume_a3=50.0)
         for p in pockets:
             assert 0.0 <= p.hydrophobic_fraction <= 1.0
+
+
+# ── non-finite coordinates ────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("bad", [np.nan, np.inf, -np.inf])
+def test_detect_pockets_rejects_non_finite_coords(bad):
+    """A diverged simulation must fail here, not on a negative array dimension.
+
+    Without this guard, one non-finite atom makes coords.max() non-finite, the
+    grid shape casts to a large negative int, and numpy raises inside
+    _build_protein_mask with a message that mentions neither the coordinates nor
+    which conformer produced them.
+    """
+    coords, structure = _box_pocket()
+    coords = coords.copy()
+    coords[0, 0] = bad
+
+    with pytest.raises(ValueError, match="non-finite"):
+        detect_pockets(coords, structure)
+
+
+def test_detect_pockets_error_counts_affected_atoms():
+    coords, structure = _box_pocket()
+    coords = coords.copy()
+    coords[:3, 1] = np.nan
+
+    with pytest.raises(ValueError, match=r"3 of \d+ atoms"):
+        detect_pockets(coords, structure)
+
+
+def test_detect_pockets_still_works_on_finite_coords():
+    """The guard must not change behaviour on valid input."""
+    coords, structure = _box_pocket()
+    assert detect_pockets(coords, structure)

@@ -126,7 +126,35 @@ class OpenMMBackend(EnsembleBackend):
             simulation = app.Simulation(fixer.topology, system, integrator, platform)
             simulation.context.setPositions(fixer.positions)
 
+            # Minimisation can diverge instead of converging, and OpenMM does not
+            # raise when it does. On 4UUM chain A the potential energy goes from
+            # 1.5e6 to 1.2e18 kJ/mol here. Positions are still finite afterwards,
+            # so nothing looks wrong until MD starts from that state and every
+            # coordinate becomes NaN within a few steps. Those frames are then
+            # returned as ordinary conformers and fail much later in whatever
+            # touches them first, with an error naming neither this backend nor
+            # the structure.
+            #
+            # The test is that energy must not increase: minimisation that raises
+            # the potential energy has failed by definition. That avoids a
+            # threshold, which would have to depend on system size and force field.
+            _energy = lambda: simulation.context.getState(
+                getEnergy=True).getPotentialEnergy().value_in_unit(
+                    unit.kilojoule_per_mole)
+            e_before = _energy()
             simulation.minimizeEnergy(maxIterations=500)
+            e_after = _energy()
+            if not np.isfinite(e_after) or e_after > e_before:
+                raise RuntimeError(
+                    "energy minimisation diverged for %s%s: potential energy went "
+                    "from %.3e to %.3e kJ/mol. The prepared system is badly "
+                    "strained, most often because atoms added to complete partial "
+                    "residues were placed in clashes. Running MD from this state "
+                    "produces non-finite coordinates."
+                    % (Path(structure_path).name,
+                       "" if chain is None else " chain %s" % chain,
+                       e_before, e_after))
+
             simulation.context.setVelocitiesToTemperature(
                 self.temperature_k * unit.kelvin, self.seed if self.seed is not None else 0)
             if self.equilibrate_ps > 0:
