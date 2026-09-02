@@ -5,6 +5,28 @@ All notable changes to Lacuna are documented here. The project follows
 governs its benchmarks: reported numbers are the ones we can defend on held-out
 data, never the most flattering ones available.
 
+## [1.0.2] - 2026-09-02
+
+### Fixed
+- **`--backend auto` always chose Boltz, so a base install could not run.** The
+  selector walked boltz, openmm, nma, random and caught `ImportError` to skip
+  what was not installed. It never fired. Each backend module imports cleanly
+  without its heavy dependency, because `import boltz` happens inside
+  `generate()` rather than at module scope, so the first candidate always
+  resolved and the rest of the chain was unreachable. After `pip install
+  lacuna-pockets`, a plain `lacuna discover protein.pdb` therefore spent thirty
+  seconds preparing the structure and then failed with "No module named
+  'boltz'", despite the nma backend being available and requiring nothing
+  beyond numpy and scipy. In a clean virtualenv the same command now finishes
+  in under six seconds. Selection probes the dependency rather than the backend
+  module; an environment that already has Boltz installed is unaffected.
+- The Boltz backend's install hint named the package `lacuna`, not
+  `lacuna-pockets`. Following it installed an unrelated project, or nothing.
+
+### Added
+- Links to the hosted webservers on Tamarind Bio and Neurosnap, for running
+  Lacuna without installing anything.
+
 ## [1.0.0] - 2026-08-07
 
 Relicensed to MIT, and the first release whose headline numbers come from a
