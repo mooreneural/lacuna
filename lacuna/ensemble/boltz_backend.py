@@ -9,7 +9,7 @@ the learned posterior over structures, giving physically realistic diversity.
 step_scale < default (1.5) increases diversity; 1.2-1.3 is good for cryptic
 pocket sampling.  step_scale > default gives more conservative sampling.
 
-Requires: pip install lacuna[boltz]  (+ GPU strongly recommended)
+Requires: pip install "lacuna-pockets[boltz]"  (+ GPU strongly recommended)
 """
 
 from __future__ import annotations
@@ -62,7 +62,7 @@ class BoltzBackend(EnsembleBackend):
         except ImportError as e:
             raise ImportError(
                 "Boltz backend requires boltz to be installed. "
-                "Run: pip install lacuna[boltz]"
+                'Run: pip install "lacuna-pockets[boltz]"'
             ) from e
 
         return self._run_diffusion_samples(Path(structure_path), n_conformers, chain=chain)
