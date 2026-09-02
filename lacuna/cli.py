@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import sys
 from pathlib import Path
@@ -34,13 +35,37 @@ def _resolve_backend(name: str):
         raise click.BadParameter(f"Unknown backend '{name}'. Choose: random, nma, openmm, boltz")
 
 
+def _installed(module: str) -> bool:
+    try:
+        return importlib.util.find_spec(module) is not None
+    except (ImportError, ValueError):
+        return False
+
+
+#: Third-party modules each backend needs at generation time. nma and random
+#: rely only on numpy/scipy, which are hard dependencies.
+_BACKEND_REQUIRES = {
+    "boltz": ("boltz",),
+    "openmm": ("openmm", "pdbfixer"),
+    "nma": (),
+    "random": (),
+}
+
+
 def _auto_backend():
-    """Pick the best available backend at runtime."""
+    """Pick the best available backend at runtime.
+
+    Probe the dependency, not the backend module. Every backend module imports
+    cleanly whether or not its heavy dependency is present, because `import
+    boltz` happens inside generate() rather than at module scope. Catching
+    ImportError around _resolve_backend therefore never fired, so auto resolved
+    to boltz on every machine and the rest of the chain was dead code. A plain
+    `pip install lacuna-pockets` followed by `lacuna discover protein.pdb` then
+    failed at generation time with an ImportError, despite nma being available.
+    """
     for name in ("boltz", "openmm", "nma", "random"):
-        try:
+        if all(_installed(m) for m in _BACKEND_REQUIRES[name]):
             return _resolve_backend(name)
-        except ImportError:
-            continue
     raise RuntimeError("No ensemble backend available.")
 
 
