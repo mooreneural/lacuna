@@ -9,6 +9,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![DOI](https://img.shields.io/badge/Zenodo-10.5281%2Fzenodo.20533638-blue)](https://doi.org/10.5281/zenodo.20533638)
 [![bioRxiv](https://img.shields.io/badge/bioRxiv-10.64898%2F2026.08.14.744956-bc2635)](https://www.biorxiv.org/content/10.64898/2026.08.14.744956v1)
+[![Run on Tamarind Bio](https://img.shields.io/badge/Run_on-Tamarind_Bio-2ea44f)](https://app.tamarind.bio/tools/lacuna)
+[![Run on Neurosnap](https://img.shields.io/badge/Run_on-Neurosnap-2ea44f)](https://neurosnap.ai/service/Lacuna%20Cryptic%20Pocket%20Discovery)
 
 Most protein structure predictors return one static conformation. But many
 disease-relevant proteins are called undruggable not because they are
