@@ -58,6 +58,7 @@ packages = ["lacuna"]
 [tool.hatch.build.targets.wheel.force-include]
 "lacuna/pockets/plm_head.npz" = "lacuna/pockets/plm_head.npz"
 "lacuna/pockets/surface_head.npz" = "lacuna/pockets/surface_head.npz"
+"lacuna/pockets/fused_ranker.npz" = "lacuna/pockets/fused_ranker.npz"
 
 [tool.ruff]
 line-length = 100

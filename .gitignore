@@ -12,7 +12,11 @@ venv/
 *.npy
 # The fitted sequence-ranker head is a shipped artifact, not a scratch file: the
 # package is unusable with --rank-by learned-plm without it.
+# Fitted models that ship with the package. Everything else matching
+# *.npz is a cache or an analysis artifact and stays out.
 !lacuna/pockets/plm_head.npz
+!lacuna/pockets/surface_head.npz
+!lacuna/pockets/fused_ranker.npz
 *.log
 benchmarks/pdb_cache/
 benchmarks/pm_data/

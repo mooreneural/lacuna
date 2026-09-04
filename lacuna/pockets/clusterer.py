@@ -13,6 +13,9 @@ Each conformer produces a list of Pocket objects. This module:
 
 from __future__ import annotations
 
+import functools
+from pathlib import Path
+
 import warnings
 
 import numpy as np
@@ -31,8 +34,8 @@ _CRYPTIC_THRESHOLD = 0.9  # persistence below this → cryptic
 # / orthosteric sites); the legacy "persistence" strategy multiplies druggability
 # by persistence, demoting the very transient pockets the tool targets; "balanced"
 # keeps druggability primary with a mild persistence bonus.
-RANK_STRATEGIES = ("learned", "learned-plm", "crypticity", "druggability",
-                   "persistence", "balanced")
+RANK_STRATEGIES = ("learned", "learned-plm", "learned-fused", "crypticity",
+                   "druggability", "persistence", "balanced")
 DEFAULT_RANK_BY = "learned"
 _DEFAULT_RANK_BY = DEFAULT_RANK_BY  # backwards-compatible alias
 
@@ -335,6 +338,38 @@ def learned_plm_score(c: PocketCluster, plm_features: dict[str, float]) -> float
                for name, w in zip(_PLM_RANKER_FEATURES, _PLM_RANKER_WEIGHTS))
 
 
+_FUSED_PATH = Path(__file__).with_name("fused_ranker.npz")
+
+
+@functools.lru_cache(maxsize=1)
+def _fused_ranker():
+    """The ranker fitted on candidates from both detectors.
+
+    The shipped `learned` weights were fitted on alpha-detector candidates only.
+    Ranking a fused pool with them costs top-five recovery (-4.3 [-7.8, -0.7] on
+    training folds) because a surface proposal is, to that model, a wrong answer
+    it happens to score highly. This one saw both.
+    """
+    if not _FUSED_PATH.exists():
+        raise FileNotFoundError(
+            'rank_by="learned-fused" needs %s, which ships with the package. '
+            "Reinstall lacuna-pockets." % _FUSED_PATH.name)
+    z = np.load(_FUSED_PATH)
+    return ([str(x) for x in z["features"]], z["mean"], z["scale"],
+            z["coef"], float(z["intercept"]))
+
+
+def learned_fused_score(c: PocketCluster) -> float:
+    """Fused-pool ranking score (higher is better).
+
+    Standardised linear pre-activation, monotonic in the predicted probability.
+    """
+    feats, mean, scale, coef, b = _fused_ranker()
+    f = ranker_features(c)
+    x = np.array([float(f.get(n, 0.0)) for n in feats])
+    return float(((x - mean) / scale) @ coef + b)
+
+
 def compute_crypticity(apo_volume: float, max_volume: float, max_druggability: float) -> float:
     """Continuous crypticity score in [0, 1].
 
@@ -368,6 +403,8 @@ def _rank_key(c: PocketCluster, rank_by: str) -> float:
         return c.crypticity
     if rank_by == "learned":
         return learned_score(c)
+    if rank_by == "learned-fused":
+        return learned_fused_score(c)
     if rank_by == "learned-plm":
         # Populated by cluster_pockets when residue probabilities are supplied.
         return learned_plm_score(c, getattr(c, "_plm_features", {}) or {})

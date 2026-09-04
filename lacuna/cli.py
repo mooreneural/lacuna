@@ -146,13 +146,17 @@ def main():
 )
 @click.option(
     "--detector",
-    type=click.Choice(["alpha", "p2rank", "fusion"]),
+    type=click.Choice(["alpha", "surface", "surface-fusion", "p2rank", "fusion"]),
     default="alpha", show_default=True,
     help=(
-        "Pocket detector. 'alpha' is Lacuna's built-in geometric detector; "
-        "'p2rank' uses P2Rank's learned surface model; 'fusion' pools both per "
-        "conformer for complementary recall. 'p2rank'/'fusion' need P2Rank "
-        "installed (Java 11+; 'prank' on PATH or set LACUNA_P2RANK)."
+        "Pocket detector. 'alpha' is Lacuna's built-in geometric detector, which "
+        "only proposes at concavities. 'surface' scores the probe-accessible "
+        "surface with a learned model and has no such filter, reaching sites the "
+        "geometry discards. 'surface-fusion' pools both, which held out on "
+        "CryptoBench takes coverage from 68.5% to 86.4% and top-five recovery "
+        "from 57.1% to 73.9%; it selects the matching ranker automatically. "
+        "'p2rank'/'fusion' use P2Rank instead and need it installed "
+        "(Java 11+; 'prank' on PATH or set LACUNA_P2RANK)."
     ),
 )
 @click.option(
@@ -194,7 +198,7 @@ def discover(
 
     from lacuna.io.structure import load_structure, coords_array, make_biological_assembly
     from lacuna.pockets.detector import detect_pockets
-    from lacuna.pockets.clusterer import cluster_pockets
+    from lacuna.pockets.clusterer import DEFAULT_RANK_BY, cluster_pockets
     from lacuna.io.writers import (
         write_report, write_pocket_pdb, write_boltz_constraint, write_vina_box,
         write_structure_pdb,
@@ -268,6 +272,25 @@ def discover(
     # Resolve the per-conformer detector (alpha | p2rank | fusion). p2rank/fusion
     # require an external JVM tool; if it is missing, fall back to alpha rather
     # than fail the run.
+    # The fused pool must be ranked by the model fitted on it. Ranking it with
+    # the shipped alpha-only weights costs top-five recovery, because a surface
+    # proposal is a wrong answer that model scores highly. Only override a
+    # ranker the user left at its default.
+    use_surface = detector in ("surface", "surface-fusion")
+    if use_surface:
+        from lacuna.pockets import surface_detector as _sd
+        if not _sd.available():
+            console.print(
+                f"  [yellow]--detector {detector}: the fitted surface model is "
+                "missing from this installation. Falling back to the alpha "
+                "detector.[/yellow]")
+            detector, use_surface = "alpha", False
+        elif rank_by == DEFAULT_RANK_BY:
+            rank_by = "learned-fused"
+            if not quiet:
+                console.print("  [dim]Ranking with 'learned-fused', which was "
+                              "fitted on candidates from both detectors.[/dim]")
+
     use_p2rank = detector in ("p2rank", "fusion")
     if use_p2rank:
         from lacuna.pockets.p2rank_detector import p2rank_available, detect_pockets_p2rank
@@ -284,7 +307,7 @@ def discover(
     # below. The embedding is per structure, not per conformer: the sequence does
     # not move.
     plm_probs = None
-    if seed_from_sequence or rank_by == "learned-plm":
+    if seed_from_sequence or rank_by == "learned-plm" or use_surface:
         from lacuna.pockets import plm as _plm
 
         if not _plm.available():
@@ -315,7 +338,12 @@ def discover(
                 seed_from_sequence = False
 
     def _detect(coords) -> list:
-        pockets = [] if detector == "p2rank" else detect_pockets(coords, structure)
+        geometric = detector not in ("p2rank", "surface")
+        pockets = detect_pockets(coords, structure) if geometric else []
+        if use_surface:
+            from lacuna.pockets.surface_detector import detect_pockets_surface
+            pockets = list(pockets) + detect_pockets_surface(
+                coords, structure, plm_residue_probs=plm_probs)
         if use_p2rank:
             pockets = list(pockets) + detect_pockets_p2rank(coords, structure)
         if seed_from_sequence and plm_probs:
