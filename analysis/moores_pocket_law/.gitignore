@@ -3,3 +3,6 @@ detector_ablation.json
 end_to_end_fusion.jsonl
 end_to_end_fusion.json
 e2e_run.log
+test_fold_eval.jsonl
+test_fold_eval.json
+test_fold_run.log
