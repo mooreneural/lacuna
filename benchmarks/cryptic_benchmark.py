@@ -680,6 +680,7 @@ def run_lacuna(
     chain: str | None = None,
     backend_name: str = "nma",
     rank_by: str = DEFAULT_RANK_BY,
+    detector: str = "alpha",
     homodimer: bool = False,
     nma_rmsd: float = 2.0,
     nma_modes: int = 10,
@@ -717,19 +718,27 @@ def run_lacuna(
     base = coords_array(structure)
     all_coords = [base] + coord_sets
 
+    # Embedded once per structure, not per conformer: the sequence is what stays
+    # fixed while the geometry moves. Resolved before detection because the
+    # surface detector consumes the probabilities, where the ranker only needs
+    # them afterwards.
+    use_surface = detector in ("surface", "surface-fusion")
+    plm_probs = None
+    if rank_by == "learned-plm" or use_surface:
+        from lacuna.pockets import plm as _plm
+        if _plm.available():
+            plm_probs = _plm.residue_probabilities(structure)
+
     pocket_lists = []
     for ci, coords in enumerate(all_coords):
-        pockets = detect_pockets(coords, structure)
+        pockets = [] if detector == "surface" else detect_pockets(coords, structure)
+        if use_surface:
+            from lacuna.pockets.surface_detector import detect_pockets_surface
+            pockets = list(pockets) + detect_pockets_surface(
+                coords, structure, plm_residue_probs=plm_probs)
         for p in pockets:
             p.conformer_idx = ci
         pocket_lists.append(pockets)
-
-    # Embedded once per structure, not per conformer: the sequence is what stays
-    # fixed while the geometry moves.
-    plm_probs = None
-    if rank_by == "learned-plm":
-        from lacuna.pockets import plm as _plm
-        plm_probs = _plm.residue_probabilities(structure)
 
     clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coords),
                                rank_by=rank_by, plm_residue_probs=plm_probs)
@@ -750,6 +759,11 @@ def main():
     parser.add_argument("--backend", choices=["nma", "random", "openmm", "boltz"],
                         default="nma",
                         help="Ensemble backend (default: nma - the package default)")
+    parser.add_argument("--detector", default="alpha",
+                        choices=["alpha", "surface", "surface-fusion"],
+                        help="alpha is the shipped geometric detector; surface "
+                             "scores the probe-accessible surface with a learned "
+                             "model; surface-fusion pools both.")
     parser.add_argument("--rank-by", dest="rank_by",
                         choices=list(RANK_STRATEGIES),
                         default=DEFAULT_RANK_BY,
@@ -859,6 +873,7 @@ def main():
             clusters, elapsed = run_lacuna(
                 apo_path, n_conf, chain=apo_chain,
                 backend_name=args.backend, rank_by=args.rank_by,
+                detector=args.detector,
                 homodimer=entry.get("homodimer", False),
                 nma_rmsd=args.nma_rmsd, nma_modes=args.nma_modes,
                 boltz_msa=args.boltz_msa,

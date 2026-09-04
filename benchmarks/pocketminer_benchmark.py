@@ -83,6 +83,11 @@ def main():
     import argparse
     from lacuna.pockets.clusterer import RANK_STRATEGIES
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--detector", default="alpha",
+                choices=["alpha", "surface", "surface-fusion"],
+                help="alpha is the shipped geometric detector; surface scores "
+                     "the probe-accessible surface with a learned model; "
+                     "surface-fusion pools both.")
     ap.add_argument("--rank-by", dest="rank_by", default=DEFAULT_RANK_BY,
                     choices=list(RANK_STRATEGIES),
                     help="Pocket ranking strategy (default: crypticity)")
@@ -122,7 +127,7 @@ def main():
         mism = "" if abs(n_res - n_lab) <= 5 else f"  [!] res/label len {n_res}/{n_lab}"
         ref = compute_known_site_centroid(apo, chain, cryptic)
         try:
-            clusters, elapsed = run_lacuna(apo, 20, chain=chain, rank_by=args.rank_by)
+            clusters, elapsed = run_lacuna(apo, 20, chain=chain, rank_by=args.rank_by, detector=args.detector)
         except Exception as e:
             print(f"  [err] {tag}: lacuna failed ({e})")
             continue

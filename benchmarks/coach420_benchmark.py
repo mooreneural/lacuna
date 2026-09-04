@@ -137,6 +137,11 @@ def main():
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--limit", type=int, default=0, help="only first N (0=all 420)")
     ap.add_argument("--conformers", type=int, default=20)
+    ap.add_argument("--detector", default="alpha",
+                choices=["alpha", "surface", "surface-fusion"],
+                help="alpha is the shipped geometric detector; surface scores "
+                     "the probe-accessible surface with a learned model; "
+                     "surface-fusion pools both.")
     ap.add_argument("--rank-by", dest="rank_by", default=DEFAULT_RANK_BY)
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
@@ -162,7 +167,7 @@ def main():
             if not (10 <= len(s.residues) <= MAX_RESIDUES):
                 n_skip += 1
                 continue
-            clusters, _ = run_lacuna(path, args.conformers, chain=chain,
+            clusters, _ = run_lacuna(path, args.conformers, chain=chain, detector=args.detector,
                                      backend_name="nma", rank_by=args.rank_by)
         except Exception as e:
             n_skip += 1
