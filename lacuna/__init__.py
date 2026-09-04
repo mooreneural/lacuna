@@ -11,7 +11,7 @@ try:                                    # pragma: no cover - trivial branch
     from importlib.metadata import PackageNotFoundError, version as _pkg_version
     __version__ = _pkg_version("lacuna-pockets")
 except Exception:                       # pragma: no cover
-    __version__ = "1.0.2"
+    __version__ = "1.0.3"
 
 from lacuna.models import Pocket, PocketCluster, DrugabilityScore, Structure
 from lacuna.io.structure import load_structure
