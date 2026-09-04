@@ -179,6 +179,54 @@ def zero_coverage_ids() -> set:
     return out
 
 
+def recover_zero_coverage(data, scores, zero, ent):
+    """Does a proposal land on the annotated site, on targets with no coverage?
+
+    Kept as one function so any arm scoring the same question scores it the same
+    way: cluster the top 2% of points, keep five proposals by summed score, and
+    characterise them with Lacuna's own code so the residue sets are on the scale
+    every other number in this project uses.
+    """
+    from lacuna.io.structure import load_structure, coords_array
+    from lacuna.pockets.detector import characterize_pockets
+    from lacuna.pockets.clusterer import _greedy_cluster
+
+    hits, checked = [], []
+    for p in sorted(scores):
+        if p.lower() not in zero:
+            continue
+        d, s = data[p], scores[p]
+        top = np.flatnonzero(s >= np.quantile(s, 0.98))
+        if len(top) < 3:
+            continue
+        lab = _greedy_cluster(d["xyz"][top].astype(float), eps=5.0)
+        centres = [d["xyz"][top][lab == c].mean(axis=0)
+                   for c in range(lab.max() + 1)]
+        strength = [float(s[top][lab == c].sum()) for c in range(lab.max() + 1)]
+        centres = [c for _v, c in sorted(zip(strength, centres),
+                                         key=lambda kv: -kv[0])[:5]]
+        e = ent[p]
+        st = load_structure(CIF / ("%s.cif" % p.upper()), chain=e["apo_chain"])
+        pocks = characterize_pockets(coords_array(st), st, centres)
+        want = {(str(x).partition("_")[0], int(str(x).partition("_")[2]))
+                for x in e["apo_pocket_selection"]}
+        best = 0.0
+        for pk in pocks:
+            if pk is None:
+                continue
+            got = set()
+            for r in pk.lining_residues:
+                head, _, ch = str(r).rpartition(":")
+                num = "".join(c for c in head if c.isdigit() or c == "-")
+                if num:
+                    got.add((ch, int(num)))
+            if got:
+                best = max(best, len(got & want) / len(got | want))
+        checked.append(p)
+        hits.append(int(best >= T))
+    return hits, checked
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=0)
@@ -266,47 +314,8 @@ def main() -> None:
           % (roc_auc_score(ally, alls), average_precision_score(ally, alls),
              ally.mean()))
 
-    # ── does it land on the site, where geometry found nothing? ──────────────
-    from lacuna.io.structure import load_structure, coords_array
-    from lacuna.pockets.detector import characterize_pockets
-    from lacuna.pockets.clusterer import _greedy_cluster
-
     ent = {p: e for p, e, _f in targets}
-    hits, checked = [], []
-    for p in sorted(scores):
-        if p.lower() not in zero:
-            continue
-        d, s = data[p], scores[p]
-        top = np.flatnonzero(s >= np.quantile(s, 0.98))
-        if len(top) < 3:
-            continue
-        lab = _greedy_cluster(d["xyz"][top].astype(float), eps=5.0)
-        centres = [d["xyz"][top][lab == c].mean(axis=0)
-                   for c in range(lab.max() + 1)]
-        # Rank proposals by summed point score, then keep five, matching the
-        # budget every other number in this project reports at.
-        strength = [float(s[top][lab == c].sum()) for c in range(lab.max() + 1)]
-        centres = [c for _v, c in sorted(zip(strength, centres),
-                                         key=lambda kv: -kv[0])[:5]]
-        e = ent[p]
-        st = load_structure(CIF / ("%s.cif" % p.upper()), chain=e["apo_chain"])
-        pocks = characterize_pockets(coords_array(st), st, centres)
-        want = {(str(x).partition("_")[0], int(str(x).partition("_")[2]))
-                for x in e["apo_pocket_selection"]}
-        best = 0.0
-        for pk in pocks:
-            if pk is None:
-                continue
-            got = set()
-            for r in pk.lining_residues:
-                head, _, ch = str(r).rpartition(":")
-                num = "".join(c for c in head if c.isdigit() or c == "-")
-                if num:
-                    got.add((ch, int(num)))
-            if got:
-                best = max(best, len(got & want) / len(got | want))
-        checked.append(p)
-        hits.append(int(best >= T))
+    hits, checked = recover_zero_coverage(data, scores, zero, ent)
 
     if not checked:
         raise SystemExit("no zero-coverage targets scored; nothing to conclude.")
