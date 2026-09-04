@@ -33,6 +33,27 @@ VDW_RADII: dict[str, float] = {
 }
 
 
+def chain_selector(chain: str | None) -> frozenset[str] | None:
+    """Parse a chain argument into the set of chain ids it names.
+
+    An interface site spans two chains, and the convention for naming one is a
+    hyphenated pair: CryptoBench writes ``"G-H"``. Comparing that string to a
+    chain id matches nothing, so ``load_structure`` returned an empty Structure
+    and every caller then failed further downstream with an error naming neither
+    the chain nor the file. Those entries were therefore absent from every
+    benchmark run here: 13.9% of the CryptoBench training folds and 17.1% of the
+    test fold.
+
+    Returns None for "every chain", otherwise the named ids.
+    """
+    if chain is None:
+        return None
+    parts = [p.strip() for p in chain.replace(",", "-").split("-") if p.strip()]
+    if not parts:
+        raise ValueError("chain selector %r names no chain" % (chain,))
+    return frozenset(parts)
+
+
 def iter_model_coords(
     path: str | Path,
     chain: str | None = None,
@@ -49,6 +70,7 @@ def iter_model_coords(
     not, and the caller can still place every atom it recognizes.
     """
     path = Path(path)
+    want = chain_selector(chain)
     parser = (MMCIFParser(QUIET=True) if path.suffix.lower() in (".cif", ".mmcif")
               else PDBParser(QUIET=True))
     with warnings.catch_warnings():
@@ -58,7 +80,7 @@ def iter_model_coords(
     for model in bio_struct.get_models():
         coords: dict[tuple[str, int, str], tuple[float, float, float]] = {}
         for chain_obj in model.get_chains():
-            if chain is not None and chain_obj.get_id() != chain:
+            if want is not None and chain_obj.get_id() not in want:
                 continue
             for res in chain_obj.get_residues():
                 if res.get_id()[0] != " ":
@@ -77,10 +99,18 @@ def load_structure(path: str | Path, chain: str | None = None) -> Structure:
 
     Args:
         path: Path to PDB or mmCIF file.
-        chain: If given, load only this chain ID (e.g. "A"). Default loads all chains.
+        chain: If given, load only these chains. A single id ("A"), or several
+            for an interface site, hyphen- or comma-separated ("G-H").
+            Default loads all chains.
+
+    Raises:
+        ValueError: if none of the named chains is present in the file. An
+            empty Structure would otherwise be returned and fail later
+            somewhere that cannot say which chain was missing.
     """
     path = Path(path)
     suffix = path.suffix.lower()
+    want = chain_selector(chain)
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", BiopythonWarning)
@@ -97,7 +127,7 @@ def load_structure(path: str | Path, chain: str | None = None) -> Structure:
     serial = 0
     for model in bio_struct.get_models():
         for chain_obj in model.get_chains():
-            if chain is not None and chain_obj.get_id() != chain:
+            if want is not None and chain_obj.get_id() not in want:
                 continue
             for res in chain_obj.get_residues():
                 if res.get_id()[0] != " ":
@@ -131,12 +161,20 @@ def load_structure(path: str | Path, chain: str | None = None) -> Structure:
                     serial += 1
         break  # first model only
 
+    if want is not None and not atoms:
+        present = sorted({c.get_id() for m in bio_struct.get_models()
+                          for c in m.get_chains()})
+        raise ValueError(
+            "chain %r matched nothing in %s; the file has %s. Returning an "
+            "empty structure here is what made these entries disappear from "
+            "benchmarks instead of failing." % (chain, path.name, present or "no chains"))
+
     # Build one-letter sequences per chain
     ppb = PPBuilder()
     sequence: dict[str, str] = {}
     for model in bio_struct.get_models():
         for chain_obj in model.get_chains():
-            if chain is not None and chain_obj.get_id() != chain:
+            if want is not None and chain_obj.get_id() not in want:
                 continue
             seq = ""
             for pp in ppb.build_peptides(chain_obj):
