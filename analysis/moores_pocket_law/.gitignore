@@ -1,2 +1,5 @@
 detector_ablation.jsonl
 detector_ablation.json
+end_to_end_fusion.jsonl
+end_to_end_fusion.json
+e2e_run.log

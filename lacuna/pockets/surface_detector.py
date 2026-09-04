@@ -214,9 +214,14 @@ def _predict_raw(X: np.ndarray, m: dict) -> np.ndarray:
     return out
 
 
-def score_points(X: np.ndarray, with_plm: bool) -> np.ndarray:
-    """P(surface point lies at a ligandable site)."""
-    return 1.0 / (1.0 + np.exp(-_predict_raw(X, _load_head(with_plm))))
+def score_points(X: np.ndarray, with_plm: bool, head: dict | None = None) -> np.ndarray:
+    """P(surface point lies at a ligandable site).
+
+    ``head`` overrides the shipped model. Cross-validation needs to score a
+    structure with a model that did not train on its fold, and there is no
+    honest way to do that with a single baked-in ensemble.
+    """
+    return 1.0 / (1.0 + np.exp(-_predict_raw(X, head or _load_head(with_plm))))
 
 
 # ──────────────────────────────── the detector ───────────────────────────────
@@ -227,6 +232,7 @@ def detect_pockets_surface(
     plm_residue_probs: dict[int, float] | None = None,
     max_pockets: int = 10,
     max_points: int = 20000,
+    head: dict | None = None,
 ) -> list[Pocket]:
     """Detect pockets in one conformer with the learned surface scorer.
 
@@ -239,7 +245,7 @@ def detect_pockets_surface(
     sequence-aware model, which is substantially better; without it the
     geometry-only model is used.
     """
-    if not available():
+    if head is None and not available():
         raise FileNotFoundError(
             "surface_head.npz is not installed, so the learned surface detector "
             "cannot run. It ships with the package; a source checkout needs "
@@ -252,7 +258,7 @@ def detect_pockets_surface(
 
     with_plm = bool(plm_residue_probs)
     X = surface_point_features(structure, ctx, vox, plm_residue_probs)
-    s = score_points(X, with_plm)
+    s = score_points(X, with_plm, head)
 
     top = np.flatnonzero(s >= np.quantile(s, TOP_QUANTILE))
     if len(top) < 3:
