@@ -89,9 +89,9 @@ def fold_residue_heads(targets, folds) -> dict:
                 continue
             for pdb, e, p in rows:
                 z = np.load(p)
-                want = {int(str(x).partition("_")[2])
-                        for x in e["apo_pocket_selection"]
-                        if str(x).partition("_")[0] == e["apo_chain"]}
+                want = {num for ch, num in
+                        dataio.cb_residues(e["apo_pocket_selection"])
+                        if ch == e["apo_chain"]}
                 lab = np.array([1 if int(n) in want else 0 for n in z["nums"]], np.int8)
                 pos = np.flatnonzero(lab == 1)
                 if not len(pos):
@@ -169,8 +169,7 @@ def _build_with_probs(pdb, entry, rng, probs):
         vox = vox[rng.permutation(len(vox))[:tsd.MAX_POINTS]]
     xyz = ctx.lo + vox * GRID_SPACING
 
-    want = {(str(x).partition("_")[0], int(str(x).partition("_")[2]))
-            for x in entry["apo_pocket_selection"]}
+    want = dataio.cb_residues(entry["apo_pocket_selection"])
     site = np.array([a.coords for a in st.atoms
                      if (a.chain_id, a.res_seq) in want], float)
     if len(site) < 3:
@@ -232,18 +231,9 @@ def run_target(pdb, entry, fold, n_conf, s_head, r_head) -> dict:
 
 
 def as_set(entries, lacuna_style: bool) -> set:
-    out = set()
-    for e in entries:
-        s = str(e)
-        if lacuna_style:
-            head, _, ch = s.rpartition(":")
-            num = "".join(c for c in head if c.isdigit() or c == "-")
-            if num:
-                out.add((ch, int(num)))
-        else:
-            ch, _, num = s.partition("_")
-            out.add((ch, int(num)))
-    return out
+    """Both label formats to {(chain, resnum)}. See dataio for the parsers."""
+    return (dataio.lacuna_residues(entries) if lacuna_style
+            else dataio.cb_residues(entries))
 
 
 def main() -> None:

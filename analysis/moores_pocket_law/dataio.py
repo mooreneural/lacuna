@@ -20,6 +20,7 @@ here and no column pretends otherwise.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -236,3 +237,41 @@ def boot_ci(values, n_boot=20000, seed=0, alpha=0.05):
     lo = means[int((alpha / 2) * n_boot)]
     hi = means[int((1 - alpha / 2) * n_boot) - 1]
     return float(v.mean()), float(lo), float(hi)
+
+#: CryptoBench writes annotated residues as 'B_60', and occasionally 'B_60A'
+#: where an insertion code is present (3 of 885 training targets). Lacuna's Atom
+#: model has no insertion-code field, so a residue can only ever be identified
+#: here by (chain, sequence number). The code is therefore dropped rather than
+#: parsed, which merges 60 and 60A into one residue. That loses nothing Lacuna
+#: could have distinguished, and it is far better than the alternative these
+#: scripts started with, which was an int() that raised and silently dropped the
+#: whole target through an except clause.
+_CB_RES = re.compile(r"^(\S+)_(-?\d+)[A-Za-z]?$")
+#: Lacuna writes lining residues as 'G12:A' or 'ALA92:B'.
+_LACUNA_RES = re.compile(r"^[A-Za-z]*(-?\d+)[A-Za-z]?:(\S+)$")
+
+
+def cb_residues(selection) -> set:
+    """CryptoBench selection entries to {(chain, resnum)}."""
+    out = set()
+    for e in selection:
+        m = _CB_RES.match(str(e))
+        if not m:
+            raise ValueError("unparseable CryptoBench residue %r" % (e,))
+        out.add((m.group(1), int(m.group(2))))
+    return out
+
+
+def lacuna_residues(lining) -> set:
+    """Lacuna lining-residue labels to {(chain, resnum)}."""
+    out = set()
+    for e in lining:
+        m = _LACUNA_RES.match(str(e))
+        if not m:
+            raise ValueError("unparseable Lacuna residue %r" % (e,))
+        out.add((m.group(2), int(m.group(1))))
+    return out
+
+
+def jaccard(a: set, b: set) -> float:
+    return len(a & b) / len(a | b) if a and b else 0.0

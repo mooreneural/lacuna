@@ -77,29 +77,15 @@ _CB_RES = re.compile(r"^(\S+)_(-?\d+)$")
 
 
 def _lacuna_residues(entries) -> set:
-    out = set()
-    for e in entries:
-        m = _LACUNA_RES.match(str(e))
-        if not m:
-            raise ValueError("unparseable Lacuna residue %r" % (e,))
-        out.add((m.group(2), int(m.group(1))))
-    return out
+    return dataio.lacuna_residues(entries)
 
 
 def _truth_residues(selection) -> set:
-    out = set()
-    for e in selection:
-        m = _CB_RES.match(str(e))
-        if not m:
-            raise ValueError("unparseable CryptoBench residue %r" % (e,))
-        out.add((m.group(1), int(m.group(2))))
-    return out
+    return dataio.cb_residues(selection)
 
 
 def jaccard(a: set, b: set) -> float:
-    if not a or not b:
-        return 0.0
-    return len(a & b) / len(a | b)
+    return dataio.jaccard(a, b)
 
 
 # ──────────────────────────────── the four arms ──────────────────────────────

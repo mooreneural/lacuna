@@ -109,11 +109,8 @@ def neighbours(pdb: str, entry: dict, xyz: np.ndarray):
 
 
 def residue_labels(entry: dict, nums: np.ndarray) -> np.ndarray:
-    want = set()
-    for e in entry["apo_pocket_selection"]:
-        ch, _, num = str(e).partition("_")
-        if ch == entry["apo_chain"]:
-            want.add(int(num))
+    want = {num for ch, num in dataio.cb_residues(entry["apo_pocket_selection"])
+            if ch == entry["apo_chain"]}
     return np.array([1 if int(n) in want else 0 for n in nums], np.int8)
 
 

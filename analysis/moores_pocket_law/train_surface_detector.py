@@ -90,10 +90,7 @@ def build(pdb: str, entry: dict, rng):
         vox = vox[rng.permutation(len(vox))[:MAX_POINTS]]
     xyz = ctx.lo + vox * GRID_SPACING
 
-    want = set()
-    for e in entry["apo_pocket_selection"]:
-        ch, _, num = str(e).partition("_")
-        want.add((ch, int(num)))
+    want = dataio.cb_residues(entry["apo_pocket_selection"])
     site = np.array([a.coords for a in st.atoms
                      if (a.chain_id, a.res_seq) in want], float)
     if len(site) < 3:

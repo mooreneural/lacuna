@@ -134,10 +134,7 @@ def build_target(pdb: str, entry: dict, rng) -> dict | None:
     xyz = ctx.lo + vox * ctx.grid_spacing
 
     # Positive = near an atom of an annotated site residue.
-    want = set()
-    for e in entry["apo_pocket_selection"]:
-        ch, _, num = str(e).partition("_")
-        want.add((ch, int(num)))
+    want = dataio.cb_residues(entry["apo_pocket_selection"])
     site_xyz = np.array([a.coords for a in structure.atoms
                          if (a.chain_id, a.res_seq) in want], float)
     if len(site_xyz) < 3:
@@ -208,20 +205,13 @@ def recover_zero_coverage(data, scores, zero, ent):
         e = ent[p]
         st = load_structure(CIF / ("%s.cif" % p.upper()), chain=e["apo_chain"])
         pocks = characterize_pockets(coords_array(st), st, centres)
-        want = {(str(x).partition("_")[0], int(str(x).partition("_")[2]))
-                for x in e["apo_pocket_selection"]}
+        want = dataio.cb_residues(e["apo_pocket_selection"])
         best = 0.0
         for pk in pocks:
             if pk is None:
                 continue
-            got = set()
-            for r in pk.lining_residues:
-                head, _, ch = str(r).rpartition(":")
-                num = "".join(c for c in head if c.isdigit() or c == "-")
-                if num:
-                    got.add((ch, int(num)))
-            if got:
-                best = max(best, len(got & want) / len(got | want))
+            got = dataio.lacuna_residues(pk.lining_residues)
+            best = max(best, dataio.jaccard(got, want))
         checked.append(p)
         hits.append(int(best >= T))
     return hits, checked
