@@ -1,0 +1,213 @@
+======================================================================
+  LACUNA - CRYPTIC POCKET BENCHMARK  (22 proteins, 20 conformers)
+  backend=nma  rank_by=learned  top_n=5  nma_rmsd=2.0  nma_modes=10
+======================================================================
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  T4L_L99A  -  T4 Lysozyme L99A (hydrophobic cavity)
+──────────────────────────────────────────────────────────────────────
+  Binding site: 8 residues (literature-defined)
+  ✅ robust:PASS(dist)  legacy:PASS  dist=3.4Å@r4  jac=23%@r4  core=62%  recall=88%@r4(n=30)  clusters=10  0.9s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  KRAS_SIIP  -  K-Ras WT apo (switch-II cryptic pocket)
+──────────────────────────────────────────────────────────────────────
+  Binding site: 14 residues (literature-defined)
+  ✅ robust:PASS(jac)  legacy:PASS  dist=5.6Å@r1  jac=33%@r1  core=50%  recall=79%@r1(n=30)  clusters=6  1.0s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  IL2  -  Interleukin-2 (cryptic helix-α1 site)
+──────────────────────────────────────────────────────────────────────
+    Ligand: CMM chain A (41 atoms)
+  Binding site: 14 residues (auto-extracted, 4.5Å cutoff)
+  ❌ robust:MISS(none)  legacy:PASS  dist=8.8Å@r1  jac=24%@r1  core=29%  recall=64%@r1(n=32)  clusters=7  0.7s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  GCK  -  Glucokinase (allosteric activator site)
+──────────────────────────────────────────────────────────────────────
+    Ligand: B84 chain A (37 atoms)
+  Binding site: 23 residues (auto-extracted, 4.5Å cutoff)
+  ✅ robust:PASS(dist+jac)  legacy:PASS  dist=3.9Å@r5  jac=48%@r5  core=30%  recall=70%@r5(n=26)  clusters=38  3.4s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  p38_DFGout  -  p38α MAPK DFG-out pocket (BIRB 796)
+──────────────────────────────────────────────────────────────────────
+    Ligand: GK4 chain A (26 atoms)
+  Binding site: 21 residues (auto-extracted, 4.5Å cutoff)
+  ✅ robust:PASS(jac)  legacy:PASS  dist=8.2Å@r3  jac=35%@r3  core=24%  recall=76%@r3(n=41)  clusters=40  2.7s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  HIVRT_NNRTI  -  HIV-1 RT NNRTI binding pocket (nevirapine)
+──────────────────────────────────────────────────────────────────────
+    Ligand: U05 chain A (22 atoms)
+  Binding site: 16 residues (auto-extracted, 4.5Å cutoff)
+  ❌ robust:MISS(none)  legacy:MISS  dist=14.4Å@r2  jac=4%@r3  core=7%  recall=6%@r2(n=34)  clusters=50  6.7s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  SRC_myristate  -  Src kinase myristate/SH2-linker pocket
+──────────────────────────────────────────────────────────────────────
+    Ligand: PD5 chain A (33 atoms)
+  Binding site: 25 residues (auto-extracted, 4.5Å cutoff)
+  ✅ robust:PASS(jac)  legacy:PASS  dist=5.8Å@r3  jac=38%@r3  core=40%  recall=72%@r3(n=40)  clusters=35  3.6s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  MDM2  -  MDM2 p53-binding cleft (cryptic Trp/Leu pocket)
+──────────────────────────────────────────────────────────────────────
+    Ligand: 0Y7 chain A (30 atoms)
+  Binding site: 19 residues (auto-extracted, 4.5Å cutoff)
+  ✅ robust:PASS(jac)  legacy:PASS  dist=6.4Å@r2  jac=31%@r2  core=14%  recall=47%@r2(n=19)  clusters=4  1.5s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  SHP2_allosteric  -  SHP-2 allosteric tunnel (SHP836/SHP099 site)
+──────────────────────────────────────────────────────────────────────
+    Ligand: 5OA chain A (23 atoms)
+  Binding site: 17 residues (auto-extracted, 4.5Å cutoff)
+  ✅ robust:PASS(jac)  legacy:PASS  dist=4.3Å@r3  jac=61%@r3  core=47%  recall=100%@r3(n=28)  clusters=32  4.4s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  ABL1_myristate  -  c-ABL myristate/allosteric pocket (asciminib target)
+──────────────────────────────────────────────────────────────────────
+    Ligand: MYR chain A (15 atoms)
+  Binding site: 16 residues (auto-extracted, 4.5Å cutoff)
+  ❌ robust:MISS(none)  legacy:MISS  dist=17.9Å@r1  jac=4%@r2  core=0%  recall=12%@r2(n=37)  clusters=22  1.7s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  PTP1B_allosteric  -  PTP1B allosteric site (C-terminal helix pocket)
+──────────────────────────────────────────────────────────────────────
+    Ligand: SK2 chain A (29 atoms)
+  Binding site: 17 residues (auto-extracted, 4.5Å cutoff)
+  ✅ robust:PASS(dist+jac)  legacy:PASS  dist=3.5Å@r2  jac=57%@r2  core=56%  recall=76%@r2(n=19)  clusters=9  1.6s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  NS5B_thumb  -  HCV NS5B thumb-site I allosteric pocket
+──────────────────────────────────────────────────────────────────────
+    Ligand: VXR chain A (28 atoms)
+  Binding site: 15 residues (auto-extracted, 4.5Å cutoff)
+  ❌ robust:MISS(none)  legacy:MISS  dist=27.3Å@r1  jac=0%@rNone  core=0%  recall=0%@rNone(n=0)  clusters=62  4.4s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  BCLXL  -  BCL-XL BH3-binding groove (navitoclax/ABT-737)
+──────────────────────────────────────────────────────────────────────
+    Ligand: N3C chain A (56 atoms)
+  Binding site: 22 residues (auto-extracted, 4.5Å cutoff)
+  ❌ robust:MISS(none)  legacy:MISS  dist=13.9Å@r1  jac=15%@r3  core=14%  recall=23%@r3(n=17)  clusters=6  2.4s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  CASP1  -  Caspase-1 allosteric dimer-interface pocket
+──────────────────────────────────────────────────────────────────────
+    Ligand: 1HN chain A (14 atoms)
+  Binding site: 12 residues (auto-extracted, 4.5Å cutoff)
+  ❌ robust:MISS(none)  legacy:MISS  dist=9.1Å@r5  jac=4%@r4  core=0%  recall=8%@r4(n=15)  clusters=12  1.5s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  ERK2  -  ERK2 allosteric binding site
+──────────────────────────────────────────────────────────────────────
+    Ligand: 38Z chain A (44 atoms)
+  Binding site: 26 residues (auto-extracted, 4.5Å cutoff)
+  ❌ robust:MISS(none)  legacy:PASS  dist=4.6Å@r2  jac=22%@r2  core=19%  recall=35%@r2(n=24)  clusters=31  2.5s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  BCL2_BH3  -  BCL-2 BH3-binding groove (venetoclax/ABT-199)
+──────────────────────────────────────────────────────────────────────
+    Ligand: LBM chain A (122 atoms)
+  Binding site: 22 residues (auto-extracted, 4.5Å cutoff)
+  ❌ robust:MISS(none)  legacy:MISS  dist=13.8Å@r4  jac=3%@r4  core=0%  recall=5%@r4(n=9)  clusters=9  1.2s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  IDH1_R132H  -  IDH1 R132H allosteric dimer-interface (ivosidenib target)
+──────────────────────────────────────────────────────────────────────
+    Ligand: VVS chain A (27 atoms)
+  Binding site: 14 residues (auto-extracted, 4.5Å cutoff)
+  ✅ robust:PASS(dist+jac)  legacy:PASS  dist=3.6Å@r4  jac=42%@r4  core=17%  recall=57%@r2(n=35)  clusters=21  3.1s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  PKM2_activator  -  PKM2 allosteric activator pocket (TEPP-46 / subunit interface)
+──────────────────────────────────────────────────────────────────────
+    Ligand: 07T chain B (50 atoms)
+  Binding site: 12 residues (auto-extracted, 4.5Å cutoff)
+  ❌ robust:MISS(none)  legacy:MISS  dist=19.1Å@r5  jac=1%@r5  core=0%  recall=8%@r5(n=71)  clusters=46  4.3s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  PPARG_allosteric  -  PPARγ LBD allosteric helix-12 site (metaglidasen/MBX-102)
+──────────────────────────────────────────────────────────────────────
+    Ligand: MGZ chain B (22 atoms)
+  Binding site: 17 residues (auto-extracted, 4.5Å cutoff)
+  ✅ robust:PASS(dist)  legacy:PASS  dist=2.8Å@r1  jac=24%@r1  core=41%  recall=100%@r1(n=71)  clusters=24  1.7s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  MMP13_allosteric  -  MMP-13 non-zinc allosteric S1′ tunnel
+──────────────────────────────────────────────────────────────────────
+    Ligand: 732 chain A (26 atoms)
+  Binding site: 16 residues (auto-extracted, 4.5Å cutoff)
+  ❌ robust:MISS(none)  legacy:PASS  dist=7.1Å@r1  jac=11%@r1  core=25%  recall=31%@r1(n=36)  clusters=10  1.1s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  TEM1_allosteric  -  TEM-1 β-lactamase cryptic allosteric site (CBT)
+──────────────────────────────────────────────────────────────────────
+    Ligand: CBT chain A (22 atoms)
+  Binding site: 12 residues (auto-extracted, 4.5Å cutoff)
+  ❌ robust:MISS(none)  legacy:PASS  dist=9.2Å@r1  jac=20%@r1  core=25%  recall=42%@r1(n=18)  clusters=16  1.3s
+
+──────────────────────────────────────────────────────────────────────
+  [CRYPTIC]  RICIN_pterin  -  Ricin A-chain cryptic specificity pocket (pteroic acid)
+──────────────────────────────────────────────────────────────────────
+    Ligand: PT1 chain A (23 atoms)
+  Binding site: 14 residues (auto-extracted, 4.5Å cutoff)
+  ❌ robust:MISS(none)  legacy:PASS  dist=9.1Å@r1  jac=23%@r1  core=14%  recall=43%@r1(n=18)  clusters=16  1.7s
+
+======================================================================
+  RESULTS BY CATEGORY
+======================================================================
+
+  CRYPTIC  (10/22)
+    ✅ 1L90  3.4Å   jac=23%  recall=88%    0.9s    T4 Lysozyme L99A (hydrophobic cavity)
+    ✅ 4OBE  5.6Å   jac=33%  recall=79%    1.0s    K-Ras WT apo (switch-II cryptic pocket)
+    ❌ 1M47  8.8Å   jac=24%  recall=64%    0.7s    Interleukin-2 (cryptic helix-α1 site)
+    ✅ 1V4S  3.9Å   jac=48%  recall=70%    3.4s    Glucokinase (allosteric activator site)
+    ✅ 1P38  8.2Å   jac=35%  recall=76%    2.7s    p38α MAPK DFG-out pocket (BIRB 796)
+    ❌ 1HMV  14.4Å  jac=4%   recall=6%     6.7s    HIV-1 RT NNRTI binding pocket (nevirapine)
+    ✅ 2SRC  5.8Å   jac=38%  recall=72%    3.6s    Src kinase myristate/SH2-linker pocket
+    ✅ 1Z1M  6.4Å   jac=31%  recall=47%    1.5s    MDM2 p53-binding cleft (cryptic Trp/Leu pocket)
+    ✅ 2SHP  4.2Å   jac=61%  recall=100%   4.4s    SHP-2 allosteric tunnel (SHP836/SHP099 site)
+    ❌ 3CS9  17.9Å  jac=4%   recall=12%    1.7s    c-ABL myristate/allosteric pocket (asciminib target)
+    ✅ 1A5Y  3.5Å   jac=56%  recall=76%    1.6s    PTP1B allosteric site (C-terminal helix pocket)
+    ❌ 1NB4  27.3Å  jac=0%   recall=0%     4.5s    HCV NS5B thumb-site I allosteric pocket
+    ❌ 1LXL  13.9Å  jac=15%  recall=23%    2.4s    BCL-XL BH3-binding groove (navitoclax/ABT-737)
+    ❌ 2HBQ  9.1Å   jac=4%   recall=8%     1.5s    Caspase-1 allosteric dimer-interface pocket
+    ❌ 2ERK  4.6Å   jac=22%  recall=35%    2.5s    ERK2 allosteric binding site
+    ❌ 1G5M  13.8Å  jac=3%   recall=4%     1.2s    BCL-2 BH3-binding groove (venetoclax/ABT-199)
+    ✅ 3MAP  3.6Å   jac=42%  recall=57%    3.1s    IDH1 R132H allosteric dimer-interface (ivosidenib target)
+    ❌ 1ZJH  19.1Å  jac=1%   recall=8%     4.3s    PKM2 allosteric activator pocket (TEPP-46 / subunit interface)
+    ✅ 2PRG  2.8Å   jac=24%  recall=100%   1.7s    PPARγ LBD allosteric helix-12 site (metaglidasen/MBX-102)
+    ❌ 2OZR  7.1Å   jac=11%  recall=31%    1.1s    MMP-13 non-zinc allosteric S1′ tunnel
+    ❌ 1JWP  9.2Å   jac=20%  recall=42%    1.3s    TEM-1 β-lactamase cryptic allosteric site (CBT)
+    ❌ 1RTC  9.1Å   jac=23%  recall=43%    1.7s    Ricin A-chain cryptic specificity pocket (pteroic acid)
+
+──────────────────────────────────────────────────────────────────────
+  CRYPTIC ONLY - size-robust headline: 10/22   (legacy recall-based: 15/22)
+  TOTAL (all categories, size-robust): 10/22
+  Size-robust criterion (top-5, OR): centroid ≤ 4.0 Å OR Jaccard ≥ 25%
+  Legacy criterion (size-gameable): centroid ≤ 4.0 Å OR recall ≥ 30%
+
+  Per-metric breakdown (transparency):
+    category          cen≤4Å  jac≥.20  jac≥.25  jac≥.30  core≥50%  recall≥30%  ROBUST  legacy
+    cryptic               5      14       8       8        3        15     10     15   (n=22)
+    ALL                   5      14       8       8        3        15     10     15   (n=22)
+
+  Cryptic by opening mechanism (size-robust ROBUST / n):
+    sidechain   2/4  misses: 1M47, 1HMV
+    loop        2/6  misses: 1NB4, 2ERK, 2OZR, 1RTC
+    helix       3/7  misses: 3CS9, 1LXL, 1G5M, 1JWP
+    hinge       2/2
+    interface   1/3  misses: 2HBQ, 1ZJH
+
+  Size-robust top-k detection curve (all 22 run):
+    top-1 :  3/22 (14%)   95% CI [0%, 32%]
+    top-3 :  7/22 (32%)   95% CI [14%, 55%]
+    top-5 : 10/22 (45%)   95% CI [23%, 68%]
+    top-10: 13/22 (59%)   95% CI [36%, 82%]
+    top-20: 15/22 (68%)   95% CI [45%, 86%]
+
+  Full results → C:\Users\clayt\Documents\GitHub\lacuna\benchmarks\cryptic_benchmark_results.json
+
+  Tool citation: Moore 2026 Lacuna (github.com/mooreneural/lacuna)

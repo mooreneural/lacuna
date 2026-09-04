@@ -1,0 +1,82 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+======================================================================
+  POCKETMINER BENCHMARK  (60 apo structures, NMA + learned-fused)
+======================================================================
+Loading weights:   0%|          | 0/534 [00:00<?, ?it/s]Loading weights: 100%|##########| 534/534 [00:00<00:00, 13046.58it/s]
+[transformers] [1mEsmModel LOAD REPORT[0m from: facebook/esm2_t33_650M_UR50D
+Key                       | Status     | 
+--------------------------+------------+-
+lm_head.layer_norm.weight | UNEXPECTED | 
+lm_head.bias              | UNEXPECTED | 
+lm_head.dense.weight      | UNEXPECTED | 
+lm_head.layer_norm.bias   | UNEXPECTED | 
+lm_head.dense.bias        | UNEXPECTED | 
+pooler.dense.bias         | MISSING    | 
+pooler.dense.weight       | MISSING    | 
+
+Notes:
+- UNEXPECTED:	can be ignored when loading from different task/architecture; not ok if you expect identical arch.
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+  miss 6hb0A  jac=14%  recall=20%  dist=6.1A  (15 cryptic res, 18.2s)  [!] res/label len 302/292
+  PASS 2laoA  jac=38%  recall=53%  dist=1.7A  (15 cryptic res, 12.8s)
+  PASS 1urpA  jac=57%  recall=62%  dist=3.1A  (13 cryptic res, 12.2s)
+  miss 6ypkA  jac=19%  recall=38%  dist=11.0A  (24 cryptic res, 14.1s)
+  PASS 3ugkA  jac=33%  recall=33%  dist=0.7A  (42 cryptic res, 15.4s)
+  PASS 5g1mA  jac=48%  recall=58%  dist=3.6A  (19 cryptic res, 13.0s)
+  PASS 5nzmA  jac=43%  recall=44%  dist=5.3A  (27 cryptic res, 18.9s)
+  PASS 4v38A  jac=56%  recall=61%  dist=2.6A  (23 cryptic res, 16.2s)
+  PASS 2w9tA  jac=43%  recall=45%  dist=4.9A  (40 cryptic res, 9.9s)
+  PASS 2hq8B  jac=33%  recall=68%  dist=5.1A  (25 cryptic res, 10.1s)
+  PASS 4r72A  jac=39%  recall=46%  dist=3.3A  (24 cryptic res, 14.5s)
+  PASS 5za4A  jac=38%  recall=38%  dist=2.9A  (24 cryptic res, 17.9s)
+  PASS 2ceyA  jac=45%  recall=50%  dist=3.0A  (18 cryptic res, 14.8s)
+  PASS 1kmoA  jac=58%  recall=64%  dist=1.8A  (22 cryptic res, 19.0s)
+  PASS 5niaA  jac=45%  recall=48%  dist=3.8A  (27 cryptic res, 21.2s)
+  PASS 2fjyA  jac=29%  recall=42%  dist=3.7A  (19 cryptic res, 8.4s)
+  miss 3p53A  jac=0%  recall=0%  dist=17.9A  (16 cryptic res, 19.0s)
+  PASS 1kx9B  jac=40%  recall=56%  dist=3.3A  (32 cryptic res, 11.1s)
+  PASS 1tvqA  jac=46%  recall=51%  dist=2.1A  (35 cryptic res, 8.0s)
+  miss 2zkuB  jac=21%  recall=23%  dist=9.0A  (31 cryptic res, 18.2s)
+  PASS 3nx1A  jac=29%  recall=64%  dist=5.8A  (11 cryptic res, 9.2s)
+  PASS 4i92A  jac=52%  recall=84%  dist=2.5A  (19 cryptic res, 15.0s)
+  PASS 3qxwB  jac=63%  recall=85%  dist=1.2A  (20 cryptic res, 11.7s)
+  PASS 5h9aA  jac=68%  recall=86%  dist=2.4A  (22 cryptic res, 8.3s)
+  [skip] 2fd7A: no cryptic-labelled residues
+  [skip] 4tqlA: no cryptic-labelled residues
+  [skip] 2alpA: no cryptic-labelled residues
+  [skip] 1ammA: no cryptic-labelled residues
+  [skip] 4ape: parse failed (chain selector '' names no chain)
+  [skip] 5uoj: parse failed (chain selector '' names no chain)
+  [skip] 3gz0: parse failed (chain selector '' names no chain)
+  [skip] 1btp: parse failed (chain selector '' names no chain)
+  [skip] 2oss: parse failed (chain selector '' names no chain)
+  [skip] 5zn5: parse failed (chain selector '' names no chain)
+  PASS 1s2oA  jac=47%  recall=64%  dist=3.6A  (14 cryptic res, 12.5s)
+  PASS 3ppnA  jac=75%  recall=100%  dist=3.0A  (12 cryptic res, 15.8s)
+  PASS 1ezmA  jac=57%  recall=57%  dist=3.2A  (21 cryptic res, 15.1s)
+  PASS 1j8fC  jac=35%  recall=38%  dist=3.7A  (26 cryptic res, 15.7s)
+  PASS 3kjeA  jac=41%  recall=43%  dist=3.2A  (21 cryptic res, 15.4s)
+  miss 1y1aA  jac=0%  recall=0%  dist=15.8A  (7 cryptic res, 17.2s)
+  PASS 4p0iB  jac=43%  recall=52%  dist=2.8A  (21 cryptic res, 14.0s)
+  PASS 5uxaA  jac=31%  recall=37%  dist=5.3A  (43 cryptic res, 14.5s)
+  miss 6rvmC  jac=11%  recall=15%  dist=15.3A  (26 cryptic res, 16.6s)
+  PASS 3fvjA  jac=34%  recall=52%  dist=4.7A  (21 cryptic res, 8.1s)
+  PASS 2oy4A  jac=64%  recall=81%  dist=3.1A  (26 cryptic res, 8.6s)
+  PASS 3rwvA  jac=28%  recall=32%  dist=4.9A  (34 cryptic res, 12.0s)
+  miss 6e5dA  jac=6%  recall=9%  dist=10.8A  (23 cryptic res, 9.8s)
+  PASS 4ic4A  jac=36%  recall=43%  dist=3.5A  (30 cryptic res, 15.1s)
+  miss 4w51A  jac=21%  recall=29%  dist=11.5A  (17 cryptic res, 9.4s)
+  miss 1rrgA  jac=15%  recall=30%  dist=10.1A  (10 cryptic res, 9.9s)
+  miss 2bu8A  jac=10%  recall=19%  dist=15.2A  (16 cryptic res, 15.4s)  [!] res/label len 360/370
+  PASS 2ohgA  jac=41%  recall=52%  dist=5.0A  (23 cryptic res, 13.2s)
+  PASS 2wgbA  jac=40%  recall=50%  dist=2.6A  (12 cryptic res, 11.0s)
+  miss 1ok8A  jac=13%  recall=24%  dist=4.9A  (17 cryptic res, 18.1s)  [!] res/label len 380/394
+  PASS 1k3fB  jac=33%  recall=44%  dist=2.1A  (16 cryptic res, 13.8s)
+  [skip] 4hjkA: no cryptic-labelled residues
+  [skip] 1igdA: no cryptic-labelled residues
+  [skip] 2zhv: parse failed (chain selector '' names no chain)
+  [skip] 5e4p: parse failed (chain selector '' names no chain)
+  [skip] 1hcl: parse failed (chain selector '' names no chain)
+----------------------------------------------------------------------
+  POCKETMINER (size-robust, cen≤4Å OR jac≥25%): 34/45 (76%)
+  POCKETMINER (legacy recall-based): 36/45 (80%)

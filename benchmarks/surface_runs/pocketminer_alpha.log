@@ -1,0 +1,66 @@
+======================================================================
+  POCKETMINER BENCHMARK  (60 apo structures, NMA + learned)
+======================================================================
+  miss 6hb0A  jac=15%  recall=27%  dist=4.6A  (15 cryptic res, 1.7s)  [!] res/label len 302/292
+  PASS 2laoA  jac=58%  recall=73%  dist=3.5A  (15 cryptic res, 1.4s)
+  PASS 1urpA  jac=65%  recall=85%  dist=3.9A  (13 cryptic res, 1.3s)
+  miss 6ypkA  jac=19%  recall=42%  dist=10.8A  (24 cryptic res, 2.3s)
+  PASS 3ugkA  jac=35%  recall=36%  dist=7.1A  (42 cryptic res, 2.5s)
+  PASS 5g1mA  jac=41%  recall=58%  dist=6.2A  (19 cryptic res, 2.1s)
+  miss 5nzmA  jac=22%  recall=30%  dist=6.5A  (27 cryptic res, 4.2s)
+  PASS 4v38A  jac=63%  recall=74%  dist=3.0A  (23 cryptic res, 2.8s)
+  PASS 2w9tA  jac=40%  recall=52%  dist=7.2A  (40 cryptic res, 0.9s)
+  PASS 2hq8B  jac=33%  recall=68%  dist=5.6A  (25 cryptic res, 1.0s)
+  PASS 4r72A  jac=60%  recall=75%  dist=3.7A  (24 cryptic res, 1.8s)
+  PASS 5za4A  jac=28%  recall=42%  dist=6.3A  (24 cryptic res, 3.4s)
+  PASS 2ceyA  jac=27%  recall=83%  dist=6.6A  (18 cryptic res, 1.7s)
+  miss 1kmoA  jac=8%  recall=45%  dist=14.4A  (22 cryptic res, 4.7s)
+  PASS 5niaA  jac=47%  recall=63%  dist=6.0A  (27 cryptic res, 5.8s)
+  PASS 2fjyA  jac=29%  recall=53%  dist=7.8A  (19 cryptic res, 0.7s)
+  miss 3p53A  jac=10%  recall=19%  dist=11.8A  (16 cryptic res, 3.7s)
+  PASS 1kx9B  jac=38%  recall=56%  dist=5.0A  (32 cryptic res, 0.5s)
+  PASS 1tvqA  jac=50%  recall=66%  dist=2.9A  (35 cryptic res, 0.7s)
+  PASS 2zkuB  jac=33%  recall=48%  dist=8.4A  (31 cryptic res, 4.3s)
+  miss 3nx1A  jac=18%  recall=64%  dist=6.7A  (11 cryptic res, 0.9s)
+  PASS 4i92A  jac=50%  recall=100%  dist=2.8A  (19 cryptic res, 1.8s)
+  PASS 3qxwB  jac=64%  recall=90%  dist=1.5A  (20 cryptic res, 0.6s)
+  PASS 5h9aA  jac=51%  recall=86%  dist=2.6A  (22 cryptic res, 0.7s)
+  [skip] 2fd7A: no cryptic-labelled residues
+  [skip] 4tqlA: no cryptic-labelled residues
+  [skip] 2alpA: no cryptic-labelled residues
+  [skip] 1ammA: no cryptic-labelled residues
+  [skip] 4ape: parse failed (chain selector '' names no chain)
+  [skip] 5uoj: parse failed (chain selector '' names no chain)
+  [skip] 3gz0: parse failed (chain selector '' names no chain)
+  [skip] 1btp: parse failed (chain selector '' names no chain)
+  [skip] 2oss: parse failed (chain selector '' names no chain)
+  [skip] 5zn5: parse failed (chain selector '' names no chain)
+  PASS 1s2oA  jac=39%  recall=50%  dist=4.7A  (14 cryptic res, 1.3s)
+  PASS 3ppnA  jac=62%  recall=83%  dist=4.2A  (12 cryptic res, 2.0s)
+  PASS 1ezmA  jac=45%  recall=62%  dist=2.7A  (21 cryptic res, 1.6s)
+  PASS 1j8fC  jac=47%  recall=73%  dist=4.6A  (26 cryptic res, 2.0s)
+  PASS 3kjeA  jac=42%  recall=62%  dist=3.8A  (21 cryptic res, 1.5s)
+  miss 1y1aA  jac=22%  recall=57%  dist=6.3A  (7 cryptic res, 1.2s)
+  PASS 4p0iB  jac=55%  recall=57%  dist=3.3A  (21 cryptic res, 1.5s)
+  PASS 5uxaA  jac=41%  recall=47%  dist=6.9A  (43 cryptic res, 2.2s)
+  miss 6rvmC  jac=11%  recall=15%  dist=12.2A  (26 cryptic res, 2.3s)
+  PASS 3fvjA  jac=34%  recall=52%  dist=6.5A  (21 cryptic res, 0.7s)
+  PASS 2oy4A  jac=64%  recall=81%  dist=2.7A  (26 cryptic res, 0.8s)
+  PASS 3rwvA  jac=32%  recall=38%  dist=5.6A  (34 cryptic res, 1.4s)
+  miss 6e5dA  jac=0%  recall=0%  dist=13.8A  (23 cryptic res, 1.0s)
+  PASS 4ic4A  jac=42%  recall=67%  dist=6.0A  (30 cryptic res, 2.5s)
+  PASS 4w51A  jac=48%  recall=76%  dist=2.6A  (17 cryptic res, 0.9s)
+  miss 1rrgA  jac=21%  recall=40%  dist=10.3A  (10 cryptic res, 0.9s)
+  miss 2bu8A  jac=10%  recall=19%  dist=12.0A  (16 cryptic res, 2.5s)  [!] res/label len 360/370
+  PASS 2ohgA  jac=45%  recall=61%  dist=4.5A  (23 cryptic res, 1.5s)
+  PASS 2wgbA  jac=22%  recall=50%  dist=2.8A  (12 cryptic res, 0.9s)
+  miss 1ok8A  jac=13%  recall=24%  dist=5.2A  (17 cryptic res, 3.1s)  [!] res/label len 380/394
+  PASS 1k3fB  jac=35%  recall=50%  dist=1.5A  (16 cryptic res, 1.5s)
+  [skip] 4hjkA: no cryptic-labelled residues
+  [skip] 1igdA: no cryptic-labelled residues
+  [skip] 2zhv: parse failed (chain selector '' names no chain)
+  [skip] 5e4p: parse failed (chain selector '' names no chain)
+  [skip] 1hcl: parse failed (chain selector '' names no chain)
+----------------------------------------------------------------------
+  POCKETMINER (size-robust, cen≤4Å OR jac≥25%): 33/45 (73%)
+  POCKETMINER (legacy recall-based): 38/45 (84%)
