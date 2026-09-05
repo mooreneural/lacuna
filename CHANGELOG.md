@@ -5,6 +5,47 @@ All notable changes to Lacuna are documented here. The project follows
 governs its benchmarks: reported numbers are the ones we can defend on held-out
 data, never the most flattering ones available.
 
+## [1.0.3] - 2026-09-04
+
+### Fixed
+- **Interface sites could not be read at all.** A site spanning two chains names
+  them as a hyphenated pair, which is how CryptoBench writes them: `G-H`.
+  `load_structure` compared that string to a chain id, matched nothing, and
+  returned an empty `Structure`. The failure then surfaced wherever an empty
+  coordinate array first reached a reduction, with an error naming neither the
+  chain nor the file. Because nothing reported these as errors they were simply
+  absent: 123 of 885 CryptoBench training entries and 38 of 222 test entries,
+  13.9% and 17.1%. Every benchmark figure published for Lacuna is therefore
+  single-chain by construction, which is also why the reported test cohort is
+  179 rather than 222. `chain=` now accepts `"A"`, `"G-H"` and `"A,B"`.
+
+### Changed
+- A `chain=` selector that matches nothing raises `ValueError` and names the
+  chains the file does contain, rather than returning an empty structure.
+  Silence is what let the bug above go unnoticed.
+
+## [1.0.2] - 2026-09-02
+
+### Fixed
+- **`--backend auto` always chose Boltz, so a base install could not run.** The
+  selector walked boltz, openmm, nma, random and caught `ImportError` to skip
+  what was not installed. It never fired. Each backend module imports cleanly
+  without its heavy dependency, because `import boltz` happens inside
+  `generate()` rather than at module scope, so the first candidate always
+  resolved and the rest of the chain was unreachable. After `pip install
+  lacuna-pockets`, a plain `lacuna discover protein.pdb` therefore spent thirty
+  seconds preparing the structure and then failed with "No module named
+  'boltz'", despite the nma backend being available and requiring nothing
+  beyond numpy and scipy. In a clean virtualenv the same command now finishes
+  in under six seconds. Selection probes the dependency rather than the backend
+  module; an environment that already has Boltz installed is unaffected.
+- The Boltz backend's install hint named the package `lacuna`, not
+  `lacuna-pockets`. Following it installed an unrelated project, or nothing.
+
+### Added
+- Links to the hosted webservers on Tamarind Bio and Neurosnap, for running
+  Lacuna without installing anything.
+
 ## [1.0.0] - 2026-08-07
 
 Relicensed to MIT, and the first release whose headline numbers come from a
