@@ -160,6 +160,16 @@ def main():
     ),
 )
 @click.option(
+    "--no-sequence",
+    is_flag=True, default=False,
+    help=(
+        "Run the surface detector on geometry alone, skipping the ESM-2 pass. "
+        "Sequence roughly doubles the surface detector's gain, so this trades "
+        "accuracy for speed and for not needing the 'plm' extra at all. It is "
+        "what an installation without torch does anyway."
+    ),
+)
+@click.option(
     "--seed-from-sequence",
     is_flag=True, default=False,
     help=(
@@ -188,6 +198,7 @@ def discover(
     quiet: bool,
     homodimer: bool,
     detector: str,
+    no_sequence: bool,
     seed_from_sequence: bool,
 ):
     """Discover cryptic binding pockets in a protein structure.
@@ -307,7 +318,9 @@ def discover(
     # below. The embedding is per structure, not per conformer: the sequence does
     # not move.
     plm_probs = None
-    if seed_from_sequence or rank_by == "learned-plm" or use_surface:
+    want_plm = seed_from_sequence or rank_by == "learned-plm" or (
+        use_surface and not no_sequence)
+    if want_plm:
         from lacuna.pockets import plm as _plm
 
         if not _plm.available():

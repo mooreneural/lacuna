@@ -37,6 +37,7 @@ Protocol: train folds only. The designated test fold is never read here.
 from __future__ import annotations
 
 import json
+import pathlib
 import sys
 from pathlib import Path
 
@@ -49,6 +50,8 @@ import dataio
 from dataio import JACCARD_THRESHOLD as T
 
 SRC = HERE / "end_to_end_fusion.jsonl"
+#: The geometry-only run writes its own file; refitting on one and
+#: reporting against the other would compare two different pools.
 
 #: end_to_end_fusion ranked with rank_by="learned", which is the 23-feature
 #: geometry ranker plus an intercept, NOT the 27-feature PLM ranker. Scoring the
@@ -153,6 +156,15 @@ def ci(d, seed=0):
 
 
 def main() -> None:
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--src', default=None,
+                    help='pipeline JSONL to refit on (default: the PLM run)')
+    a = ap.parse_args()
+    global SRC
+    if a.src:
+        SRC = pathlib.Path(a.src)
+    print("source: %s" % SRC.name)
     rows = load()
     if len(rows) < 100:
         raise SystemExit("only %d targets loaded from %s" % (len(rows), SRC))
