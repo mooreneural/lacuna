@@ -61,6 +61,7 @@ DATASET = REPO / "benchmarks" / "cb_data" / "dataset.json"
 EMB = HERE / "data" / "plm_emb"
 FOLD_HEADS = HERE / "data" / "surface_fold_heads"
 CACHE = HERE / "end_to_end_fusion.jsonl"
+CACHE_NOPLM = HERE / "end_to_end_fusion_noplm.jsonl"
 
 ARMS = ("alpha", "surface", "fused")
 KS = (1, 5, 10)
@@ -107,6 +108,8 @@ def fold_residue_heads(targets, folds) -> dict:
 
 
 def residue_probs(pdb, entry, head) -> dict | None:
+    if head is None:
+        return None
     p = EMB / ("%s%s.npz" % (pdb.lower(), entry["apo_chain"]))
     if not p.exists():
         return None
@@ -126,7 +129,11 @@ def fold_surface_heads(targets, res_heads) -> dict:
     for i, (pdb, e, f) in enumerate(targets, 1):
         try:
             probs = residue_probs(pdb, e, res_heads[f])
-            if probs is None:
+            # A missing embedding is a reason to skip only when the run is
+            # supposed to have one. In geometry-only mode every structure has
+            # probs None by design, and skipping them all leaves no data and a
+            # KeyError four steps later.
+            if probs is None and res_heads[f] is not None:
                 continue
             d = _build_with_probs(pdb, e, rng, probs)
             if d is not None:
@@ -241,6 +248,11 @@ def main() -> None:
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--conformers", type=int, default=10)
     ap.add_argument("--refresh", action="store_true")
+    ap.add_argument("--no-plm", action="store_true",
+                    help="Train and run the surface head on geometry alone. "
+                         "The measured gain used ESM-2, which needs the plm "
+                         "extra and a GPU to be quick; this says what is left "
+                         "without either.")
     a = ap.parse_args()
 
     folds = dataio.fold_map()
@@ -264,12 +276,19 @@ def main() -> None:
     print("targets: %d   conformers: %d\n" % (len(targets), a.conformers))
 
     print("fitting per-fold heads (nothing scores a structure it trained on)")
-    r_heads = fold_residue_heads(targets, folds)
+    if a.no_plm:
+        # None everywhere: surface_point_features omits the plm_* columns,
+        # and the per-fold heads are fitted on the same eleven features they
+        # will be scored with. Mixing those would be train/serve skew.
+        r_heads = {f: None for f in {t[2] for t in targets}}
+    else:
+        r_heads = fold_residue_heads(targets, folds)
     s_heads = fold_surface_heads(targets, r_heads)
 
+    cache = CACHE_NOPLM if a.no_plm else CACHE
     done = {}
-    if CACHE.exists() and not a.refresh:
-        for line in CACHE.read_text(encoding="utf-8").splitlines():
+    if cache.exists() and not a.refresh:
+        for line in cache.read_text(encoding="utf-8").splitlines():
             if line.strip():
                 r = json.loads(line)
                 done[r["pdb"]] = r
@@ -277,7 +296,7 @@ def main() -> None:
     print("\ncached: %d   to run: %d" % (len(targets) - len(todo), len(todo)))
 
     fail, t0 = 0, time.time()
-    with CACHE.open("a", encoding="utf-8") as fh:
+    with cache.open("a", encoding="utf-8") as fh:
         for i, (pdb, e, f) in enumerate(todo, 1):
             try:
                 r = run_target(pdb, e, f, a.conformers, s_heads[f], r_heads[f])
@@ -351,14 +370,14 @@ def main() -> None:
         print("so on the zero-coverage subset. Worth checking whether the "
               "clusterer is merging surface proposals into alpha ones.")
 
-    (HERE / "end_to_end_fusion.json").write_text(json.dumps(
+    (HERE / ("end_to_end_fusion_noplm.json" if a.no_plm else "end_to_end_fusion.json")).write_text(json.dumps(
         {"n": n, "conformers": a.conformers,
          "arms": {arm: {"coverage": float(np.mean(per[arm]["cov"])),
                         **{"hit_%d" % k: float(np.mean(per[arm][k])) for k in KS}}
                   for arm in ARMS},
          "deltas": {k: {"mean": v[0], "lo": v[1], "hi": v[2]}
                     for k, v in res.items()}}, indent=1))
-    print("\nwrote %s" % (HERE / "end_to_end_fusion.json"))
+    print("\nwrote %s" % (HERE / ("end_to_end_fusion_noplm.json" if a.no_plm else "end_to_end_fusion.json")))
 
 
 if __name__ == "__main__":
