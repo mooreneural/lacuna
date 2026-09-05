@@ -20,6 +20,7 @@ the label length (a sign the order mapping is unreliable for that entry).
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -83,6 +84,8 @@ def main():
     import argparse
     from lacuna.pockets.clusterer import RANK_STRATEGIES
     ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--out", default=None,
+                    help="Where to write per-target results")
     ap.add_argument("--detector", default="alpha",
                 choices=["alpha", "surface", "surface-fusion"],
                 help="alpha is the shipped geometric detector; surface scores "
@@ -143,7 +146,10 @@ def main():
         n_run += 1
         n_pass += int(found)
         n_pass_legacy += int(found_legacy)
-        rows.append((tag, found, best_ov, best_jac, best_dist, len(cryptic)))
+        rows.append({"id": tag, "robust": bool(found), "legacy": bool(found_legacy),
+                     "recall": float(best_ov), "jaccard": float(best_jac),
+                     "centroid_A": None if best_dist == float("inf") else float(best_dist),
+                     "n_cryptic": len(cryptic), "elapsed_s": float(elapsed)})
         mark = "PASS" if found else "miss"
         dist_s = f"{best_dist:.1f}A" if best_dist < float("inf") else "n/a"
         print(f"  {mark} {tag}  jac={best_jac:.0%}  recall={best_ov:.0%}  dist={dist_s}  "
@@ -154,6 +160,15 @@ def main():
           f"{n_pass}/{n_run} ({n_pass / max(n_run, 1):.0%})")
     print(f"  POCKETMINER (legacy recall-based): "
           f"{n_pass_legacy}/{n_run} ({n_pass_legacy / max(n_run, 1):.0%})")
+
+    # Per-target verdicts, without which two runs cannot be paired. A summary
+    # alone cannot say whether a two-target difference is the same two targets
+    # moving or four moving in opposite directions, and on 45 structures that is
+    # the difference between a signal and noise.
+    out = Path(args.out) if args.out else (
+        Path(__file__).parent / ("pocketminer_%s_%s.json" % (args.rank_by, args.detector)))
+    out.write_text(json.dumps(rows, indent=1), encoding="utf-8")
+    print("  per-target results -> %s" % out)
 
 
 if __name__ == "__main__":
