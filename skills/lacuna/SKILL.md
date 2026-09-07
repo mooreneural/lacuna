@@ -11,8 +11,9 @@ is sites a single static structure does not show: a cryptic pocket is closed or
 shallow in the apo form and opens on binding, so a detector looking at one
 snapshot finds nothing there.
 
-This skill describes **v1.0.3**, the current release on PyPI. Check
-`lacuna --version` if behaviour differs from what is written here.
+This skill describes **v1.1.0**. If `lacuna --version` reports something older,
+`--detector surface-fusion` and `--no-sequence` will not exist; upgrade with
+`pip install -U lacuna-pockets`, or fall back to the defaults and say so.
 
 ## Install
 
@@ -23,14 +24,25 @@ pip install "lacuna-pockets[plm]"   # adds the sequence-aware ranker (torch)
 
 Core dependencies are numpy, scipy, biopython, click, rich. MIT licensed.
 
-## The basic command
+## The command to reach for
 
 ```bash
-lacuna discover protein.pdb
+lacuna discover protein.pdb --detector surface-fusion
 ```
 
 Writes `pocket_report.json` into `<input_stem>_lacuna/`, ranked best first.
-Roughly 2 seconds per structure on CPU at the default 20 conformers.
+
+**Prefer `--detector surface-fusion` when recall matters.** The default is
+`alpha`, the geometric detector, which only proposes candidates where there is a
+concavity, and a cryptic site in its apo form frequently has none. Pooling both
+detectors, held out on CryptoBench, takes coverage from 68.5% to 86.4% and
+top-five recovery from 57.1% to 73.9%. It picks the matching ranker
+automatically. The default stays `alpha` for backwards compatibility, not because
+it is the better choice.
+
+It costs time: on 1AKE at ten conformers, 2.4 s for alpha against 20.7 s for
+surface-fusion, of which about half is the sequence pass. Use plain
+`lacuna discover protein.pdb` when screening many structures and speed dominates.
 
 ## Choosing options
 
@@ -61,9 +73,21 @@ specific reason.
 
 **Detector** (`--detector`, default `alpha`)
 
-`alpha` is the built-in geometric detector. `p2rank` and `fusion` use P2Rank
-instead and require it installed separately (Java 11+, `prank` on PATH or
-`LACUNA_P2RANK` set). Without P2Rank, leave this alone.
+| value | when |
+|---|---|
+| `surface-fusion` | when recall matters; best coverage and recovery |
+| `alpha` | speed, or reproducing older results |
+| `surface` | the learned surface model alone, without geometric candidates |
+| `p2rank` / `fusion` | only with P2Rank installed (Java 11+, `prank` on PATH or `LACUNA_P2RANK` set) |
+
+**Sequence signal** (`--no-sequence`)
+
+The surface detector uses ESM-2 by default. Passing `--no-sequence` runs it on
+geometry alone: faster, and no need for the `plm` extra. The cost is measured, not
+guessed. Against the alpha baseline on 746 training targets, the fused pool gains
++5.5 points [+2.4, +8.6] on geometry alone against +12.6 [+9.3, +16.0] with
+sequence, so geometry keeps a little under half the gain and still resolves clear
+of zero. An install without torch does this anyway.
 
 **Other flags worth knowing**
 
@@ -96,7 +120,7 @@ persistence (fraction of conformers it appears in), and centroid.
 
 **Report a ranked shortlist, not a single answer.** Lacuna's own benchmarking is
 the reason: on CryptoBench the site is usually proposed somewhere and then
-out-ranked. Top-five recovery is 66.3% with `learned-plm`, so the top hit alone is
+out-ranked. Top-five recovery is 73.9% with `surface-fusion`, so the top hit alone is
 frequently not the answer even when the answer is in the list. Show the top three
 to five with their scores.
 

@@ -5,6 +5,54 @@ All notable changes to Lacuna are documented here. The project follows
 governs its benchmarks: reported numbers are the ones we can defend on held-out
 data, never the most flattering ones available.
 
+## [1.1.0] - 2026-09-07
+
+### Added
+- **A learned surface detector, and `--detector surface-fusion` to pool it with
+  the geometric one.** The alpha detector only proposes candidates where there is
+  a concavity, and a cryptic site in its apo form frequently has none: that is the
+  definition of the problem rather than a fault in the detector. The surface
+  detector scores the probe-accessible surface with a learned model and has no
+  such filter. Pooling both, held out on CryptoBench, takes coverage from 68.5% to
+  86.4% and top-five recovery from 57.1% to 73.9%. It selects the matching ranker
+  automatically.
+
+  The default stays `alpha`. Changing it would alter every existing user's results
+  silently, and the fused pool is slower. Pass `--detector surface-fusion`
+  deliberately.
+
+- **`--no-sequence`**, which runs the surface detector on geometry alone and skips
+  the ESM-2 pass. The cost is measured rather than assumed. Refitting on a
+  geometry-only fused pool over 746 training targets:
+
+  | pool and ranker | recovery | vs alpha |
+  |---|---|---|
+  | alpha pool, shipped ranker | 55.0% | reference |
+  | fused pool, refit on geometry only | 60.2% | +5.23 [+2.14, +8.31] |
+  | fused pool, shipped `fused_ranker.npz` | 60.5% | +5.50 [+2.41, +8.58] |
+
+  Against +12.6 [+9.3, +16.0] with sequence on the same folds, so geometry alone
+  holds a little under half the gain and still resolves clear of zero. On 1AKE at
+  ten conformers the sequence pass is half the wall clock: 10.4 s without, 20.7 s
+  with, against 2.4 s for alpha.
+
+  Notably, `fused_ranker.npz` was fitted on a pool built *with* sequence features
+  and an installation without torch feeds it a pool built without them. That
+  mismatch costs nothing measurable, +5.50 against +5.23 for a ranker fitted on
+  the right pool, so a second ranker would have been complexity for no gain.
+
+- **A local stdio MCP server** exposing pocket discovery to Claude, and
+  `skills/lacuna/SKILL.md` so the repository can be imported as a Claude skill.
+
+### Fixed
+- **`--backend auto` always chose boltz, so a base install could not run.** Every
+  backend module imports cleanly whether or not its heavy dependency is present,
+  because `import boltz` happens inside `generate()` rather than at module scope.
+  The `except ImportError` around `_resolve_backend` therefore never fired and the
+  rest of the chain was dead code. A plain `pip install lacuna-pockets` followed by
+  `lacuna discover protein.pdb` failed at generation time despite nma being
+  available. Auto now probes the dependency rather than the module.
+
 ## [1.0.3] - 2026-09-04
 
 ### Fixed
