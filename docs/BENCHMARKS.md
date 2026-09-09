@@ -19,7 +19,22 @@ column.
 | CryptoBench (designated test fold) | 180 | **55.6%** | 77% | **66.1%** | largest and most diverse; the headline |
 | PocketMiner | 45 | **73%** (33/45) | 84% | **80%** (36/45) | per-residue cryptic labels |
 | Curated apo/holo set (this repo) | 22 | **45%** (10/22) | 68% | 41% (9/22) | hand-picked literature cryptic pairs |
-| COACH420 | 144 | **87%** (125/144) | 93% | not measured | *general* holo sites, not cryptic |
+| COACH420 | 286 | **87%** (248/286) | 93% | not measured | *general* holo sites, not cryptic |
+
+COACH420 appears twice in this document with two different denominators, and
+both are correct. This table reports Lacuna standing alone, so it uses every
+structure Lacuna scored: 248/286. The head-to-head against P2Rank below, under
+"COACH420: general binding sites, and where Lacuna's specialisation shows",
+pairs the two tools on the 144 structures *both* of them scored, because an
+unpaired comparison would let a difference in which structures each tool
+happened to handle masquerade as a difference in the tools. The rate is the same
+either way (86.8% paired, 86.7% standalone); the larger denominator only narrows
+the interval, from 95% CI [80.2, 91.9] to [82.2, 90.4].
+
+With `--detector surface-fusion` the same 287-structure COACH420 run reaches
+**96.5%** (277/287, 95% CI [93.7, 98.3]), against 86.7% for the default `alpha`
+detector. That detector is not the default and is not folded into the table
+above, which reports the zero-dependency default throughout.
 
 On the curated 22 the default edges out the PLM-assisted ranker, 10/22 against
 9/22. At that sample size the difference is one structure and means nothing on
