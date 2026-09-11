@@ -7,7 +7,8 @@ import pytest
 from lacuna.models import Atom, Residue, Structure, Pocket
 from lacuna.pockets.clusterer import (
     cluster_pockets, compute_crypticity, learned_score, ranker_features,
-    RANK_STRATEGIES, _RANKER_FEATURES, _RANKER_WEIGHTS, _RANKER_INTERCEPT,
+    CRYPTICITY_THRESHOLD, RANK_STRATEGIES, _RANKER_FEATURES, _RANKER_WEIGHTS,
+    _RANKER_INTERCEPT,
 )
 
 
@@ -51,18 +52,35 @@ class TestClusterPockets:
         assert len(clusters) >= 1
         assert clusters[0].persistence == pytest.approx(0.5)
 
-    def test_cryptic_flag_below_threshold(self):
-        """Pocket in <90% of conformers should be flagged cryptic."""
-        pockets = [[_make_pocket((0.0, 0.0, 0.0), conformer_idx=i)] for i in range(8)]
-        pockets += [[], []]
-        clusters = cluster_pockets(pockets, n_conformers=10)
-        assert clusters[0].cryptic is True
+    def test_cryptic_flag_tracks_crypticity(self):
+        """The cryptic flag is exactly crypticity >= threshold, not a persistence
+        rule. A pocket absent from the apo conformer opens (apo_volume 0), so a
+        reliably reopened site is still cryptic even at high persistence, which is
+        the behaviour the old persistence rule got wrong on real targets."""
+        pockets = [[_make_pocket((0.0, 0.0, 0.0), conformer_idx=i)] for i in range(1, 9)]
+        pockets = [[]] + pockets  # absent in conformer 0
+        clusters = cluster_pockets(pockets, n_conformers=9)
+        c = clusters[0]
+        assert c.persistence > 0.8  # opened in almost every conformer
+        assert c.cryptic == (c.crypticity >= CRYPTICITY_THRESHOLD)
 
-    def test_persistent_pocket_not_cryptic(self):
-        """Pocket in 100% of conformers should not be cryptic."""
+    def test_constitutive_pocket_not_cryptic(self):
+        """A pocket already fully formed in the apo conformer has opening 0, so
+        crypticity 0, so it is not cryptic - regardless of persistence."""
         pockets = [[_make_pocket((0.0, 0.0, 0.0), conformer_idx=i)] for i in range(10)]
         clusters = cluster_pockets(pockets, n_conformers=10)
+        assert clusters[0].crypticity == pytest.approx(0.0)
         assert clusters[0].cryptic is False
+
+    def test_cryptic_flag_matches_report_count(self):
+        """The per-pocket flag and the report's n_cryptic_pockets never diverge:
+        both are the same boolean. This is the regression guard for the bug where
+        one used persistence < 0.9 and the other crypticity >= 0.3."""
+        pockets = [[]] + [[_make_pocket((0.0, 0.0, 0.0), conformer_idx=i)] for i in range(1, 6)]
+        pockets += [[_make_pocket((30.0, 30.0, 30.0), conformer_idx=i)] for i in range(6)]
+        clusters = cluster_pockets(pockets, n_conformers=6)
+        for c in clusters:
+            assert c.cryptic == (c.crypticity >= CRYPTICITY_THRESHOLD)
 
     def test_ranked_by_druggability(self):
         """Higher-druggability pocket should rank first."""

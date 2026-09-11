@@ -87,7 +87,7 @@ class PocketCluster:
     volume_a3: float
     druggability: float
     persistence: float          # fraction of conformers where pocket is open
-    cryptic: bool               # True if persistence < 0.9
+    cryptic: bool               # True if crypticity >= clusterer.CRYPTICITY_THRESHOLD
     lining_residues: list[str]
     appears_in_conformers: list[int]
     # Ensemble volume dynamics - how the pocket breathes across conformers.

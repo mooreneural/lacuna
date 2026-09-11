@@ -23,7 +23,7 @@ def write_report(
         "n_conformers": n_conformers,
         "ranked_by": rank_by,
         "n_pockets_found": len(clusters),
-        "n_cryptic_pockets": sum(1 for c in clusters if c.crypticity >= 0.3),
+        "n_cryptic_pockets": sum(1 for c in clusters if c.cryptic),
         "pockets": [c.to_dict() for c in clusters],
     }
     out = output_dir / "pocket_report.json"

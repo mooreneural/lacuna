@@ -24,7 +24,13 @@ from lacuna.models import Pocket, PocketCluster
 from lacuna.pockets.scorer import score_pocket
 
 _DBSCAN_EPS = 5.0    # Å - pockets within 5 Å centroid distance are the same pocket
-_CRYPTIC_THRESHOLD = 0.9  # persistence below this → cryptic
+# A pocket is cryptic when its crypticity score clears this bar. The score, not
+# persistence, is the right signal: persistence counts how many ensemble
+# conformers show the pocket, and a genuine cryptic site that the sampler opens
+# reliably (KRAS switch-II, say) has high persistence, so a "persistence < 0.9"
+# rule would call the real cryptic pocket not-cryptic. This is the single
+# definition; the report's n_cryptic_pockets counts the same boolean.
+CRYPTICITY_THRESHOLD = 0.3
 
 # Ranking strategies. The default "learned" is a fitted model (see below) and
 # recovers roughly three times as many known sites as the analytic rules on
@@ -522,7 +528,7 @@ def cluster_pockets(
             apo_volume_a3=round(apo_volume, 1),
             crypticity=crypticity,
             persistence=round(persistence, 3),
-            cryptic=persistence < _CRYPTIC_THRESHOLD,
+            cryptic=crypticity >= CRYPTICITY_THRESHOLD,
             lining_residues=consensus_residues,
             appears_in_conformers=conformer_set,
             member_pockets=members,
