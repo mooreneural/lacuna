@@ -12,6 +12,18 @@
 [![Run on Tamarind Bio](https://img.shields.io/badge/Run_on-Tamarind_Bio-2ea44f)](https://app.tamarind.bio/tools/lacuna)
 [![Run on Neurosnap](https://img.shields.io/badge/Run_on-Neurosnap-2ea44f)](https://neurosnap.ai/service/Lacuna%20Cryptic%20Pocket%20Discovery)
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mooreneural/lacuna/main/docs/cryptic_pocket_breathing.gif"
+       alt="Adenosine kinase breathing along its lowest normal mode; as the interdomain cleft opens, a cryptic pocket (blue) is revealed and a ligand docks into it"
+       width="46%">
+</p>
+
+<p align="center"><em>A protein breathes through Lacuna's conformational ensemble, and a cryptic
+pocket appears. Adenosine kinase along its lowest normal mode (Lacuna's NMA backend): as the
+interdomain cleft opens, the substrate pocket (blue) is exposed and 2-fluoroadenosine (orange,
+the crystallographic ligand from holo 2PKK) docks into it. The motion is Lacuna's own mode-0
+ensemble; the ligand is shown at its bound pose.</em></p>
+
 Most protein structure predictors return one static conformation. But many
 disease-relevant proteins are called undruggable not because they are
 biologically intractable, but because no pocket is visible in their ground
@@ -46,6 +58,18 @@ pip install "lacuna-pockets[all]"      # everything
 
 Requires Python 3.10+. The default backend needs no GPU, no force field and no
 model weights.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mooreneural/lacuna/main/docs/bclxl_pocket_example.png"
+       alt="A Lacuna-detected cryptic pocket on apo BCL-XL, in blue, overlapping the ABT-737 binding site"
+       width="65%">
+</p>
+
+<p align="center"><em>Apo BCL-XL (1LXL): a Lacuna-detected pocket (blue) opening onto the
+groove where ABT-737 (orange, from the holo structure 2YXJ) binds, a site never shown to
+the detector. With <code>--detector surface-fusion</code> this site is recovered at rank 2,
+Jaccard 0.36, centroid 5.6 Å. The default <code>alpha</code> detector places it third and
+does not clear the size-robust bar, which is the specialisation this release is about.</em></p>
 
 ## Quick start
 
