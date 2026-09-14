@@ -10,9 +10,6 @@
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
   <a href="https://doi.org/10.5281/zenodo.20533638"><img alt="DOI" src="https://img.shields.io/badge/Zenodo-10.5281%2Fzenodo.20533638-blue"></a>
   <a href="https://www.biorxiv.org/content/10.64898/2026.08.14.744956v1"><img alt="bioRxiv" src="https://img.shields.io/badge/bioRxiv-10.64898%2F2026.08.14.744956-bc2635"></a>
-</p>
-
-<p align="center">
   <a href="https://app.tamarind.bio/tools/lacuna"><img alt="Run on Tamarind Bio" src="https://img.shields.io/badge/Run_on-Tamarind_Bio-2ea44f"></a>
   <a href="https://neurosnap.ai/service/Lacuna%20Cryptic%20Pocket%20Discovery"><img alt="Run on Neurosnap" src="https://img.shields.io/badge/Run_on-Neurosnap-2ea44f"></a>
 </p>
