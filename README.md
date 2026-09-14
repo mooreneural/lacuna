@@ -15,7 +15,7 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/mooreneural/lacuna/main/docs/cryptic_pocket_breathing.gif"
        alt="Adenosine kinase breathing along its lowest normal mode; as the interdomain cleft opens, a cryptic pocket (blue) is revealed and a ligand docks into it"
-       width="46%">
+       width="62%">
 </p>
 
 <p align="center"><em>A protein breathes through Lacuna's conformational ensemble, and a cryptic
