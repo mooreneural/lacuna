@@ -173,6 +173,34 @@ def write_structure_pdb(structure: "Structure", path: Path) -> None:
     path.write_text("\n".join(lines) + "\n")
 
 
+def write_ensemble_pdb(structure: "Structure", coord_sets, path: Path) -> None:
+    """Write the conformational ensemble as a multi-model PDB.
+
+    One MODEL record per conformer, so the file loads as a trajectory in
+    PyMOL/ChimeraX/VMD and each frame can be split out for docking or MD. Every
+    coordinate set must be an (N_atoms, 3) array aligned to ``structure.atoms``,
+    which is what the ensemble backends and ``coords_array`` produce.
+    """
+    atoms = structure.atoms
+    lines: list[str] = []
+    for model_num, coords in enumerate(coord_sets, 1):
+        lines.append(f"MODEL     {model_num:>4d}")
+        for atom, xyz in zip(atoms, coords):
+            x, y, z = float(xyz[0]), float(xyz[1]), float(xyz[2])
+            name = atom.name
+            name_str = f" {name:<3}" if len(name) < 4 else f"{name:<4}"
+            chain = (atom.chain_id[0] if atom.chain_id else "A")
+            elem = atom.element[:2].rjust(2) if atom.element else " C"
+            lines.append(
+                f"ATOM  {atom.serial + 1:5d} {name_str} {atom.res_name:>3s} {chain}"
+                f"{atom.res_seq:4d}    {x:8.3f}{y:8.3f}{z:8.3f}  1.00  0.00"
+                f"          {elem}  "
+            )
+        lines.append("ENDMDL")
+    lines.append("END")
+    path.write_text("\n".join(lines) + "\n")
+
+
 def write_vina_box(
     cluster: PocketCluster,
     output_dir: Path,

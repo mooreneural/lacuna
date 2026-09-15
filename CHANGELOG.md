@@ -7,6 +7,12 @@ data, never the most flattering ones available.
 
 ## [Unreleased]
 
+### Added
+- `--emit-conformers`: write the generated conformational ensemble as a
+  multi-model PDB (`<input_stem>_ensemble.pdb`), with the input structure as
+  model 1 and the generated conformers as subsequent models. Loadable as a
+  trajectory in PyMOL/ChimeraX/VMD and splittable per frame for docking or MD.
+
 ### Fixed
 - Corrected the CryptoBench citation across the docs to Škrhák et al. 2025
   (*Bioinformatics* 41(1):btae745), previously mis-attributed to Vavra et al.

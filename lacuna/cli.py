@@ -115,6 +115,10 @@ def main():
               help="Write AutoDock Vina box config files for each pocket.")
 @click.option("--emit-pocket-pdbs", is_flag=True, default=False,
               help="Write pocket pseudoatom PDB files for visualization.")
+@click.option("--emit-conformers", is_flag=True, default=False,
+              help="Write the generated conformational ensemble as a multi-model "
+                   "PDB (<input_stem>_ensemble.pdb); model 1 is the input "
+                   "structure, the rest are the generated conformers.")
 @click.option("--top", default=10, show_default=True,
               help="Maximum number of pockets to report.")
 @click.option(
@@ -192,6 +196,7 @@ def discover(
     emit_boltz_constraints: bool,
     emit_vina_boxes: bool,
     emit_pocket_pdbs: bool,
+    emit_conformers: bool,
     top: int,
     rank_by: str,
     min_crypticity: float,
@@ -212,7 +217,7 @@ def discover(
     from lacuna.pockets.clusterer import DEFAULT_RANK_BY, cluster_pockets
     from lacuna.io.writers import (
         write_report, write_pocket_pdb, write_boltz_constraint, write_vina_box,
-        write_structure_pdb,
+        write_structure_pdb, write_ensemble_pdb,
     )
 
     output_dir = output or Path(f"{input_path.stem}_lacuna")
@@ -404,6 +409,11 @@ def discover(
     report_path = write_report(clusters, structure, len(all_coord_sets), output_dir, rank_by=rank_by)
 
     written: list[str] = [f"[green]{report_path.name}[/green]"]
+
+    if emit_conformers:
+        ensemble_path = output_dir / f"{input_path.stem}_ensemble.pdb"
+        write_ensemble_pdb(structure, all_coord_sets, ensemble_path)
+        written.append(f"[green]{ensemble_path.name}[/green]")
 
     for i, cluster in enumerate(clusters):
         if emit_pocket_pdbs:
