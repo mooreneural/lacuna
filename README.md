@@ -110,14 +110,26 @@ and AutoDock Vina boxes ready for docking. Full options in
 ## Results
 
 On CryptoBench's designated test fold, Lacuna recovers **55.6%** of known
-cryptic sites in its top five with the zero-dependency default, and **66.1%**
-with the optional PLM-assisted ranker. The latter is level with P2Rank's 63.3%
-(+2.8%, CI -4.4 to +9.4, spanning zero, so parity rather than a win); the
-default trails it by 7.8 points. Against MDpocket given the *same* ensemble,
-which isolates this pipeline from the sampler, the default gains +11.7%
-(CI +3.9 to +19.4).
+cryptic sites in its top five with the zero-dependency default and **66.1%**
+with the optional PLM-assisted ranker, and the true site is present in the
+candidate set for up to 92% of structures.
 
-**[Full results, including where Lacuna loses →](docs/BENCHMARKS.md)**
+### Recovery by configuration
+
+Cryptic-pocket recovery on CryptoBench's held-out test fold, under the
+size-robust criterion (Jaccard >= 0.25, or centroid within 4 A of the site).
+
+| Configuration | Top-5 recovery | Site found (coverage) |
+|---|:--:|:--:|
+| Default (CPU-only, zero-dependency) | 55.6% | 73.7% |
+| + PLM reranker | 66.1% | 73.7% |
+| `surface-fusion` detector | 73.9%¹ | 86.4%¹ |
+| Union across detectors | n/a | **92.2%** |
+
+¹ Held-out surface-fusion evaluation at 5 conformers (n=184); the other rows use
+the 20-conformer cohort (n=180).
+
+**[Full results, including head-to-head comparisons and where Lacuna loses →](docs/BENCHMARKS.md)**
 
 > **The more interesting result is not Lacuna's score.** Across five
 > candidate-generation methods evaluated in six configurations, coverage
