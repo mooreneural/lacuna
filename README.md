@@ -178,7 +178,7 @@ which always resolves to the newest.
 Lacuna is measured against, and builds on, work released openly by others:
 **fpocket** (Le Guilloux et al. 2009), **P2Rank** (Krivák & Hoksza 2018),
 **IF-SitePred** (Carbery et al. 2024) and **MDpocket** (Schmidtke et al. 2011).
-Evaluation uses the **CryptoBench** (Vavra et al. 2024) and **PocketMiner**
+Evaluation uses the **CryptoBench** (Škrhák et al. 2025) and **PocketMiner**
 (Meller et al. 2023) datasets. Method credits: **ANM** (Atilgan et al. 2001),
 **SiteMap druggability** (Halgren 2009), **enclosure scoring** (Schmidtke &
 Barril 2010), **ESM-2** (Lin et al. 2023).
