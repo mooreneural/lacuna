@@ -5,6 +5,13 @@ All notable changes to Lacuna are documented here. The project follows
 governs its benchmarks: reported numbers are the ones we can defend on held-out
 data, never the most flattering ones available.
 
+## [Unreleased]
+
+### Fixed
+- Corrected the CryptoBench citation across the docs to Škrhák et al. 2025
+  (*Bioinformatics* 41(1):btae745), previously mis-attributed to Vavra et al.
+  2024. Thanks to Vít Škrhák for flagging it.
+
 ## [1.1.0] - 2026-09-07
 
 ### Added

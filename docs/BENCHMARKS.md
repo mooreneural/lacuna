@@ -41,8 +41,8 @@ On the curated 22 the default edges out the PLM-assisted ranker, 10/22 against
 its own, but it is a reminder that the PLM-assisted ranker's advantage is
 established on CryptoBench and does not automatically transfer.
 
-Datasets: PocketMiner (Meller et al. 2023, *Nat. Commun.*); CryptoBench (Vavra
-et al. 2024, *Bioinformatics*). The CryptoBench split follows the dataset's own
+Datasets: PocketMiner (Meller et al. 2023, *Nat. Commun.*); CryptoBench (Škrhák
+et al. 2025, *Bioinformatics*). The CryptoBench split follows the dataset's own
 homology-separated folds, and the ranker's coefficients were fitted on the train
 folds only; no test-fold example entered that fit. The tool as a whole has been
 developed over many iterations during which test-fold performance was measured,
