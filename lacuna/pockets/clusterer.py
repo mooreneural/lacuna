@@ -34,7 +34,7 @@ CRYPTICITY_THRESHOLD = 0.3
 
 # Ranking strategies. The default "learned" is a fitted model (see below) and
 # recovers roughly three times as many known sites as the analytic rules on
-# CryptoBench (57.0% vs 17.8% on the held-out test fold, n=180). It also wins on
+# CryptoBench (55.6% vs 17.8% on the held-out test fold, n=180). It also wins on
 # always-open / orthosteric sites: +20.1 points [+13.2, +27.1] over "druggability"
 # on COACH420 (docs/BENCHMARKS.md), so there is no case for a separate ranking
 # path for general pocket finding. "crypticity" is the previous default and ranks
