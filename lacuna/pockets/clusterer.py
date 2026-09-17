@@ -34,11 +34,14 @@ CRYPTICITY_THRESHOLD = 0.3
 
 # Ranking strategies. The default "learned" is a fitted model (see below) and
 # recovers roughly three times as many known sites as the analytic rules on
-# CryptoBench (57.0% vs 17.8% on the held-out test fold, n=180). "crypticity" is the previous
-# default and ranks purely by how much a site opens relative to the input;
-# "druggability" ranks by peak open-state druggability (preferable for always-open
-# / orthosteric sites); the legacy "persistence" strategy multiplies druggability
-# by persistence, demoting the very transient pockets the tool targets; "balanced"
+# CryptoBench (57.0% vs 17.8% on the held-out test fold, n=180). It also wins on
+# always-open / orthosteric sites: +20.1 points [+13.2, +27.1] over "druggability"
+# on COACH420 (docs/BENCHMARKS.md), so there is no case for a separate ranking
+# path for general pocket finding. "crypticity" is the previous default and ranks
+# purely by how much a site opens relative to the input; "druggability" is the
+# legacy pre-model rule ranking by peak open-state druggability, kept for
+# reproducibility; the legacy "persistence" strategy multiplies druggability by
+# persistence, demoting the very transient pockets the tool targets; "balanced"
 # keeps druggability primary with a mild persistence bonus.
 RANK_STRATEGIES = ("learned", "learned-plm", "learned-fused", "crypticity",
                    "druggability", "persistence", "balanced")

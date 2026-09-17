@@ -52,9 +52,10 @@ surface-fusion, of which about half is the sequence pass. Use plain
 rules. Use `learned-plm` if the `plm` extra is installed: it adds protein language
 model features and is the strongest option, reaching 66.3% top-five recovery on
 the CryptoBench test fold against 55.9% for `learned`. Use `crypticity` only when
-you specifically want sites that open a lot relative to the input, and
-`druggability` for always-open orthosteric sites, which is a different question
-from the one Lacuna is built for.
+you specifically want sites that open a lot relative to the input. Do not switch
+to `druggability` for always-open orthosteric sites: `learned` beats it there by
++20.1 points on COACH420 (docs/BENCHMARKS.md). `druggability` is the legacy
+pre-model rule, kept for reproducibility.
 
 **Conformers** (`--conformers`, default 20)
 
