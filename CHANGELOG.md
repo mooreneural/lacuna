@@ -17,13 +17,32 @@ data, never the most flattering ones available.
   RNA-specific retuning we tried either failed to generalise on held-out data or
   had no measurable effect.
 
-  Held out on 31 apo/holo RNA structures spanning 62 to 459 nt, drawn from 12
-  independent BGSU equivalence classes with one structure per class, the true
-  ligand site is found for 87% of structures, in the top ten for 65% and in the
-  top five for 39%. On a separate set of 120 apo/holo records over 37 distinct
-  apo structures, top-five recovery is 76% and top-one 38% per structure (80%
-  and 50% per record). Figures are quoted per structure because an apo PDB entry
-  paired with several holo entries would otherwise be counted several times.
+  The point of the ensemble is cryptic sites, so that is what the headline
+  measures. On RNA sites with NO detectable cavity in the input structure, over
+  62 apo structures spanning 41 independent sequence families, the ensemble is
+  what finds them:
+
+      cryptic sites, no cavity in the input      single structure    ensemble
+      found at all                                           44%         73%
+      ranked in the top five                                 32%         55%
+
+  On sites that are already open in the input, the same ensemble adds 4 points
+  rather than 29, because there is nothing to open. That contrast is the claim:
+  the machinery earns its cost exactly where the premise says it should. Under
+  60 nt, where the benchmark is thickest at 22 independent families, cryptic
+  top-five recovery is 81%.
+
+  Two further figures, quoted separately because they are NOT cryptic claims:
+  across 31 structures from 12 independent BGSU classes spanning 62 to 459 nt,
+  single-structure detection alone finds the ligand site for 87% of structures
+  and ranks it top-ten for 65%; on 120 apo/holo records over 37 apo structures,
+  top-five is 76% per structure. Both are over all ligand sites, most of which
+  are already open, and neither exercises the ensemble.
+
+  Figures are quoted per apo structure, and with a family count where one is
+  available, because an apo entry paired with several holo entries would
+  otherwise be counted several times, and because conformational states of one
+  RNA are not independent measurements of it.
 
   Hydrogens are dropped from nucleic input before detection, since every
   benchmark above was measured on heavy atoms only and keeping them changes both
