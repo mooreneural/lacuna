@@ -18,6 +18,18 @@ structures whose site is shut, that fallback recovered 0 of them while stretchin
 C1'-C1' spacing 25%. It was worse than refusing the input while looking like it
 had worked.
 
+Measured performance, all on held-out structures:
+
+  120 apo/holo records, 37 structures   top-5 80%, top-1 50%
+  31 apo/holo pairs over 12 independent
+  BGSU equivalence classes, 62-459 nt   site found 87%, top-10 65%, top-5 39%
+
+Large RNA is therefore supported and worth running, but ranks the site deeper:
+a 400 nt RNA yields 40 or more clusters, so read further down the list than you
+would for a 30-mer. Above roughly 120 nt a bigger ensemble stops helping, since
+the sites there are already open in the input rather than cryptic; the
+single-structure result is what the 87% figure measures.
+
 Evidence, including the stages that were tried and reversed, is in the lacuna-rna
 staging repository.
 """
