@@ -293,6 +293,15 @@ _FITTED_GEOMETRY = {
     "MAX_VOLUME_A3": 1500.0,
     "GRID_SPACING": 1.0,
     "LINING_CONTACT_A": 5.0,
+    # The alpha-sphere bounds decide which grid points become alpha points at all,
+    # so they change carving as directly as the cluster radius does, and they were
+    # missing from this list. The omission is not hypothetical: an RNA study swept
+    # ALPHA_DIST_MAX from 6.0 down to 4.0 across 96 settings, the learned ranker
+    # scored every one of them, and no warning fired. Held-out evaluation later
+    # showed the tuned geometry performing worse, which is exactly the symptom
+    # this guard exists to explain rather than leave as an unexplained drop.
+    "ALPHA_DIST_MIN": 1.6,
+    "ALPHA_DIST_MAX": 6.0,
 }
 
 _geometry_warned = False

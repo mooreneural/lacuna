@@ -205,3 +205,62 @@ def test_generation_is_deterministic():
         a = list(RNAAnmBackend(seed=0).generate(prepared, 5))
         b = list(RNAAnmBackend(seed=0).generate(prepared, 5))
     assert all(np.allclose(x, y) for x, y in zip(a, b))
+
+
+# ------------------------------------------------------- the fitted-geometry guard
+
+def test_the_guard_covers_every_constant_that_changes_carving():
+    """The learned ranker reads pocket size, burial and depth, so any constant that
+    changes how cavities are carved changes what those features mean, and the
+    documented failure is SILENT: ranking drops to the random null with no error.
+
+    The alpha-sphere bounds decide which grid points become alpha points at all
+    and were missing from the guard. That omission was not hypothetical: an RNA
+    study swept ALPHA_DIST_MAX from 6.0 to 4.0 across 96 settings with the learned
+    ranker scoring every one, and nothing warned."""
+    import lacuna.pockets.detector as detector
+    from lacuna.pockets.clusterer import _FITTED_GEOMETRY
+
+    carving = {"ALPHA_DIST_MIN", "ALPHA_DIST_MAX", "CLUSTER_RADIUS_A",
+               "MIN_VOLUME_A3", "MAX_VOLUME_A3", "GRID_SPACING", "LINING_CONTACT_A"}
+    present = {c for c in carving if hasattr(detector, c)}
+    missing = present - set(_FITTED_GEOMETRY)
+    assert not missing, "these change carving but are unguarded: %s" % sorted(missing)
+
+
+def test_the_guard_actually_fires_on_an_alpha_bound_change():
+    import warnings as _w
+
+    import lacuna.pockets.detector as detector
+    import lacuna.pockets.clusterer as clusterer
+
+    old_val = detector.ALPHA_DIST_MAX
+    old_flag = clusterer._geometry_warned
+    detector.ALPHA_DIST_MAX = old_val - 2.0
+    clusterer._geometry_warned = False
+    try:
+        with _w.catch_warnings(record=True) as caught:
+            _w.simplefilter("always")
+            clusterer._check_fitted_geometry()
+        assert caught, "changing ALPHA_DIST_MAX produced no warning"
+        assert "ALPHA_DIST_MAX" in str(caught[0].message)
+    finally:
+        detector.ALPHA_DIST_MAX = old_val
+        clusterer._geometry_warned = old_flag
+
+
+def test_the_guard_is_quiet_at_the_shipped_geometry():
+    """It must not cry wolf on a default install."""
+    import warnings as _w
+
+    import lacuna.pockets.clusterer as clusterer
+
+    old = clusterer._geometry_warned
+    clusterer._geometry_warned = False
+    try:
+        with _w.catch_warnings(record=True) as caught:
+            _w.simplefilter("always")
+            clusterer._check_fitted_geometry()
+        assert not [c for c in caught if "detection geometry" in str(c.message)]
+    finally:
+        clusterer._geometry_warned = old
