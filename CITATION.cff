@@ -6,8 +6,8 @@ authors:
   - family-names: Moore
     given-names: Clayton W.
     orcid: "https://orcid.org/0009-0001-1033-6320"
-version: 1.0.1
-date-released: 2026-08-18
+version: 1.3.0
+date-released: 2026-10-26
 url: "https://github.com/mooreneural/lacuna"
 repository-code: "https://github.com/mooreneural/lacuna"
 repository-artifact: "https://pypi.org/project/lacuna-pockets/"

@@ -5,6 +5,64 @@ All notable changes to Lacuna are documented here. The project follows
 governs its benchmarks: reported numbers are the ones we can defend on held-out
 data, never the most flattering ones available.
 
+## [1.3.0] - 2026-10-26
+
+### Added
+- **Nucleic-acid support: `lacuna discover rna.cif` works, with no extra flags.**
+  Input is detected as nucleic acid and the elastic network is built on
+  nucleotide beads (C1', C2 and P at a 9 A cutoff, the three-bead SBP model of
+  Pinamonti et al. 2015, *Nucleic Acids Research* 43:7260) instead of on CA
+  atoms. Detection geometry, clustering and the learned ranker are Lacuna's
+  shipped settings, unchanged, because they already work on RNA: every
+  RNA-specific retuning we tried either failed to generalise on held-out data or
+  had no measurable effect.
+
+  Held out on 31 apo/holo RNA structures spanning 62 to 459 nt, drawn from 12
+  independent BGSU equivalence classes with one structure per class, the true
+  ligand site is found for 87% of structures, in the top ten for 65% and in the
+  top five for 39%. On a separate set of 120 apo/holo records over 37 distinct
+  apo structures, top-five recovery is 76% and top-one 38% per structure (80%
+  and 50% per record). Figures are quoted per structure because an apo PDB entry
+  paired with several holo entries would otherwise be counted several times.
+
+  Hydrogens are dropped from nucleic input before detection, since every
+  benchmark above was measured on heavy atoms only and keeping them changes both
+  the atom count and the pocket count.
+
+- `--backend rna-nma`, to request the nucleic elastic network explicitly. The
+  default `auto` already selects it from the structure, so this is for scripted
+  runs that want to be explicit or to fail loudly on unexpected input.
+
+### Fixed
+- **Lacuna no longer prints a confident ranked table for RNA built on random
+  noise.** The NMA backend keyed on atoms named CA. RNA has none, so the backend
+  silently fell back to random perturbation and still produced a full report with
+  crypticity and persistence columns. That fallback recovered 0 of 10 held-out
+  closed RNA sites and stretched the backbone by 25% on every structure, which
+  makes the output meaningless rather than merely weak. Nucleic input without a
+  usable bead set is now refused with an explanation instead of answered.
+
+- Guarded the alpha-sphere bounds against ranker geometry drift.
+  `_FITTED_GEOMETRY` couples the learned ranker's weights to the carving
+  constants, and `ALPHA_DIST_MIN` and `ALPHA_DIST_MAX` were not among the
+  constants it pinned. A change to either silently degraded ranking toward the
+  random null rather than failing, so both are now pinned at the values the
+  ranker was fitted against, 1.6 and 6.0 A.
+
+- Corrected the version note in `skills/lacuna/SKILL.md`, which attributed
+  `--detector surface-fusion` and `--no-sequence` to 1.3.0. Both arrived in
+  1.1.0.
+
+- Corrected the stale software version in `CITATION.cff`, which still read 1.0.1.
+
+### Not included
+This release makes RNA work on the same footing as protein. It does not add the
+RNA-specific cryptic-pocket machinery developed alongside it: there is no
+ensemble candidate short list, no per-size recovery calibration and no cavity
+hotspot splitting here. Those are measured but held back, because the strongest
+figures behind them rest on too few independent RNA families to publish as
+rates. See the project roadmap for what is measured and what is still provisional.
+
 ## [1.2.0] - 2026-09-15
 
 ### Added

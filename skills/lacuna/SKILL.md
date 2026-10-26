@@ -11,12 +11,17 @@ is sites a single static structure does not show: a cryptic pocket is closed or
 shallow in the apo form and opens on binding, so a detector looking at one
 snapshot finds nothing there.
 
-This skill describes **v1.3.0**. If `lacuna --version` reports something older,
-`--detector surface-fusion` and `--no-sequence` will not exist, and nucleic-acid
-input is NOT handled: before 1.3.0 Lacuna silently fell back to random
-perturbation on RNA and still printed a ranked table. On an older version with an
-RNA input, say so and upgrade with `pip install -U lacuna-pockets` rather than
-reporting the numbers.
+This skill describes **v1.3.0**, which added nucleic-acid support. On 1.2.0 or
+older, nucleic-acid input is NOT handled: Lacuna built its elastic network from
+CA atoms, found none in RNA, silently fell back to random perturbation, and still
+printed a ranked table with crypticity and persistence columns. That fallback
+recovered 0 of 10 held-out closed RNA sites and tore the backbone by 25% every
+time, so the numbers were not weak but meaningless. On an older version with an
+RNA or DNA input, say so and upgrade with `pip install -U lacuna-pockets` rather
+than reporting the numbers.
+
+`--detector surface-fusion` and `--no-sequence` are not new here; they arrived in
+1.1.0 and this skill previously mis-attributed them to 1.3.0.
 
 ## Install
 
