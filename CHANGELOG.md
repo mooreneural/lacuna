@@ -74,6 +74,27 @@ data, never the most flattering ones available.
 
 - Corrected the stale software version in `CITATION.cff`, which still read 1.0.1.
 
+### Changed, from commits that landed after 1.2.0 and ship here for the first time
+- **Retired the advice to pass `--rank-by druggability` for always-open or
+  orthosteric sites.** Three user-facing places still gave it: the `--rank-by`
+  help text, the `RANK_STRATEGIES` comment in `clusterer.py` and
+  `skills/lacuna/SKILL.md`. It was measured wrong by 20 points. On COACH420,
+  paired n=145, `learned` recovers 86.9% against 66.9% for `druggability`,
+  +20.1 [+13.2, +27.1], with 30 structures flipping in favour of `learned` and
+  one against. All three now say `learned` is correct for cryptic and
+  always-open sites alike, and describe `druggability` as the legacy pre-model
+  rule kept for reproducibility. If you scripted `--rank-by druggability` on
+  that advice, this is the release to drop it.
+
+- Corrected three ranker figures that had drifted from the CryptoBench test fold
+  at n=180 (`learned` 55.6%, `learned-plm` 66.1%, `crypticity` 17.8%). The
+  `--rank-by` help said `learned` recovers roughly twice what the analytic rules
+  do; the ratio is 3.1x. `SKILL.md` quoted 66.3% against 55.9%, which spliced
+  two different cohorts together. The `clusterer.py` comment quoted 57.0%, which
+  is not achievable at n=180. Strings and comments only, no behaviour change.
+
+- Pointed the bioRxiv badge at v2 of the preprint.
+
 ### Not included
 This release makes RNA work on the same footing as protein. It does not add the
 RNA-specific cryptic-pocket machinery developed alongside it: there is no
