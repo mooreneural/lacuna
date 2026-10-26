@@ -1,6 +1,6 @@
 ---
 name: "lacuna"
-description: "Find cryptic binding pockets in a protein structure: sites that are closed or shallow in the unbound form and only open on ligand binding. Use when someone has a PDB or mmCIF file and asks where a ligand could bind, whether a target is druggable, where an allosteric or hidden pocket might be, or wants AutoDock Vina boxes or Boltz constraints prepared for a target. Also use to prepare those docking artifacts from an existing pocket report."
+description: "Find binding pockets in a protein, RNA or DNA structure, including cryptic sites that are closed or shallow in the unbound form and only open on ligand binding. Use when someone has a PDB or mmCIF file and asks where a ligand could bind, whether a target is druggable, where an allosteric or hidden pocket might be, or wants AutoDock Vina boxes or Boltz constraints prepared. Works on RNA targets too: riboswitches, aptamers, splice-site duplexes, viral elements and ribosomal fragments, with no extra flags. Also use to prepare docking artifacts from an existing pocket report."
 ---
 
 # Lacuna: cryptic binding pocket discovery
@@ -11,9 +11,12 @@ is sites a single static structure does not show: a cryptic pocket is closed or
 shallow in the apo form and opens on binding, so a detector looking at one
 snapshot finds nothing there.
 
-This skill describes **v1.1.0**. If `lacuna --version` reports something older,
-`--detector surface-fusion` and `--no-sequence` will not exist; upgrade with
-`pip install -U lacuna-pockets`, or fall back to the defaults and say so.
+This skill describes **v1.3.0**. If `lacuna --version` reports something older,
+`--detector surface-fusion` and `--no-sequence` will not exist, and nucleic-acid
+input is NOT handled: before 1.3.0 Lacuna silently fell back to random
+perturbation on RNA and still printed a ranked table. On an older version with an
+RNA input, say so and upgrade with `pip install -U lacuna-pockets` rather than
+reporting the numbers.
 
 ## Install
 
@@ -124,6 +127,39 @@ the reason: on CryptoBench the site is usually proposed somewhere and then
 out-ranked. Top-five recovery is 73.9% with `surface-fusion`, so the top hit alone is
 frequently not the answer even when the answer is in the list. Show the top three
 to five with their scores.
+
+## RNA and DNA
+
+No extra flags. `lacuna discover rna.cif` detects nucleic-acid input, builds the
+elastic network on nucleotide beads (C1', C2, P at 9 A) instead of CA atoms, and
+returns the same table and the same report files as protein. The only visible
+difference is two extra lines saying it detected nucleic acid and dropped
+hydrogens.
+
+What to expect, all measured on held-out structures:
+
+| Input | What happens |
+|---|---|
+| RNA 20 to 200 nt | site ranked top-5 in 80% of cases, top-1 in 50% |
+| RNA 62 to 459 nt | site found in 87%, top-10 in 65%, top-5 in 39% |
+| protein | unchanged |
+
+**The single most useful thing to tell an RNA user: read further down the list.**
+A 400 nt RNA yields 40 or more clusters and the true site lands around rank 10,
+where a 30-mer puts it at rank 1 to 3. Quote top-10 for anything above 200 nt,
+not top-5.
+
+Runtime on CPU, 20 conformers: about 1 s at 25 nt, 6 s at 200 nt, 31 s at 459 nt.
+
+Say plainly what this is NOT. There are no validated cryptic RNA pockets in the
+strict protein sense, and this tool recovers shallow sites a single structure
+misses far more reliably than sterically occluded ones. The defensible claim is
+"finds RNA sites single-structure detection misses", not "finds cryptic RNA
+pockets". If a user asks specifically for cryptic RNA pockets, give them that
+distinction rather than the headline.
+
+`-b rna-nma` forces the nucleic network if auto-detection is not wanted. A
+protein structure handed to that backend raises rather than silently degrading.
 
 ## What to tell the user honestly
 

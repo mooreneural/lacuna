@@ -33,6 +33,9 @@ crash in the science code from the transport, and means the tested code path is
 the one that runs. The cost is a subprocess per call, which is noise next to the
 ensemble generation.
 
+Protein, RNA and DNA are all accepted; nucleic-acid input is detected from
+residue composition and needs no flag.
+
 Structures may be given as a local path or a four-character PDB id. The id form
 downloads from RCSB into a cache directory, because the alternative is the user
 hunting for a file path before they can ask a question.
@@ -54,8 +57,10 @@ from mcp.server import MCPServer
 mcp = MCPServer(
     "lacuna",
     instructions=(
-        "Finds cryptic binding pockets: sites closed or absent in a protein's "
-        "unbound structure that open only as it moves. Runs locally on CPU in "
+        "Finds binding pockets, including cryptic sites closed or absent in an "
+        "unbound structure that open only as it moves. Accepts PROTEIN, RNA or DNA: "
+        "nucleic-acid input is detected automatically and uses a nucleotide elastic "
+        "network, with the same output. Runs locally on CPU in "
         "seconds. Use for cryptic, transient, hidden or allosteric pockets, not "
         "for sites already open in the structure."
     ),
@@ -123,7 +128,12 @@ def find_cryptic_pockets(
     min_druggability: float = 0.0,
     rank_by: str = "learned",
 ) -> str:
-    """Find cryptic binding pockets in a protein structure.
+    """Find cryptic binding pockets in a protein, RNA or DNA structure.
+
+    Nucleic-acid input needs no flag: it is detected from residue composition and
+    routed to a nucleotide elastic network. Tell an RNA user to read further down
+    the list than they would for a protein: a 400 nt RNA yields 40 or more
+    clusters and the site lands around rank 10, so quote top-10 above 200 nt.
 
     Cryptic pockets are binding sites that are closed, too small, or absent in a
     protein's unbound (apo) structure and open only as the protein moves. Ordinary
@@ -204,7 +214,7 @@ def export_docking_region(
     top: int = 3,
     fmt: str = "vina",
 ) -> str:
-    """Emit docking search regions for a protein's top cryptic pockets.
+    """Emit docking search regions for a structure's top cryptic pockets.
 
     Runs the same discovery as find_cryptic_pockets, then writes inputs that
     downstream docking and co-folding tools consume directly: AutoDock Vina and
