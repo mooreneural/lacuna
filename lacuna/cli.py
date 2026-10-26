@@ -25,6 +25,9 @@ def _resolve_backend(name: str):
     elif name == "nma":
         from lacuna.ensemble.nma_backend import NMABackend
         return NMABackend()
+    elif name == "rna-nma":
+        from lacuna.nucleic.anm import RNAAnmBackend
+        return RNAAnmBackend()
     elif name == "openmm":
         from lacuna.ensemble.openmm_backend import OpenMMBackend
         return OpenMMBackend()
@@ -32,7 +35,8 @@ def _resolve_backend(name: str):
         from lacuna.ensemble.boltz_backend import BoltzBackend
         return BoltzBackend()
     else:
-        raise click.BadParameter(f"Unknown backend '{name}'. Choose: random, nma, openmm, boltz")
+        raise click.BadParameter(
+            f"Unknown backend '{name}'. Choose: random, nma, rna-nma, openmm, boltz")
 
 
 def _installed(module: str) -> bool:
@@ -52,8 +56,17 @@ _BACKEND_REQUIRES = {
 }
 
 
-def _auto_backend():
+def _auto_backend(structure=None):
     """Pick the best available backend at runtime.
+
+    Nucleic-acid input takes the RNA elastic network, and that routing is the
+    whole bug fix rather than a convenience. ``NMABackend`` builds its network
+    from atoms named CA; RNA has none, so it fell through to ``RandomBackend``
+    and the run still printed a ranked table with crypticity and persistence
+    columns computed from Gaussian noise. On 10 held-out structures whose site is
+    shut, that fallback recovered 0 of them while stretching C1'-C1' spacing 25%.
+    A user asking for `auto` on an RNA structure was getting noise presented as a
+    result, so `auto` now has to look at what it was given.
 
     Probe the dependency, not the backend module. Every backend module imports
     cleanly whether or not its heavy dependency is present, because `import
@@ -63,6 +76,11 @@ def _auto_backend():
     `pip install lacuna-pockets` followed by `lacuna discover protein.pdb` then
     failed at generation time with an ImportError, despite nma being available.
     """
+    if structure is not None:
+        from lacuna.nucleic.chem import classify
+        info = classify([r.name for r in structure.residues])
+        if info["kind"] in ("nucleic", "mixed"):
+            return _resolve_backend("rna-nma")
     for name in ("boltz", "openmm", "nma", "random"):
         if all(_installed(m) for m in _BACKEND_REQUIRES[name]):
             return _resolve_backend(name)
@@ -86,10 +104,11 @@ def main():
 @click.argument("input_path", type=click.Path(exists=True, path_type=Path))
 @click.option(
     "--backend", "-b",
-    type=click.Choice(["auto", "random", "nma", "openmm", "boltz"]),
+    type=click.Choice(["auto", "random", "nma", "rna-nma", "openmm", "boltz"]),
     default="auto",
     show_default=True,
-    help="Ensemble generation backend.",
+    help="Ensemble generation backend. 'auto' detects nucleic-acid input and "
+         "uses the RNA elastic network.",
 )
 @click.option(
     "--ensemble", "ensemble_source",
@@ -236,6 +255,11 @@ def discover(
         console.print("[dim]Loading structure...[/dim]")
     structure = load_structure(input_path)
 
+    from lacuna.nucleic import heavy_atoms_only, is_nucleic
+    _nucleic = is_nucleic(structure)
+    if _nucleic and not quiet:
+        console.print(f"[dim]Nucleic acid detected ({len(structure.residues)} residues).[/dim]")
+
     # Optionally expand to biological assembly for dimer-interface pocket detection
     effective_path = input_path
     with tempfile.TemporaryDirectory() as _tmpdir:
@@ -263,6 +287,27 @@ def discover(
             n_chains = len(structure.sequence)
             console.print(f"  [dim]{n_res} residues, {n_chains} chain(s)[/dim]")
 
+        # Nucleic input is prepared in exactly one respect: hydrogens are dropped.
+        # mmCIF entries often carry them, they change the van der Waals surface and
+        # so the pocket count (6VUH reads 1062 atoms with them against 702 without,
+        # and 2 pockets against 1), and every nucleic benchmark was measured on
+        # heavy atoms. Protein input is left exactly as it was.
+        #
+        # effective_path has to follow the structure. A backend reloads from the
+        # path, so stripping the Structure while leaving the path pointing at the
+        # original file hands the sampler a different atom count than the detector
+        # scores against, which numpy does not always refuse.
+        if _nucleic:
+            _stripped = heavy_atoms_only(structure)
+            if len(_stripped.atoms) != len(structure.atoms):
+                tmp_nuc = Path(_tmpdir) / f"{input_path.stem}_heavy.pdb"
+                write_structure_pdb(_stripped, tmp_nuc)
+                if not quiet:
+                    console.print(f"  [dim]Dropped {len(structure.atoms) - len(_stripped.atoms)} "
+                                  f"hydrogens; detection was validated on heavy atoms.[/dim]")
+                structure = _stripped
+                effective_path = tmp_nuc
+
         # Resolve backend. A supplied ensemble wins: the user already has the
         # conformers, so generating more would be discarded work.
         if ensemble_source is not None:
@@ -273,7 +318,7 @@ def discover(
                 cap = f", first {conformers}" if conformers > 0 else ""
                 console.print(f"\n[dim]Reading ensemble from {ensemble_source}{cap}...[/dim]")
         elif backend == "auto":
-            be = _auto_backend()
+            be = _auto_backend(structure)
             backend = be.name
         else:
             be = _resolve_backend(backend)
