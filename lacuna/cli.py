@@ -255,8 +255,13 @@ def discover(
         console.print("[dim]Loading structure...[/dim]")
     structure = load_structure(input_path)
 
-    from lacuna.nucleic import heavy_atoms_only, is_nucleic
+    from lacuna.nucleic import heavy_atoms_only, is_nucleic, is_nucleic_only
     _nucleic = is_nucleic(structure)
+    # Two different questions, so two different predicates. `_nucleic` (nucleic
+    # or mixed) decides which beads the elastic network needs. `_nucleic_only`
+    # gates the ranker's burial weight, which must not fire on a protein target
+    # carrying an incidental nucleotide; is_nucleic_only explains why.
+    _nucleic_only = is_nucleic_only(structure)
     if _nucleic and not quiet:
         console.print(f"[dim]Nucleic acid detected ({len(structure.residues)} residues).[/dim]")
 
@@ -439,7 +444,8 @@ def discover(
     # Cluster across ensemble. plm_probs was resolved before detection, since
     # sequence-seeded proposals need it there; the ranker reuses the same values.
     clusters = cluster_pockets(pocket_lists, n_conformers=len(all_coord_sets),
-                               rank_by=rank_by, plm_residue_probs=plm_probs)
+                               rank_by=rank_by, plm_residue_probs=plm_probs,
+                               nucleic=_nucleic_only)
 
     # Apply filters
     clusters = [

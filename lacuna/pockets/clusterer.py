@@ -129,6 +129,53 @@ _RANKER_WEIGHTS = (
 # intercept, so this is fixed at zero.
 _RANKER_INTERCEPT = 0.0
 
+# ── nucleic correction to the burial term ───────────────────────────────────────
+# `enc` and `bur_raw` are one measurement entered twice. detector.py computes
+# enclosure_raw = local_density[mask].mean(), clips it to
+# enc = min(enclosure_raw / 0.4, 1.0), and also emits the raw value, which
+# ranker_features surfaces as "bur_raw". Together, at +2.003 and -15.465, they
+# form a burial PENALTY with a kink at the 0.4 clip: slope -10.46 below it and
+# -15.465 above.
+#
+# That is correct for protein and backwards for nucleic acid, because the two
+# polymers put their ligand site on opposite sides of the burial distribution.
+# Within a structure, comparing the true site against the other candidates it
+# produced (paired, so neither pool size nor structure size can drive it):
+#
+#   protein, CryptoBench test fold, 210 structures   -0.053   p = 1.7e-08
+#   nucleic, closed apo sites, 60 structures         +0.030   p = 0.015
+#   nucleic, open sites, 652 structures              +0.117   p = 3.1e-61
+#
+# The protein pocket is the SHALLOWER candidate and the nucleic one is the more
+# buried, so a penalty that finds protein sites hides nucleic ones. The clip
+# compounds it: protein clusters straddle the knee (median burial 0.42, 57%
+# saturated) while nucleic clusters sit well below it (median 0.20, 11%
+# saturated), so nucleic input is ranked almost entirely on the steeper-penalty
+# side of a function fitted for the other polymer.
+#
+# Setting bur_raw to zero for nucleic input leaves `enc` at +2.003, which turns
+# the nucleic burial slope from -10.46 to +5.0 per unit and matches the measured
+# direction. Nothing is refitted: one shipped weight is set to zero, and only on
+# nucleic input. Measured effect, strict label, held out, per structure:
+#
+#   population                      n    chance   shipped   corrected
+#   nucleic, open sites           660       47%       39%         67%
+#   nucleic, closed apo sites      61       50%       64%         61%
+#   protein (gate never fires)    210       34%       64%         64%
+#
+# On open nucleic sites the shipped ranker is significantly BELOW the
+# random-ordering baseline (p = 1.3e-07) and the correction puts it significantly
+# above (p = 1.4e-36). On closed apo sites the change is -3 points on 61
+# structures, which does not reach significance (paired sign test p = 0.75), so
+# the correction is justified by the open population and merely costless on the
+# cryptic one. Protein keeps bur_raw: removing it there costs 17 points.
+_NUCLEIC_ZEROED_FEATURES = ("bur_raw",)
+#: Built from the shipped weights at import, so the two can never drift apart.
+_NUCLEIC_RANKER_WEIGHTS = tuple(
+    0.0 if name in _NUCLEIC_ZEROED_FEATURES else w
+    for name, w in zip(_RANKER_FEATURES, _RANKER_WEIGHTS)
+)
+
 # ── sequence-augmented ranker ("learned-plm") ───────────────────────────────────
 # The same linear form, refitted with four extra features summarizing what a
 # protein language model thinks of each pocket's lining residues (lacuna/pockets/
@@ -331,16 +378,26 @@ def _check_fitted_geometry() -> None:
     _geometry_warned = True
 
 
-def learned_score(c: PocketCluster) -> float:
+def learned_score(c: PocketCluster, *, nucleic: bool = False) -> float:
     """Learned ranking score (higher is better).
 
     The linear pre-activation of the fitted logistic model. Monotonic in the
     predicted probability, so it orders identically without needing the sigmoid.
+
+    Args:
+        c: The cluster to score.
+        nucleic: True for RNA/DNA input, which zeroes the duplicated ``bur_raw``
+            weight. The burial penalty those weights encode is fitted on protein,
+            where the ligand site is the shallower candidate, and it inverts on
+            nucleic acid, where the site is the more buried one. See
+            ``_NUCLEIC_RANKER_WEIGHTS``. Defaults to False, so protein scoring is
+            unchanged to the bit.
     """
     _check_fitted_geometry()
     f = ranker_features(c)
+    weights = _NUCLEIC_RANKER_WEIGHTS if nucleic else _RANKER_WEIGHTS
     return _RANKER_INTERCEPT + sum(
-        w * f[name] for name, w in zip(_RANKER_FEATURES, _RANKER_WEIGHTS)
+        w * f[name] for name, w in zip(_RANKER_FEATURES, weights)
     )
 
 
@@ -410,7 +467,7 @@ def compute_crypticity(apo_volume: float, max_volume: float, max_druggability: f
     return round(opening * max_druggability, 4)
 
 
-def _rank_key(c: PocketCluster, rank_by: str) -> float:
+def _rank_key(c: PocketCluster, rank_by: str, nucleic: bool = False) -> float:
     if rank_by == "persistence":
         return c.persistence * c.druggability
     if rank_by == "balanced":
@@ -420,7 +477,12 @@ def _rank_key(c: PocketCluster, rank_by: str) -> float:
     if rank_by == "crypticity":
         return c.crypticity
     if rank_by == "learned":
-        return learned_score(c)
+        return learned_score(c, nucleic=nucleic)
+    # "learned-fused" and "learned-plm" are separate fits and are deliberately
+    # left alone: the burial measurement above covers _RANKER_WEIGHTS only, and
+    # neither of those models was evaluated on nucleic input. The fused model is
+    # not even a scaled copy of the same failure, since it gives both burial
+    # terms a negative coefficient rather than the +2.003 / -15.465 pairing.
     if rank_by == "learned-fused":
         return learned_fused_score(c)
     if rank_by == "learned-plm":
@@ -436,6 +498,8 @@ def cluster_pockets(
     n_conformers: int,
     rank_by: str = _DEFAULT_RANK_BY,
     plm_residue_probs: dict[int, float] | None = None,
+    *,
+    nucleic: bool = False,
 ) -> list[PocketCluster]:
     """Aggregate pockets across ensemble conformers into ranked clusters.
 
@@ -450,6 +514,14 @@ def cluster_pockets(
             primary with a mild persistence bonus; ``"learned"`` uses the fitted
             linear ranker, which substantially outperforms the analytic strategies
             on CryptoBench (see ``_RANKER_WEIGHTS``).
+        plm_residue_probs: Per-residue sequence probabilities, required by
+            ``rank_by="learned-plm"`` and ignored otherwise.
+        nucleic: True when the input is RNA or DNA with no protein present, which
+            corrects the burial term the ranker inherited from protein. Pass
+            ``lacuna.nucleic.is_nucleic_only(structure)``, NOT ``is_nucleic``:
+            the correction is measured on nucleic-only structures, and a protein
+            carrying one incidental nucleotide classifies as mixed. Affects
+            ``rank_by="learned"`` only. See ``_NUCLEIC_RANKER_WEIGHTS``.
 
     Returns:
         Ranked list of PocketCluster objects (rank 1 = best under ``rank_by``).
@@ -558,7 +630,8 @@ def cluster_pockets(
             c._plm_features = _plm_pocket_features(nums, plm_residue_probs)
 
     # Rank by the chosen strategy (ties broken by peak druggability for stability)
-    clusters.sort(key=lambda c: (_rank_key(c, rank_by), c.max_druggability), reverse=True)
+    clusters.sort(key=lambda c: (_rank_key(c, rank_by, nucleic), c.max_druggability),
+                  reverse=True)
     for i, c in enumerate(clusters):
         c.rank = i + 1
 

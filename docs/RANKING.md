@@ -25,6 +25,16 @@ wanders between conformers, which a single-structure detector cannot compute. It
 is trained on within-structure pairs, so it optimises ordering directly rather
 than classifying pockets in isolation.
 
+On nucleic-acid input one of the 23 weights is zeroed, which makes the effective
+feature count 22 there and 23 on protein. The feature is a duplicated burial
+measurement whose fitted weight penalises burial: correct for protein, where the
+ligand site is the shallower of the candidates a structure yields, and backwards
+for RNA and DNA, where it is the more buried one. Nothing is refitted and the
+other 22 weights are shared. See `_NUCLEIC_RANKER_WEIGHTS` in
+`lacuna/pockets/clusterer.py` for the measurements, and note the gate fires only
+on structures with no protein in them, so a protein carrying an incidental
+nucleotide keeps the protein weighting.
+
 On CryptoBench's test fold it recovers 55.6% against 17.8% for the analytic
 `crypticity` rule it replaced, rising to 66.1% with `learned-plm`.
 

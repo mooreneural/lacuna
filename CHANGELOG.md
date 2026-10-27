@@ -5,6 +5,91 @@ All notable changes to Lacuna are documented here. The project follows
 governs its benchmarks: reported numbers are the ones we can defend on held-out
 data, never the most flattering ones available.
 
+## [1.3.1] - 2026-10-26
+
+### Fixed
+- **The learned ranker's burial term is corrected for nucleic-acid input, where
+  it was pointed the wrong way.** Before this release, on RNA sites that are
+  already open in the input structure, the ranker was measurably worse than
+  shuffling its own output.
+
+  `enc` and `bur_raw` are one measurement entered twice. The detector computes a
+  local-density burial value, clips it to `enc = min(raw / 0.4, 1.0)`, and also
+  emits it raw. At the fitted weights, +2.003 and -15.465, the pair forms a
+  burial PENALTY, and `bur_raw` alone carries 41% of the model's weight mass.
+
+  That penalty is correct for protein and backwards for nucleic acid, because the
+  two polymers put their ligand site on opposite sides of the burial
+  distribution. Comparing the true site against the other candidates from the
+  same structure, paired so that neither pool size nor structure size can drive
+  it:
+
+      protein, CryptoBench test fold, 210 structures    -0.053   p = 1.7e-08
+      nucleic, sites shut in the input, 60 structures    +0.030   p = 0.015
+      nucleic, sites open in the input, 652 structures   +0.117   p = 3.1e-61
+
+  The protein pocket is the shallower candidate; the nucleic one is the more
+  buried. A penalty that finds protein sites therefore hides nucleic ones. The
+  clip compounds it: protein clusters straddle the 0.4 knee, median burial 0.42
+  with 57% saturated, while nucleic clusters sit well below it, median 0.20 with
+  11% saturated, so nucleic input was ranked almost entirely on the
+  steeper-penalty side of a function fitted for the other polymer.
+
+  The fix sets `bur_raw` to zero on nucleic input, which leaves `enc` at +2.003
+  and turns the nucleic burial slope from -10.46 to +5.0 per unit, matching the
+  measured direction. **Nothing is refitted and no new parameter is introduced:**
+  one shipped weight is set to zero, and only when the input contains no protein.
+  Ranking is reported against the random-ordering baseline it has to beat,
+  `1 - C(N-k, m)/C(N, m)` averaged over structures, because on a short RNA with a
+  handful of clusters a top-5 hit is close to free and an unbaselined percentage
+  there says nothing:
+
+      population                        n    baseline    1.3.0    1.3.1
+      nucleic, site open              660         47%      39%      67%
+      nucleic, site shut               61         50%      64%      61%
+      protein (gate never fires)      210         34%      64%      64%
+
+  At 39% against a 47% baseline the old behaviour was significantly below chance
+  (p = 1.3e-07); at 67% the corrected behaviour is significantly above it
+  (p = 1.4e-36). Top-ten on the same population goes from 59% to 84%, which is
+  the figure that matters most in practice, since a report shows ten rows by
+  default. On sites that are shut in the input the change is -3 points over 61
+  structures and does not reach significance (paired sign test p = 0.75), so the
+  correction is justified by the open population and is merely costless on the
+  cryptic one.
+
+  Protein ranking is unchanged to the bit, verified by IEEE-754 comparison over
+  4,555 clusters from the 210-structure CryptoBench test fold. The gate fires on
+  nucleic-ONLY structures, deliberately stricter than the nucleic-or-mixed test
+  that selects the elastic-network backend: residue classification calls a
+  structure "mixed" with no minimum nucleic fraction, so a protein target
+  carrying one incidental nucleotide is "mixed", and 4 of those 210 CryptoBench
+  structures are exactly that. Removing `bur_raw` on protein costs 17 points, so
+  gating on the looser test would have introduced a silent regression on 1.9% of
+  the protein benchmark. Mixed input therefore keeps the protein weighting, which
+  is a conservative choice rather than a measured one.
+
+  `--rank-by learned-plm` and the `learned-fused` model reached by
+  `--detector surface` are separate fits and are deliberately untouched: the
+  measurement above covers the default `learned` weights only, and the fused
+  model is not even a scaled copy of the same failure, since it gives both burial
+  terms a negative coefficient instead of the +2.003 / -15.465 pairing.
+
+### Changed
+- **Nucleic ranking figures published in 1.3.0 are withdrawn and restated against
+  a baseline.** The 1.3.0 notes and the nucleic module quoted "top-5 in 80%" over
+  120 apo/holo records and "top-10 65%, top-5 39%" over 31 structures. Those are
+  open-site populations, measured with the uncorrected burial term and against no
+  baseline, and the 39% is the same below-chance number this release fixes. Some
+  were also quoted per apo/holo record rather than per structure, which counts one
+  apo entry paired with six holo entries as six independent successes.
+
+  1.3.0's DETECTION figures are unaffected and stand: cryptic sites found at all
+  rising from 44% to 73% with the ensemble, and the ligand site found at all for
+  87% of structures across 31 structures from 12 BGSU classes. Detection does not
+  consult the ranker. 1.3.0's cryptic RANKING figures were above baseline and are
+  not retracted, but they were published without one.
+
 ## [1.3.0] - 2026-10-26
 
 ### Added

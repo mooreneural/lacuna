@@ -11,7 +11,8 @@ is sites a single static structure does not show: a cryptic pocket is closed or
 shallow in the apo form and opens on binding, so a detector looking at one
 snapshot finds nothing there.
 
-This skill describes **v1.3.0**, which added nucleic-acid support. On 1.2.0 or
+This skill describes **v1.3.1**. v1.3.0 added nucleic-acid support; v1.3.1
+corrected the ranker's burial term for it. On 1.2.0 or
 older, nucleic-acid input is NOT handled: Lacuna built its elastic network from
 CA atoms, found none in RNA, silently fell back to random perturbation, and still
 printed a ranked table with crypticity and persistence columns. That fallback
@@ -141,18 +142,28 @@ returns the same table and the same report files as protein. The only visible
 difference is two extra lines saying it detected nucleic acid and dropped
 hydrogens.
 
-What to expect, all measured on held-out structures:
+What to expect, all measured on held-out structures. Ranking is quoted against
+the random-ordering baseline it has to beat to mean anything, because on a short
+RNA with a handful of clusters a top-5 hit is close to free:
 
 | Input | What happens |
 |---|---|
-| RNA 20 to 200 nt | site ranked top-5 in 80% of cases, top-1 in 50% |
-| RNA 62 to 459 nt | site found in 87%, top-10 in 65%, top-5 in 39% |
-| protein | unchanged |
+| RNA, site open in the input | top-5 in 67%, against a 47% baseline (660 structures) |
+| RNA, site shut in the input | top-5 in 61%, against a 50% baseline (61 structures) |
+| RNA 62 to 459 nt | site found at all in 87% (detection, independent of ranking) |
+| protein | unchanged, to the bit |
 
-**The single most useful thing to tell an RNA user: read further down the list.**
-A 400 nt RNA yields 40 or more clusters and the true site lands around rank 10,
-where a 30-mer puts it at rank 1 to 3. Quote top-10 for anything above 200 nt,
-not top-5.
+**Do not tell an RNA user the old advice that the true site "lands around rank
+10" and the list should be read far down.** That was the signature of a defect,
+not a property of RNA: the ranker's burial term is fitted on protein, where the
+ligand site is the shallower candidate, and it inverts on nucleic acid, where the
+site is the more buried one. Before v1.3.1 that put open RNA sites at top-5 in
+39% against a 47% baseline, which is worse than shuffling the list. v1.3.1
+corrects it and the site now ranks near the top as it does for protein.
+
+Still true: a 400 nt RNA yields 40 or more clusters where a 30-mer yields a
+handful, so quote top-10 above 200 nt rather than top-5. The correction shortens
+that distance, it does not remove it.
 
 Runtime on CPU, 20 conformers: about 1 s at 25 nt, 6 s at 200 nt, 31 s at 459 nt.
 

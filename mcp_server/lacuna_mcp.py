@@ -130,10 +130,12 @@ def find_cryptic_pockets(
 ) -> str:
     """Find cryptic binding pockets in a protein, RNA or DNA structure.
 
-    Nucleic-acid input needs no flag: it is detected from residue composition and
-    routed to a nucleotide elastic network. Tell an RNA user to read further down
-    the list than they would for a protein: a 400 nt RNA yields 40 or more
-    clusters and the site lands around rank 10, so quote top-10 above 200 nt.
+    Nucleic-acid input needs no flag: it is detected from residue composition,
+    routed to a nucleotide elastic network, and ranked with the burial term
+    corrected for nucleic acid, which v1.3.1 fixed. Do not repeat the pre-1.3.1
+    advice that an RNA site "lands around rank 10" and the list must be read far
+    down: that was the defect, not a property of RNA. A large RNA does still
+    yield more clusters than a short one, so quote top-10 above 200 nt.
 
     Cryptic pockets are binding sites that are closed, too small, or absent in a
     protein's unbound (apo) structure and open only as the protein moves. Ordinary

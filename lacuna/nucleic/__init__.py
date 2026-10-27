@@ -2,10 +2,12 @@
 # Copyright (C) 2026 Clayton Moore
 """Nucleic-acid support.
 
-Detection, clustering and ranking are shared with the protein path unchanged,
-because they already work on RNA: on 120 held-out apo/holo records the true
-ligand site is ranked top-5 in 80% of cases. What RNA needs is narrower than it
-first appears.
+Detection and clustering are shared with the protein path unchanged, because they
+already work on RNA. Ranking is shared too, with one weight corrected: the
+ranker's burial term is fitted on protein, where the ligand site is the
+SHALLOWER of the candidates a structure yields, and it inverts on nucleic acid,
+where the site is the more buried one. See ``_NUCLEIC_RANKER_WEIGHTS`` in
+``lacuna.pockets.clusterer``. What RNA needs is narrower than it first appears.
 
   chem   nucleotide chemistry, which the 20-amino-acid lookups elsewhere miss
   anm    an elastic network built on nucleotide beads rather than CA atoms
@@ -18,17 +20,32 @@ structures whose site is shut, that fallback recovered 0 of them while stretchin
 C1'-C1' spacing 25%. It was worse than refusing the input while looking like it
 had worked.
 
-Measured performance, all on held-out structures:
+DETECTION, measured on held-out structures: across 31 structures from 12
+independent BGSU equivalence classes spanning 62 to 459 nt, a single pass finds
+the ligand site for 87% of structures. Detection does not depend on the ranker,
+so the correction below leaves it untouched.
 
-  120 apo/holo records, 37 structures   top-5 80%, top-1 50%
-  31 apo/holo pairs over 12 independent
-  BGSU equivalence classes, 62-459 nt   site found 87%, top-10 65%, top-5 39%
+RANKING. Every ranking figure quoted here before 1.3.1 was measured with the
+uncorrected burial term, against no baseline, so they are withdrawn rather than
+restated. Ranking is now reported against the random-ordering baseline it has to
+beat to mean anything, which is ``1 - C(N-k, m)/C(N, m)`` averaged over
+structures, per structure and held out:
 
-Large RNA is therefore supported and worth running, but ranks the site deeper:
-a 400 nt RNA yields 40 or more clusters, so read further down the list than you
-would for a 30-mer. Above roughly 120 nt a bigger ensemble stops helping, since
-the sites there are already open in the input rather than cryptic; the
-single-structure result is what the 87% figure measures.
+  population                              n    baseline   1.3.0   1.3.1
+  nucleic sites open in the input       660         47%     39%     67%
+  nucleic sites shut in the input        61         50%     64%     61%
+
+The first row is the correction: at 39% the shipped ranker was significantly
+WORSE than shuffling the list (p = 1.3e-07), because it was penalising exactly
+the burial that identifies a nucleic site. The second row is unchanged within
+noise (paired sign test p = 0.75) and was already above baseline.
+
+Large RNA is supported and worth running. It still ranks the site deeper than a
+short one does, because a 400 nt RNA yields 40 or more clusters while a 30-mer
+yields a handful, so read further down the list; the correction shortens that
+distance rather than removing it. Above roughly 120 nt a bigger ensemble stops
+helping, since the sites there are already open in the input rather than cryptic,
+and the 87% detection figure is a single-structure result.
 
 Evidence, including the stages that were tried and reversed, is in the lacuna-rna
 staging repository.
@@ -39,12 +56,48 @@ from lacuna.nucleic.anm import RNAAnmBackend
 from lacuna.nucleic.chem import classify, is_nucleotide
 
 __all__ = ["RNAAnmBackend", "classify", "is_nucleotide", "is_nucleic",
-           "heavy_atoms_only"]
+           "is_nucleic_only", "heavy_atoms_only"]
 
 
 def is_nucleic(structure) -> bool:
-    """True when the structure is RNA, DNA, or a nucleic/protein mixture."""
+    """True when the structure is RNA, DNA, or a nucleic/protein mixture.
+
+    This is the ensemble-backend question: it decides whether the elastic network
+    needs nucleotide beads, and a mixture does, because ``NMABackend`` would
+    leave every nucleotide rigid. For the RANKER gate use ``is_nucleic_only``.
+    """
     return classify([r.name for r in structure.residues])["kind"] in ("nucleic", "mixed")
+
+
+def is_nucleic_only(structure) -> bool:
+    """True when the structure is RNA or DNA with no protein in it.
+
+    Deliberately stricter than ``is_nucleic``, and the difference is load-bearing
+    rather than pedantic. ``classify`` reports "mixed" whenever both polymers are
+    present with no minimum fraction, so 300 amino acids beside a single guanine
+    is "mixed", and 4 of the 210 structures in the CryptoBench test fold are
+    protein targets carrying a small nucleic co-crystal: 1g59 at 14% nucleotide,
+    6du4 at 9%, 5hto at 5%, 4gv9 at 4%. Their annotated sites are protein
+    pockets, and the ranker's burial term is right for those.
+
+    So the two questions differ. Which beads the elastic network needs is about
+    whether nucleotides are present at all, and a mixture needs them. Which way
+    the burial term should point is about what walls the pocket, and in a mostly
+    protein structure that is protein. Gating the weight on ``is_nucleic`` would
+    apply the nucleic correction to 1.9% of the protein benchmark, where it costs
+    17 points, and the regression would be invisible to the benchmark harness,
+    which loads those structures one chain at a time and so sees all 210 as pure
+    protein.
+
+    Mixed protein/nucleic input therefore keeps the protein weighting. That is
+    the conservative choice rather than a measured one: the correction is
+    validated on nucleic-only structures, and a separate survey of 478 ligand
+    copies in protein/RNA complexes found their sites sharply bimodal, about 44%
+    walled almost entirely by protein and 36% almost entirely by RNA, so a single
+    structure-level answer cannot be right for both. Per-pocket gating is the
+    open question, not a shipped behaviour.
+    """
+    return classify([r.name for r in structure.residues])["kind"] == "nucleic"
 
 
 def heavy_atoms_only(structure):
