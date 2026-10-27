@@ -3,7 +3,7 @@
        alt="Lacuna" width="720">
 </p>
 
-<p align="center"><strong>Cryptic binding pocket discovery via conformational ensemble analysis.</strong></p>
+<p align="center"><strong>Cryptic binding pocket discovery in proteins, RNA and DNA, via conformational ensemble analysis.</strong></p>
 
 <p align="center">
   <a href="https://pypi.org/project/lacuna-pockets/"><img alt="PyPI" src="https://img.shields.io/pypi/v/lacuna-pockets"></a>
@@ -41,6 +41,22 @@ fitted model.
 ```bash
 lacuna discover kras.pdb --conformers 20 --emit-boltz-constraints --emit-vina-boxes
 ```
+
+**RNA and DNA work the same way, with no extra flags.** Nucleic-acid input is
+recognised from its residues, and the elastic network is built on nucleotide
+beads (C1', C2 and P) instead of CA atoms:
+
+```bash
+lacuna discover riboswitch.cif --conformers 20
+```
+
+Across 31 RNA structures from 12 independent BGSU equivalence classes, spanning
+62 to 459 nucleotides, a single pass finds the ligand site for 87% of
+structures. On RNA sites with no detectable cavity in the input, the ensemble
+takes "found at all" from 44% to 73%, which is the case it exists for. Ranking
+is reported against the random-ordering baseline in
+[docs/RANKING.md](docs/RANKING.md), because on a short RNA with few candidates a
+top-five hit is close to free and a bare percentage there says little.
 
 ## Install
 
