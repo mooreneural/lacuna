@@ -245,7 +245,8 @@ Evaluation uses the **CryptoBench** (Škrhák et al. 2025) and **PocketMiner**
 Barril 2010), **ESM-2** (Lin et al. 2023).
 
 Lacuna has also been evaluated by others. **zPocket** (Portnoi, Keys, DiFrancesco
-& Gruver 2026, [arXiv:2610.17696](https://arxiv.org/abs/2610.17696)) benchmarked
+& Gruver 2026, [arXiv:2610.17696](https://arxiv.org/abs/2610.17696)), winner of
+the Octavian-Eugen Ganea Prize for Best Paper at MoML 2026, benchmarked
 it on their PocketWatch dataset, where it recorded the highest candidate coverage
 of any baseline method and the lowest conversion of that coverage into top
 ranks. That independently reproduced this project's own coverage-versus-conversion
