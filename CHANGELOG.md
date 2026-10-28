@@ -17,11 +17,12 @@ What is new is a second kind of output and a backend correction.
   clusters of the fraction of that cluster's conformers in which the residue
   lines the pocket.
 
-  This exists because the field evaluates per-residue ROC-AUC and AUPRC, not
-  top-k. CryptoBench's own paper, PocketMiner, UniPocket and zPocket all report
-  it; Lacuna reported only top-k and so could not be placed on those tables at
-  all. Measured on the CryptoBench held-out test fold, n=231 targets and 76,633
-  residues, with the aggregation form selected on the train folds:
+  This exists because the field scores per residue, not top-k: CryptoBench,
+  PocketMiner, UniPocket and zPocket all report ROC-AUC with a precision-recall
+  summary beside it. Lacuna reported only top-k and so could not be placed on
+  those tables at all. Measured on the CryptoBench held-out test fold, n=231
+  targets and 76,633 residues, with the aggregation form selected on the train
+  folds:
 
       scorer                            AUROC   AUPRC
       this, 20 conformers               0.774   0.345
@@ -32,9 +33,13 @@ What is new is a second kind of output and a backend correction.
   The burial row is the one that matters, because a cavity-lining score could
   easily be a restatement of how buried a residue is. Paired over targets, the
   propensity beats burial by **+0.188 AUROC** (95% CI +0.164 to +0.211) and
-  **+0.229 AUPRC** (+0.199 to +0.261). For reference, P2Rank on apo structures
-  reaches 0.21 AUPRC on this benchmark and CryptoBench's own protein-language
-  model 0.36.
+  **+0.229 AUPRC** (+0.199 to +0.261).
+
+  Published comparators need the averaging convention stated. The figures above
+  average within each protein then over proteins; CryptoBench's table pools all
+  residues into one curve. Pooled the same way this scorer gives AUROC 0.813 and
+  AUPRC 0.237, against CryptoBench's P2Rank 0.81 / 0.21 and their own sequence
+  model 0.86 / 0.36. So: a little above P2Rank, clearly below the sequence model.
 
   The ensemble earns its place here: 0.345 against 0.249 for the deposited
   structure alone, and the gap holds under a stricter single-partner label

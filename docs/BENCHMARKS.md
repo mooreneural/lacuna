@@ -66,9 +66,11 @@ python benchmarks/verify_recall_gaming.py                     # why Jaccard, not
 ## Per-residue propensity (v1.4.0)
 
 Top-k pocket recovery is what a user reads, but it is not what this subfield
-reports. CryptoBench's own paper, PocketMiner, UniPocket and zPocket all evaluate
-**per-residue ROC-AUC and AUPRC**. Until 1.4.0 Lacuna emitted no per-residue
-score and so could not appear on those tables at all.
+reports. CryptoBench's own paper, PocketMiner, UniPocket and zPocket all score
+**per residue**, reporting ROC-AUC alongside a precision-recall summary (AUPRC in
+CryptoBench, PR-AUC in PocketMiner, average precision in UniPocket and zPocket).
+Until 1.4.0 Lacuna emitted no per-residue score and so could not appear on those
+tables at all.
 
 CryptoBench held-out test fold, n=231 targets, 76,633 residues. Labels are the
 union of `apo_pocket_selection` per chain. The aggregation form was selected on
@@ -81,8 +83,28 @@ the train folds and then applied unchanged.
 | burial neighbour count | 0.586 | 0.115 |
 | random expectation | 0.500 | 0.067 |
 
-Published comparators on this benchmark: P2Rank on apo structures reaches 0.21
-AUPRC, and CryptoBench's own protein-language-model network 0.36.
+**Comparing these to published numbers needs care, because the averaging
+convention differs.** The table above averages precision within each protein and
+then over proteins, which is the convention zPocket uses and which stops large
+proteins dominating. CryptoBench's published table pools every residue into one
+curve instead: its paper does not say so, but its evaluation code concatenates
+all proteins before computing the curve, and the pooled figures reproduce its
+Table 5. Pooled the same way, this scorer gives **AUROC 0.813 and AUPRC 0.237**,
+and that is the number to set beside CryptoBench's:
+
+| method (pooled per-residue) | AUC | AUPRC |
+|---|:--:|:--:|
+| CryptoBench pLM-NN, CB-full | 0.86 | 0.36 |
+| **`residue_propensity`, 20 conformers** | **0.813** | **0.237** |
+| P2Rank, CB-P2RANK-apo | 0.81 | 0.21 |
+| PocketMiner, CB-PM | 0.76 | 0.19 |
+
+Read even that with the subsets in mind: CB-full is the whole test set, CB-PM
+drops the 60 structures PocketMiner could not process, and CB-P2RANK-apo is the
+single-chain apo subset. So this sits a little above P2Rank, close to level on
+AUC, and clearly below CryptoBench's sequence model, which is the expected place
+for a geometric and ensemble-derived score carrying no learned sequence
+component.
 
 **The burial row is the load-bearing control.** A score built from cavity lining
 could be a restatement of how buried a residue is, which would make it a
