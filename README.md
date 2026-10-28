@@ -119,7 +119,13 @@ and AutoDock Vina boxes ready for docking. Full options in
 4. **Druggability scoring.** Gaussian volume reward centred at 300 A³, plus
    enclosure, hydrophobicity and aromaticity (Halgren 2009), scored per conformer.
 5. **Ranking.** A fitted linear model over 23 geometric and ensemble-derived
-   features orders the sites. Each also carries a continuous crypticity score.
+   features orders the sites. Each also carries a continuous crypticity score,
+   its chain composition, and a flag for whether it sits at a chain interface.
+6. **Per-residue propensity.** The ranked pockets are collapsed back onto the
+   sequence, giving every residue a score for how strongly it lines a
+   high-ranking, persistently-open cavity. This is the form most cryptic-site
+   predictors are evaluated in, so it is what to use when comparing Lacuna
+   against them.
 
 ## Documentation
 
@@ -151,6 +157,26 @@ size-robust criterion (Jaccard >= 0.25, or centroid within 4 A of the site).
 
 ¹ Held-out surface-fusion evaluation at 5 conformers (n=184); the other rows use
 the 20-conformer cohort (n=180).
+
+### Per-residue recovery
+
+Top-5 is what a user acts on, but most cryptic-site predictors are scored
+per-residue instead, so since v1.4.0 Lacuna reports that too. Same held-out
+CryptoBench fold, n=231 targets and 76,633 residues:
+
+| scorer | AUROC | AUPRC |
+|---|:--:|:--:|
+| **20 conformers** | **0.774** | **0.345** |
+| input structure only | 0.697 | 0.249 |
+| burial neighbour count | 0.586 | 0.115 |
+| random expectation | 0.500 | 0.067 |
+
+The second row is the one worth reading twice: the same scorer on the deposited
+coordinates alone reaches 0.249, so the conformational ensemble is doing real
+work rather than restating the input. The third row is the control that matters,
+since a cavity-lining score could easily be a re-description of how buried a
+residue is. Paired over targets the propensity beats burial by **+0.229 AUPRC**
+(95% CI +0.199 to +0.261).
 
 **[Full results, including head-to-head comparisons and where Lacuna loses →](docs/BENCHMARKS.md)**
 
