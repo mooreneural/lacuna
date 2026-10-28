@@ -96,12 +96,26 @@ class PocketCluster:
     # Peak druggability over the ensemble (the pocket scored in its most-open
     # state, which is the relevant value for a transiently-open cryptic site).
     max_druggability: float = 0.0
-    # Volume in the input/apo structure (conformer 0); 0.0 if absent there.
+    # Largest frame-0 member assigned to THIS cluster, or 0.0 when no member of
+    # this cluster came from conformer 0. That is not the same as "no cavity in
+    # the input": clustering is a greedy single pass, so a frame-0 pocket at this
+    # site can be absorbed by a neighbouring cluster and leave 0.0 behind. Measured
+    # at 4-7% of pockets. To ask whether a site is open in the input, re-run with
+    # --conformers 0, which is byte-identical to frame 0 of an ensemble run.
     apo_volume_a3: float = 0.0
     # Continuous crypticity score [0,1]: how strongly this pocket exhibits the
     # conformational-selection signature of a cryptic site (opens up relative to
     # the apo state and is druggable when open). See clusterer.compute_crypticity.
     crypticity: float = 0.0
+    #: Fraction of consensus lining residues contributed by each chain, keyed by
+    #: chain id. A single-chain pocket is ``{"A": 1.0}``.
+    chain_shares: dict[str, float] = field(default_factory=dict)
+    #: True when at least two chains each contribute a meaningful share of the
+    #: lining (see clusterer.INTERFACE_MIN_SHARE / INTERFACE_MIN_RESIDUES). On
+    #: CryptoBench this flag is ANTI-correlated with being an annotated site:
+    #: 73.6% of top-5 pockets are interfacial against 14.8% of true sites, so it
+    #: is useful for de-prioritising, not for finding.
+    interface: bool = False
     member_pockets: list[Pocket] = field(default_factory=list, repr=False)
 
     def to_dict(self) -> dict:
@@ -117,5 +131,8 @@ class PocketCluster:
             "cryptic": self.cryptic,
             "crypticity": round(self.crypticity, 3),
             "lining_residues": self.lining_residues,
+            # List of conformer INDICES, not a count. Index 0 is the input structure.
             "appears_in_conformers": self.appears_in_conformers,
+            "chain_shares": {k: round(v, 3) for k, v in sorted(self.chain_shares.items())},
+            "interface": self.interface,
         }

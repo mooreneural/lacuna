@@ -63,6 +63,42 @@ python benchmarks/compare_mdpocket.py --folds test            # vs MDpocket (nee
 python benchmarks/verify_recall_gaming.py                     # why Jaccard, not recall
 ```
 
+## Per-residue propensity (v1.4.0)
+
+Top-k pocket recovery is what a user reads, but it is not what this subfield
+reports. CryptoBench's own paper, PocketMiner, UniPocket and zPocket all evaluate
+**per-residue ROC-AUC and AUPRC**. Until 1.4.0 Lacuna emitted no per-residue
+score and so could not appear on those tables at all.
+
+CryptoBench held-out test fold, n=231 targets, 76,633 residues. Labels are the
+union of `apo_pocket_selection` per chain. The aggregation form was selected on
+the train folds and then applied unchanged.
+
+| scorer | AUROC | AUPRC |
+|---|:--:|:--:|
+| `residue_propensity`, 20 conformers | **0.774** [0.747, 0.800] | **0.345** [0.313, 0.377] |
+| `residue_propensity`, input structure only | 0.697 | 0.249 |
+| burial neighbour count | 0.586 | 0.115 |
+| random expectation | 0.500 | 0.067 |
+
+Published comparators on this benchmark: P2Rank on apo structures reaches 0.21
+AUPRC, and CryptoBench's own protein-language-model network 0.36.
+
+**The burial row is the load-bearing control.** A score built from cavity lining
+could be a restatement of how buried a residue is, which would make it a
+geometric re-description rather than new information. Paired over targets, the
+propensity beats burial by **+0.188 AUROC** (95% CI +0.164 to +0.211) and
+**+0.229 AUPRC** (+0.199 to +0.261).
+
+This is also the clearest evidence that the conformational ensemble carries
+information the input structure does not: 0.345 against 0.249 for the same
+scorer on the deposited coordinates alone. The gap survives a stricter label
+definition using only the main holo partner, 0.312 against 0.216.
+
+Scope, stated because it is narrow: this measures where cryptic sites *are*, not
+how well pockets are ordered. It does not change any top-k number below, and the
+ranker is untouched in 1.4.0.
+
 ## Success criterion
 
 A pocket counts as recovered if, among the top five ranked clusters, one's lining

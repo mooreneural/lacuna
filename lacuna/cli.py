@@ -123,7 +123,8 @@ def main():
 @click.option("--conformers", "-n", default=20, show_default=True,
               help="Number of conformers to generate.")
 @click.option("--output", "-o", type=click.Path(path_type=Path), default=None,
-              help="Output directory (default: <input_stem>_lacuna/).")
+              help="Output DIRECTORY, which always receives pocket_report.json "
+                   "(default: <input_stem>_lacuna/).")
 @click.option("--min-druggability", default=0.0, show_default=True,
               help="Filter: minimum druggability score [0–1].")
 @click.option("--min-persistence", default=0.0, show_default=True,

@@ -5,6 +5,92 @@ All notable changes to Lacuna are documented here. The project follows
 governs its benchmarks: reported numbers are the ones we can defend on held-out
 data, never the most flattering ones available.
 
+## [1.4.0] - 2026-10-28
+
+Ranking behaviour is unchanged. Every number in `docs/BENCHMARKS.md` stands, the
+fitted weights are untouched, and no existing report field changes type or value.
+What is new is a second kind of output and a backend correction.
+
+### Added
+- **`residue_propensity`: a per-residue cryptic-pocket score in
+  `pocket_report.json`.** For each residue, the inverse-rank-weighted sum over
+  clusters of the fraction of that cluster's conformers in which the residue
+  lines the pocket.
+
+  This exists because the field evaluates per-residue ROC-AUC and AUPRC, not
+  top-k. CryptoBench's own paper, PocketMiner, UniPocket and zPocket all report
+  it; Lacuna reported only top-k and so could not be placed on those tables at
+  all. Measured on the CryptoBench held-out test fold, n=231 targets and 76,633
+  residues, with the aggregation form selected on the train folds:
+
+      scorer                            AUROC   AUPRC
+      this, 20 conformers               0.774   0.345
+      this, input structure only        0.697   0.249
+      burial neighbour count            0.586   0.115
+      random expectation                0.500   0.067
+
+  The burial row is the one that matters, because a cavity-lining score could
+  easily be a restatement of how buried a residue is. Paired over targets, the
+  propensity beats burial by **+0.188 AUROC** (95% CI +0.164 to +0.211) and
+  **+0.229 AUPRC** (+0.199 to +0.261). For reference, P2Rank on apo structures
+  reaches 0.21 AUPRC on this benchmark and CryptoBench's own protein-language
+  model 0.36.
+
+  The ensemble earns its place here: 0.345 against 0.249 for the deposited
+  structure alone, and the gap holds under a stricter single-partner label
+  definition (0.312 against 0.216).
+
+- **`chain_shares` and `interface` per pocket.** Every lining residue already
+  carried a chain id and nothing reported whether a pocket sat at a chain
+  interface. A chain counts toward the flag at >=10% of the lining and >=3
+  residues, on two or more chains.
+
+  Reported with its measured direction, which is the opposite of the obvious
+  one: on the CryptoBench test fold **63.6% of proposed pockets are interfacial,
+  rising to 73.6% of the top five, while only 14.8% of annotated sites are**. The
+  flag is therefore useful for de-prioritising a candidate, not for finding one.
+
+### Fixed
+- **The Boltz backend no longer matches atoms by position or pad with zeros, and
+  now superposes onto the input frame.** Two defects, both silent:
+
+  Boltz predicts from sequence and may reorder atoms, which its own comment in
+  this file acknowledged, yet a count mismatch was handled by taking the first N
+  atoms positionally and filling the remainder with `np.zeros`, placing unmatched
+  atoms at the origin. Atoms are now matched on `(chain, residue, atom name)`,
+  unmatched atoms keep their reference coordinate, and a frame matching under
+  half the input is discarded rather than used.
+
+  Separately, nothing superposed Boltz's output onto the input. It folds de novo
+  in its own coordinate frame, and cluster identity downstream is absolute
+  Cartesian centroid proximity within 5 Å, so pockets from a Boltz conformer
+  would rarely co-cluster with the input's: `apo_volume_A3` would read 0 and the
+  whole protein would report as cryptic. Conformers are now Kabsch-superposed on
+  their matched atoms, with a reflection guard.
+
+  This affects `--backend boltz` only. The default NMA backend is frame-safe by
+  construction and is unchanged.
+
+### Changed
+- **Documentation corrected where it contradicted the code.** Each of these
+  described behaviour the code has not had for some time:
+  - `docs/RANKING.md` and the clusterer docstring said a pocket is flagged
+    cryptic when "present in fewer than 90% of conformers". The rule is
+    `crypticity >= 0.3` and has been since before 1.0.0.
+  - The clusterer described its clustering as "DBSCAN (eps=5 Å, min_samples=1)"
+    and as using union-find. It is neither: it is an order-dependent greedy
+    single pass, which is why pocket identity can depend on the order conformers
+    are pooled in.
+  - `apo_volume_A3` was documented as the volume "in the apo structure, 0.0 if
+    absent there". It is the largest frame-0 member **assigned to that cluster**,
+    so it also reads 0.0 when the greedy pass put the site's frame-0 pocket in a
+    neighbouring cluster, measured at 4 to 7% of pockets. `docs/RANKING.md` now
+    also states that whenever it is 0.0, `crypticity` is numerically identical to
+    `max_druggability`, and points at `--conformers 0` as the way to ask whether
+    a site is genuinely open in the input.
+  - `appears_in_conformers` is now documented as a list of conformer indices
+    rather than a count, and `--output` help names the report file it writes.
+
 ## [1.3.1] - 2026-10-26
 
 ### Fixed

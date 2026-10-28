@@ -16,11 +16,35 @@ from __future__ import annotations
 
 import subprocess
 import tempfile
+import warnings
 from pathlib import Path
 
 import numpy as np
 
 from lacuna.ensemble.base import EnsembleBackend
+
+#: Below this fraction of input atoms matched, a predicted frame is discarded
+#: rather than used. Matches the external backend's threshold.
+_MIN_MATCH_FRACTION = 0.5
+
+
+def _superpose(mobile: np.ndarray, target: np.ndarray, idx: np.ndarray) -> np.ndarray:
+    """Kabsch-superpose `mobile` onto `target` using only the atoms in `idx`.
+
+    Returns the full `mobile` array rotated and translated into the target frame.
+    Unmatched atoms carry the reference coordinate already, so they are invariant
+    under the transform by construction and need no special handling.
+    """
+    if idx.size < 3:
+        return mobile
+    m, t = mobile[idx], target[idx]
+    mc, tc = m.mean(axis=0), t.mean(axis=0)
+    cov = (m - mc).T @ (t - tc)
+    u, _s, vt = np.linalg.svd(cov)
+    # Reflection guard: without it an improper rotation can mirror the structure.
+    d = np.sign(np.linalg.det(vt.T @ u.T))
+    rot = vt.T @ np.diag([1.0, 1.0, d]) @ u.T
+    return (mobile - mc) @ rot.T + tc
 
 
 class BoltzBackend(EnsembleBackend):
@@ -122,24 +146,47 @@ class BoltzBackend(EnsembleBackend):
 
             conformers: list[np.ndarray] = []
             input_structure = load_structure(structure_path, chain=chain)
-            n_atoms = len(input_structure.atoms)
+            base = coords_array(input_structure)
+            keys = [(a.chain_id, a.res_seq, a.name) for a in input_structure.atoms]
 
             for pdb_file in pdb_files:
                 try:
                     s = load_structure(pdb_file)
-                    coords = coords_array(s)
-                    # Align atom count - Boltz may add or reorder atoms
-                    if coords.shape[0] == n_atoms:
-                        conformers.append(coords)
-                    else:
-                        # Try to match by truncating/padding - take first N atoms
-                        n = min(coords.shape[0], n_atoms)
-                        padded = np.zeros((n_atoms, 3), dtype=np.float32)
-                        padded[:n] = coords[:n]
-                        conformers.append(padded)
                 except Exception:
                     continue
+                frame = {(a.chain_id, a.res_seq, a.name): c
+                         for a, c in zip(s.atoms, coords_array(s))}
+                # Boltz predicts from sequence alone, so it may reorder atoms and
+                # will in general return a different count. Match on identity and
+                # keep the reference coordinate where an atom is missing; the
+                # previous positional take-the-first-N with zero padding silently
+                # placed unmatched atoms at the origin.
+                out = base.copy()
+                matched_idx = []
+                for i, key in enumerate(keys):
+                    got = frame.get(key)
+                    if got is not None:
+                        out[i] = got
+                        matched_idx.append(i)
+                frac = len(matched_idx) / max(len(keys), 1)
+                if frac < _MIN_MATCH_FRACTION:
+                    warnings.warn(
+                        f"{pdb_file.name} matched only {frac:.0%} of input atoms; "
+                        "skipping this conformer",
+                        RuntimeWarning, stacklevel=2)
+                    continue
+                # Boltz folds de novo in its own frame. Cluster identity downstream
+                # is absolute-Cartesian centroid proximity, so an unaligned frame
+                # would put every pocket in its own cluster and report the whole
+                # protein as cryptic. Superpose on the matched atoms.
+                idx = np.asarray(matched_idx)
+                out = _superpose(out, base, idx)
+                conformers.append(out.astype(np.float32))
 
+            if not conformers:
+                raise RuntimeError(
+                    "boltz predict produced structures but none matched the input "
+                    "atoms well enough to use")
             return conformers
 
     def _write_input_yaml(

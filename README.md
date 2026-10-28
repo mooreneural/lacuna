@@ -12,6 +12,7 @@
   <a href="https://www.biorxiv.org/content/10.64898/2026.08.14.744956v2"><img alt="bioRxiv" src="https://img.shields.io/badge/bioRxiv-10.64898%2F2026.08.14.744956-bc2635"></a>
   <a href="https://app.tamarind.bio/tools/lacuna"><img alt="Run on Tamarind Bio" src="https://img.shields.io/badge/Run_on-Tamarind_Bio-2ea44f"></a>
   <a href="https://neurosnap.ai/service/Lacuna%20Cryptic%20Pocket%20Discovery"><img alt="Run on Neurosnap" src="https://img.shields.io/badge/Run_on-Neurosnap-2ea44f"></a>
+  <a href="https://os.templecompute.com/library/lacuna-cryptic-pocket-discovery-2500e2"><img alt="Run on Horus" src="https://img.shields.io/badge/Run_on-Horus-2ea44f"></a>
 </p>
 
 <p align="center">

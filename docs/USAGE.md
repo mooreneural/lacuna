@@ -93,6 +93,46 @@ NMA runtime is sub-second to about 7s per protein on a laptop CPU.
 The JSON report also includes per-pocket volume dynamics (`apo_volume_A3`,
 `volume_range_A3`) and `max_druggability`.
 
+### Per-pocket chain composition
+
+`chain_shares` gives the fraction of a pocket's lining contributed by each chain,
+and `interface` is true when two or more chains each contribute at least 10% of
+the lining and at least 3 residues.
+
+Read the flag in the direction it was measured. On the CryptoBench test fold
+63.6% of proposed pockets are interfacial, rising to 73.6% of the top five, while
+only 14.8% of annotated sites are. It is a reason to look harder at a candidate
+before trusting it, not a reason to prefer one.
+
+### `residue_propensity`
+
+A per-residue cryptic-pocket score over the whole structure, aggregated from the
+ranked pockets:
+
+```python
+import json
+report = json.load(open("protein_lacuna/pocket_report.json"))
+scores = report["residue_propensity"]      # {"LYS155:A": 1.85, ...}
+scores.get("ALA42:A", 0.0)                 # residues lining no pocket are absent
+```
+
+Each residue's score is the inverse-rank-weighted sum, over pockets, of the
+fraction of that pocket's conformers in which the residue lines it. A residue
+lining the top-ranked pocket in every conformer scores 1.0 from that pocket
+alone; residues absent from the map line no proposed pocket and should be read
+as 0.0.
+
+This is the quantity most cryptic-site predictors are evaluated on, as
+per-residue ROC-AUC and AUPRC, so it is what to use when comparing Lacuna against
+CryptoBench, PocketMiner, UniPocket or similar. On the CryptoBench held-out test
+fold (n=231) it reaches **AUROC 0.774 and AUPRC 0.345**, against 0.249 AUPRC for
+the same scorer run on the input structure alone and 0.115 for a burial
+neighbour count. See `docs/BENCHMARKS.md`.
+
+Note the units differ from `crypticity`: this is an unbounded sum over pockets,
+not a score in [0, 1], so compare residues within a structure rather than across
+structures.
+
 ## Input formats
 
 Accepts PDB or mmCIF from any predictor or database:

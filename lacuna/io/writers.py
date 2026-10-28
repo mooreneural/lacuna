@@ -18,6 +18,9 @@ def write_report(
     rank_by: str = "druggability",
 ) -> Path:
     """Write pocket_report.json with ranked cluster metadata."""
+    from lacuna.pockets.clusterer import residue_propensity
+
+    propensity = residue_propensity(clusters)
     report = {
         "protein": structure.path,
         "n_conformers": n_conformers,
@@ -25,6 +28,10 @@ def write_report(
         "n_pockets_found": len(clusters),
         "n_cryptic_pockets": sum(1 for c in clusters if c.cryptic),
         "pockets": [c.to_dict() for c in clusters],
+        # Per-residue cryptic-pocket propensity. This is the quantity the field
+        # evaluates on (per-residue ROC-AUC / AUPRC); residues absent from this
+        # map line no proposed pocket and score 0.0.
+        "residue_propensity": {k: round(v, 4) for k, v in sorted(propensity.items())},
     }
     out = output_dir / "pocket_report.json"
     out.write_text(json.dumps(report, indent=2))

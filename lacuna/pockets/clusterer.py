@@ -4,11 +4,21 @@
 
 Each conformer produces a list of Pocket objects. This module:
   1. Pools all pockets across all conformers.
-  2. Clusters by centroid proximity using DBSCAN (eps=5 Å, min_samples=1).
+  2. Clusters by centroid proximity: a greedy single pass that assigns each pocket
+     to the nearest existing cluster mean within 5 Å, or starts a new cluster.
   3. Computes per-cluster statistics: persistence, druggability, volume
-     dynamics, a continuous crypticity score, and consensus residues.
+     dynamics, a continuous crypticity score, consensus residues and chain shares.
   4. Ranks clusters by a configurable strategy (see ``rank_by``).
-  5. Flags clusters as "cryptic" if persistence < 0.9 (not open in all conformers).
+  5. Flags clusters as "cryptic" when ``crypticity >= CRYPTICITY_THRESHOLD``.
+  6. Derives a per-residue propensity from the ranked clusters
+     (see ``residue_propensity``).
+
+Two corrections to earlier descriptions of this file, both of which said something
+the code does not do. The clustering is NOT DBSCAN and is not union-find: it is the
+order-dependent greedy pass in ``_greedy_cluster``, so pocket identity depends on
+the order conformers are pooled in. And the cryptic flag has not been
+``persistence < 0.9`` since before 1.0.0; the reason that rule was dropped is in
+the comment above ``CRYPTICITY_THRESHOLD``.
 """
 
 from __future__ import annotations
@@ -445,6 +455,86 @@ def learned_fused_score(c: PocketCluster) -> float:
     return float(((x - mean) / scale) @ coef + b)
 
 
+#: A chain counts toward the interface flag when it contributes at least this
+#: share of a pocket's consensus lining AND at least INTERFACE_MIN_RESIDUES of it.
+INTERFACE_MIN_SHARE = 0.10
+INTERFACE_MIN_RESIDUES = 3
+
+
+def _chain_id(label: str) -> str:
+    """Chain id from a residue label formatted ``NAME<seq>:<chain>``."""
+    _, _, chain = label.rpartition(":")
+    return chain
+
+
+def _chain_shares(lining_residues: list[str]) -> dict[str, float]:
+    """Fraction of the lining contributed by each chain."""
+    if not lining_residues:
+        return {}
+    counts: dict[str, int] = {}
+    for label in lining_residues:
+        chain = _chain_id(label)
+        counts[chain] = counts.get(chain, 0) + 1
+    total = float(len(lining_residues))
+    return {c: n / total for c, n in counts.items()}
+
+
+def residue_propensity(clusters: list[PocketCluster]) -> dict[str, float]:
+    """Per-residue cryptic-pocket propensity, aggregated over ranked clusters.
+
+    For each cluster, a residue's occupancy is the fraction of that cluster's own
+    conformers in which some member pocket lines it. Occupancies are weighted by
+    inverse rank and summed across clusters::
+
+        propensity(r) = sum_c  (1 / rank_c) * occupancy(r, c)
+
+    Two properties make this worth emitting. It is the quantity the field actually
+    scores on (CryptoBench, PocketMiner, UniPocket and zPocket all report
+    per-residue ROC-AUC and AUPRC, none report top-k), and the occupancy term is a
+    measured frequency over an ensemble, which no single-structure predictor can
+    compute.
+
+    Measured on the CryptoBench held-out test fold, n=231 targets, 76,633 residues,
+    with the aggregation form selected on the train folds:
+
+    =========================  ======  ======
+    scorer                     AUROC   AUPRC
+    =========================  ======  ======
+    this, 20 conformers         0.774   0.345
+    this, input structure only  0.697   0.249
+    burial neighbour count      0.586   0.115
+    random expectation          0.500   0.067
+    =========================  ======  ======
+
+    The burial comparison is the load-bearing one, because a cavity-lining score
+    could be a restatement of how buried a residue is. Paired over targets it is
+    +0.188 AUROC (95% CI +0.164 to +0.211) and +0.229 AUPRC (+0.199 to +0.261).
+
+    Ranks must already be assigned, so call this after ``cluster_pockets``.
+
+    Returns
+    -------
+    dict
+        Residue label to propensity. Residues lining no cluster are omitted and
+        should be read as 0.0.
+    """
+    scores: dict[str, float] = {}
+    for c in clusters:
+        if c.rank < 1 or not c.appears_in_conformers:
+            continue
+        n_conf = len(c.appears_in_conformers)
+        weight = 1.0 / float(c.rank)
+        # Distinct conformers per residue, not member-pocket count: a conformer can
+        # contribute several member pockets to one cluster and must not count twice.
+        seen: dict[str, set[int]] = {}
+        for p in c.member_pockets:
+            for label in p.lining_residues:
+                seen.setdefault(label, set()).add(p.conformer_idx)
+        for label, confs in seen.items():
+            scores[label] = scores.get(label, 0.0) + weight * (len(confs) / n_conf)
+    return scores
+
+
 def compute_crypticity(apo_volume: float, max_volume: float, max_druggability: float) -> float:
     """Continuous crypticity score in [0, 1].
 
@@ -549,7 +639,9 @@ def cluster_pockets(
 
     centroids = np.array([p.centroid for p in all_pockets])  # (N, 3)
 
-    # DBSCAN without sklearn: greedy centroid merging with union-find
+    # Greedy single-pass centroid merging, NOT DBSCAN and NOT union-find: each
+    # pocket joins the nearest existing cluster mean within eps or seeds a new one,
+    # so the result depends on the order pockets are pooled in.
     labels = _greedy_cluster(centroids, eps=_DBSCAN_EPS)
     n_clusters = labels.max() + 1 if len(labels) > 0 else 0
 
@@ -579,8 +671,11 @@ def cluster_pockets(
         # half-collapsed in the representative (mean-centroid) member.
         max_drug_score = max(score_pocket(p).composite for p in members)
 
-        # Volume in the input/apo structure (conformer 0). 0.0 if the pocket is
-        # absent there - the strongest signal of crypticity.
+        # Largest frame-0 member OF THIS CLUSTER. The `else 0.0` makes "no frame-0
+        # member landed in this cluster" indistinguishable from "the input has no
+        # cavity here", and those differ: the greedy pass above can assign a site's
+        # frame-0 pocket to a neighbouring cluster. Measured at 4-7% of pockets.
+        # `--conformers 0` answers the physical question directly.
         apo_members = [p.volume_a3 for p in members if p.conformer_idx == 0]
         apo_volume = float(max(apo_members)) if apo_members else 0.0
 
@@ -601,6 +696,13 @@ def cluster_pockets(
             r for r, cnt in res_counts.items() if cnt >= threshold
         )
 
+        chain_shares = _chain_shares(consensus_residues)
+        is_interface = sum(
+            1 for share in chain_shares.values()
+            if share >= INTERFACE_MIN_SHARE
+            and share * len(consensus_residues) >= INTERFACE_MIN_RESIDUES
+        ) >= 2
+
         clusters.append(PocketCluster(
             rank=0,  # set after sorting
             centroid=centroid,
@@ -615,6 +717,8 @@ def cluster_pockets(
             cryptic=crypticity >= CRYPTICITY_THRESHOLD,
             lining_residues=consensus_residues,
             appears_in_conformers=conformer_set,
+            chain_shares=chain_shares,
+            interface=is_interface,
             member_pockets=members,
         ))
 

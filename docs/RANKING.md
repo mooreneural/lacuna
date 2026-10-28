@@ -74,8 +74,20 @@ crypticity = opening × peak_open_state_druggability
 
 A constitutive pocket already formed in the input scores near 0. One that is
 absent in the apo structure and opens into a druggable cavity scores near 1. A
-site is additionally flagged `cryptic: true` when it is present in fewer than
-90% of conformers.
+site is flagged `cryptic: true` when `crypticity >= 0.3`.
+
+> An earlier version of this page said the flag was "present in fewer than 90% of
+> conformers". That rule was replaced before 1.0.0 and the sentence outlived it.
+>
+> Two limits of `apo_volume_A3` are worth knowing before reading `crypticity`.
+> It is the largest frame-0 pocket **assigned to that cluster**, so it reads 0.0
+> both when the input has no cavity there and when the greedy clustering put the
+> frame-0 pocket in a neighbouring cluster; the latter accounts for roughly 4-7%
+> of pockets. And whenever it is 0.0, `opening` is 1.0 and `crypticity` becomes
+> numerically identical to `max_druggability`, which happens for over half the
+> pockets in a typical ensemble run. To ask whether a site is genuinely open in
+> your input, re-run with `--conformers 0`: that is byte-identical to frame 0 of
+> the ensemble run, and every pocket it reports has `crypticity` exactly 0.
 
 ## Refitting
 

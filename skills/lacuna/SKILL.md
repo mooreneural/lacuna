@@ -11,7 +11,10 @@ is sites a single static structure does not show: a cryptic pocket is closed or
 shallow in the apo form and opens on binding, so a detector looking at one
 snapshot finds nothing there.
 
-This skill describes **v1.3.1**. v1.3.0 added nucleic-acid support; v1.3.1
+This skill describes **v1.4.0**, which adds a per-residue `residue_propensity`
+map and per-pocket `chain_shares` / `interface` fields to `pocket_report.json`,
+and corrects the Boltz backend's frame handling. Ranking behaviour is unchanged
+from v1.3.1. v1.3.0 added nucleic-acid support; v1.3.1
 corrected the ranker's burial term for it. On 1.2.0 or
 older, nucleic-acid input is NOT handled: Lacuna built its elastic network from
 CA atoms, found none in RNA, silently fell back to random perturbation, and still

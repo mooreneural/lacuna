@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lacuna-pockets"
-version = "1.3.1"
+version = "1.4.0"
 description = "Cryptic binding pocket discovery in proteins, RNA and DNA, via conformational ensemble analysis"
 readme = "README.md"
 requires-python = ">=3.10"
