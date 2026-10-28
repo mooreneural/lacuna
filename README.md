@@ -218,6 +218,14 @@ Evaluation uses the **CryptoBench** (Škrhák et al. 2025) and **PocketMiner**
 **SiteMap druggability** (Halgren 2009), **enclosure scoring** (Schmidtke &
 Barril 2010), **ESM-2** (Lin et al. 2023).
 
+Lacuna has also been evaluated by others. **zPocket** (Portnoi, Keys, DiFrancesco
+& Gruver 2026, [arXiv:2610.17696](https://arxiv.org/abs/2610.17696)) benchmarked
+it on their PocketWatch dataset, where it recorded the highest candidate coverage
+of any baseline method and the lowest conversion of that coverage into top
+ranks. That independently reproduced this project's own coverage-versus-conversion
+finding, and it prompted the per-residue `residue_propensity` output added in
+v1.4.0.
+
 ## License
 
 **[MIT](LICENSE)**, free to use, study, modify, share, and embed in
