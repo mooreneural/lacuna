@@ -21,30 +21,19 @@ from pathlib import Path
 
 import numpy as np
 
-from lacuna.ensemble.base import EnsembleBackend
+from lacuna.ensemble.base import MIN_MATCH_FRACTION, EnsembleBackend, align_frame
 
 #: Below this fraction of input atoms matched, a predicted frame is discarded
-#: rather than used. Matches the external backend's threshold.
-_MIN_MATCH_FRACTION = 0.5
+#: rather than used. Shared with the other backends.
+_MIN_MATCH_FRACTION = MIN_MATCH_FRACTION
 
-
-def _superpose(mobile: np.ndarray, target: np.ndarray, idx: np.ndarray) -> np.ndarray:
-    """Kabsch-superpose `mobile` onto `target` using only the atoms in `idx`.
-
-    Returns the full `mobile` array rotated and translated into the target frame.
-    Unmatched atoms carry the reference coordinate already, so they are invariant
-    under the transform by construction and need no special handling.
-    """
-    if idx.size < 3:
-        return mobile
-    m, t = mobile[idx], target[idx]
-    mc, tc = m.mean(axis=0), t.mean(axis=0)
-    cov = (m - mc).T @ (t - tc)
-    u, _s, vt = np.linalg.svd(cov)
-    # Reflection guard: without it an improper rotation can mirror the structure.
-    d = np.sign(np.linalg.det(vt.T @ u.T))
-    rot = vt.T @ np.diag([1.0, 1.0, d]) @ u.T
-    return (mobile - mc) @ rot.T + tc
+#: Below this fraction of PAIRED residues sharing a residue name, a frame is
+#: discarded. Matching on atom name alone cannot detect a numbering offset,
+#: because every residue carries N/CA/C/O: on 1EVY (numbered 9-357) against a
+#: Boltz frame numbered 1-346, 70% of atoms matched by name while only 7% of
+#: them were the same residue, yielding a 19 A conformer from a fold that was
+#: correct to 0.92 A. Residue identity is what actually detects that.
+_MIN_IDENTITY_FRACTION = 0.9
 
 
 class BoltzBackend(EnsembleBackend):
@@ -56,7 +45,7 @@ class BoltzBackend(EnsembleBackend):
         sampling_steps: int = 200,
         accelerator: str = "gpu",
         cache_dir: str | None = None,
-        use_msa_server: bool = False,
+        use_msa_server: bool = True,
         msa_server_url: str = "https://api.colabfold.com",
     ):
         # step_scale: lower = more diversity (1.2–1.5 recommended)
@@ -147,40 +136,80 @@ class BoltzBackend(EnsembleBackend):
             conformers: list[np.ndarray] = []
             input_structure = load_structure(structure_path, chain=chain)
             base = coords_array(input_structure)
-            keys = [(a.chain_id, a.res_seq, a.name) for a in input_structure.atoms]
+
+            # Residues in observation order, with the atom slots each one owns.
+            # Boltz renumbers its output 1..N, so the input's own numbering is
+            # NOT a usable key: 80% of CryptoBench structures start somewhere
+            # other than 1, and matching on res_seq then pairs atoms across an
+            # offset. Order is exact, because Boltz folded the sequence that
+            # was extracted from this very structure.
+            ref_order: list[tuple[str, int]] = []
+            ref_slots: dict[tuple[str, int], dict[str, int]] = {}
+            ref_name: dict[tuple[str, int], str] = {}
+            for i, a in enumerate(input_structure.atoms):
+                k = (a.chain_id, a.res_seq)
+                if k not in ref_slots:
+                    ref_order.append(k)
+                    ref_slots[k] = {}
+                    ref_name[k] = a.res_name
+                ref_slots[k][a.name] = i
 
             for pdb_file in pdb_files:
                 try:
                     s = load_structure(pdb_file)
                 except Exception:
                     continue
-                frame = {(a.chain_id, a.res_seq, a.name): c
-                         for a, c in zip(s.atoms, coords_array(s))}
-                # Boltz predicts from sequence alone, so it may reorder atoms and
-                # will in general return a different count. Match on identity and
-                # keep the reference coordinate where an atom is missing; the
-                # previous positional take-the-first-N with zero padding silently
-                # placed unmatched atoms at the origin.
+                # Same decomposition for the predicted frame.
+                frame_order: list[tuple[str, int]] = []
+                frame_atoms: dict[tuple[str, int], dict[str, np.ndarray]] = {}
+                frame_name: dict[tuple[str, int], str] = {}
+                for a, c in zip(s.atoms, coords_array(s)):
+                    k = (a.chain_id, a.res_seq)
+                    if k not in frame_atoms:
+                        frame_order.append(k)
+                        frame_atoms[k] = {}
+                        frame_name[k] = a.res_name
+                    frame_atoms[k][a.name] = c
+
+                # Pair residues by position in sequence, then atoms by name
+                # within each pair. Keep the reference coordinate wherever the
+                # prediction lacks an atom.
                 out = base.copy()
                 matched_idx = []
-                for i, key in enumerate(keys):
-                    got = frame.get(key)
-                    if got is not None:
-                        out[i] = got
-                        matched_idx.append(i)
-                frac = len(matched_idx) / max(len(keys), 1)
+                paired = same_name = 0
+                for rk, fk in zip(ref_order, frame_order):
+                    paired += 1
+                    if ref_name[rk] == frame_name[fk]:
+                        same_name += 1
+                    got = frame_atoms[fk]
+                    for name, slot in ref_slots[rk].items():
+                        c = got.get(name)
+                        if c is not None:
+                            out[slot] = c
+                            matched_idx.append(slot)
+
+                frac = len(matched_idx) / max(len(base), 1)
+                ident = same_name / max(paired, 1)
                 if frac < _MIN_MATCH_FRACTION:
                     warnings.warn(
                         f"{pdb_file.name} matched only {frac:.0%} of input atoms; "
                         "skipping this conformer",
                         RuntimeWarning, stacklevel=2)
                     continue
+                if ident < _MIN_IDENTITY_FRACTION:
+                    warnings.warn(
+                        f"{pdb_file.name}: only {ident:.0%} of paired residues "
+                        f"share a residue name ({same_name}/{paired}). The "
+                        "prediction does not correspond to the input sequence; "
+                        "skipping this conformer",
+                        RuntimeWarning, stacklevel=2)
+                    continue
                 # Boltz folds de novo in its own frame. Cluster identity downstream
                 # is absolute-Cartesian centroid proximity, so an unaligned frame
                 # would put every pocket in its own cluster and report the whole
-                # protein as cryptic. Superpose on the matched atoms.
-                idx = np.asarray(matched_idx)
-                out = _superpose(out, base, idx)
+                # protein as cryptic. Superpose on the matched atoms, and leave the
+                # unmatched ones at their reference coordinates.
+                out = align_frame(out, base, matched_idx)
                 conformers.append(out.astype(np.float32))
 
             if not conformers:
