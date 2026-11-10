@@ -35,6 +35,69 @@ def _multi_model(offsets, n_res: int = 4, start: int = 1) -> str:
     return "\n".join(out) + "\n"
 
 
+# Frames are superposed onto the reference, so a rigid offset carries no
+# information and is removed by design. Tests that need to prove a coordinate
+# came from the frame rather than from the reference fallback vary the spacing
+# instead: that is an internal change, and superposition preserves it exactly.
+def _stretched(scale: float, n_res: int = 4, start: int = 1) -> str:
+    lines = []
+    for i in range(n_res):
+        lines.append(_ATOM.format(serial=i + 1, res="ALA", seq=start + i,
+                                  x=i * 3.8 * scale, y=0.0, z=0.0))
+    return "\n".join(lines)
+
+
+def _multi_stretched(scales, n_res: int = 4, start: int = 1) -> str:
+    out = []
+    for i, s in enumerate(scales, 1):
+        out += [f"MODEL     {i:>4}", _stretched(s, n_res, start), "ENDMDL"]
+    out.append("END")
+    return "\n".join(out) + "\n"
+
+
+def _span(c) -> float:
+    """Distance from the first atom to the last: an internal, frame-invariant
+    signature of which frame a conformer came from."""
+    return float(np.linalg.norm(np.asarray(c)[-1] - np.asarray(c)[0]))
+
+
+_ATOM3 = ("ATOM  {serial:>5}  CA  ALA {ch}{seq:>4}    "
+          "{x:>8.3f}{y:>8.3f}{z:>8.3f}  1.00  0.00           C")
+
+#: A deliberately non-collinear backbone. Kabsch needs three independent
+#: directions to pin a rotation, and the linear fixtures above are degenerate.
+_SHAPE = np.array([
+    [0.0, 0.0, 0.0],
+    [3.8, 0.4, 0.2],
+    [6.9, 2.8, -0.6],
+    [8.1, 6.1, 1.1],
+    [5.4, 8.0, -1.4],
+    [2.0, 7.2, 0.9],
+], dtype=float)
+
+
+def _write3d(path, xyz, chain="A") -> None:
+    lines = [_ATOM3.format(serial=i + 1, ch=chain, seq=i + 1,
+                           x=p[0], y=p[1], z=p[2])
+             for i, p in enumerate(np.asarray(xyz, float))]
+    path.write_text("\n".join(lines) + "\nEND\n")
+
+
+def _rigid(xyz, axis_angle=(0.3, 0.7, -0.5), shift=(17.0, -9.0, 25.0)):
+    """Rotate and translate rigidly, leaving internal geometry untouched."""
+    ax = np.asarray(axis_angle, float)
+    theta = float(np.linalg.norm(ax))
+    k = ax / theta
+    kx = np.array([[0.0, -k[2], k[1]], [k[2], 0.0, -k[0]], [-k[1], k[0], 0.0]])
+    rot = np.eye(3) + np.sin(theta) * kx + (1.0 - np.cos(theta)) * (kx @ kx)
+    return np.asarray(xyz, float) @ rot.T + np.asarray(shift, float)
+
+
+def _pdist(xyz) -> np.ndarray:
+    a = np.asarray(xyz, float)
+    return np.linalg.norm(a[:, None, :] - a[None, :, :], axis=-1)
+
+
 @pytest.fixture
 def reference(tmp_path):
     """A single-model reference structure and its path."""
@@ -65,11 +128,16 @@ class TestIterModelCoords:
 class TestMultiModelFile:
     def test_reads_every_model(self, tmp_path, reference):
         ens = tmp_path / "ens.pdb"
-        ens.write_text(_multi_model([0.0, 0.5, 1.0]))
+        # Vary the spacing, not the global position: a rigid offset is removed
+        # by superposition, so it cannot show which model a conformer came from.
+        ens.write_text(_multi_stretched([1.0, 1.1, 1.2]))
         got = ExternalEnsembleBackend(ens).generate(reference, 0)
         assert len(got) == 3
         assert all(c.shape == (4, 3) for c in got)
-        assert got[1][0][0] == pytest.approx(0.5)
+        # Each conformer carries its own model's internal geometry.
+        assert _span(got[0]) == pytest.approx(3 * 3.8 * 1.0, abs=1e-3)
+        assert _span(got[1]) == pytest.approx(3 * 3.8 * 1.1, abs=1e-3)
+        assert _span(got[2]) == pytest.approx(3 * 3.8 * 1.2, abs=1e-3)
 
     def test_n_conformers_caps_the_ensemble(self, tmp_path, reference):
         ens = tmp_path / "ens.pdb"
@@ -110,13 +178,17 @@ class TestAtomCorrespondence:
             self, tmp_path, reference):
         """A frame missing a residue should not shift every other atom."""
         ens = tmp_path / "partial.pdb"
-        # 3 of the reference's 4 residues, all displaced by 1.0.
-        ens.write_text(_multi_model([1.0], n_res=3))
+        # 3 of the reference's 4 residues, at 1.1x the reference spacing.
+        ens.write_text(_multi_stretched([1.1], n_res=3))
         c = ExternalEnsembleBackend(ens).generate(reference, 0)[0]
-        # Matched atoms moved; the unmatched one kept its reference position.
-        assert c[0][0] == pytest.approx(1.0)
-        assert c[2][0] == pytest.approx(2 * 3.8 + 1.0)
-        assert c[3][0] == pytest.approx(3 * 3.8)
+        # The matched atoms carry the frame's internal geometry.
+        assert float(np.linalg.norm(c[2] - c[0])) == pytest.approx(
+            2 * 3.8 * 1.1, abs=1e-3)
+        # The unmatched atom kept its reference position exactly, rather than
+        # being dragged along by the superposition of the matched ones.
+        assert c[3][0] == pytest.approx(3 * 3.8, abs=1e-3)
+        assert c[3][1] == pytest.approx(0.0, abs=1e-3)
+        assert c[3][2] == pytest.approx(0.0, abs=1e-3)
 
     def test_numbering_mismatch_warns_and_is_skipped(self, tmp_path, reference):
         """Wrong residue numbering is a mismatch, not a conformational change."""
@@ -185,13 +257,14 @@ class TestChainRelabelling:
         ref = tmp_path / "ref_b.pdb"
         ref.write_text(self._chain(_model(0.0) + "\nEND", "B"))
         ens = tmp_path / "frames_a.pdb"
-        ens.write_text(_multi_model([0.5, 1.0]))          # chain A
+        ens.write_text(_multi_stretched([1.1, 1.2]))      # chain A
 
         got = ExternalEnsembleBackend(ens).generate(ref, 0, chain="B")
         assert len(got) == 2, "single-chain frames should map onto any reference chain"
         # Coordinates must actually come from the frame, not silently fall back
         # to the reference, which would look like success while ignoring the input.
-        assert got[0][0][0] == pytest.approx(0.5)
+        assert _span(got[0]) == pytest.approx(3 * 3.8 * 1.1, abs=1e-3)
+        assert _span(got[1]) == pytest.approx(3 * 3.8 * 1.2, abs=1e-3)
 
     def test_multi_chain_frame_still_requires_matching_chains(self, tmp_path):
         """With more than one chain the letter is the only thing separating
@@ -212,3 +285,73 @@ class TestChainRelabelling:
         with pytest.warns(RuntimeWarning, match="numbering"):
             with pytest.raises(ValueError, match="no usable conformers"):
                 ExternalEnsembleBackend(ens).generate(ref, 0, chain="C")
+
+
+class TestGlobalFrame:
+    """An external frame arrives in whatever global frame its producer used.
+
+    Lacuna decides whether two detections are the same site by comparing pocket
+    centroids in absolute Cartesian space, so an unaligned frame puts each of
+    its pockets in a cluster of its own, leaves the input structure's pockets
+    matching nothing, and reports the whole protein as cryptic. Multi-model NMR
+    depositions are usually pre-aligned, but a trajectory exported without
+    fitting and the output of any model that folds in its own frame are not.
+    """
+
+    def test_rigid_transform_is_undone(self, tmp_path):
+        ref = tmp_path / "ref3.pdb"
+        _write3d(ref, _SHAPE)
+        moved = _rigid(_SHAPE)
+        # The frame as written is far from the reference.
+        assert np.linalg.norm(moved - _SHAPE, axis=1).mean() > 20.0
+
+        ens = tmp_path / "moved.pdb"
+        _write3d(ens, moved)
+        c = np.asarray(ExternalEnsembleBackend(ens).generate(ref, 0)[0], float)
+        # After superposition it sits on the reference.
+        assert np.linalg.norm(c - _SHAPE, axis=1).max() < 1e-3
+
+    def test_internal_geometry_is_untouched(self, tmp_path):
+        """Superposition is rigid, so every interatomic distance must survive."""
+        ref = tmp_path / "ref3.pdb"
+        _write3d(ref, _SHAPE)
+        bent = _SHAPE.copy()
+        bent[4] += np.array([2.5, -1.5, 3.0])        # a real internal change
+        ens = tmp_path / "bent.pdb"
+        _write3d(ens, _rigid(bent))                  # and an arbitrary frame
+
+        c = np.asarray(ExternalEnsembleBackend(ens).generate(ref, 0)[0], float)
+        assert np.abs(_pdist(c) - _pdist(bent)).max() < 1e-3
+
+    def test_a_real_conformational_change_is_not_flattened(self, tmp_path):
+        """Alignment must remove the arbitrary frame and nothing else."""
+        ref = tmp_path / "ref3.pdb"
+        _write3d(ref, _SHAPE)
+        bent = _SHAPE.copy()
+        bent[4] += np.array([2.5, -1.5, 3.0])
+        ens = tmp_path / "bent.pdb"
+        _write3d(ens, _rigid(bent))
+
+        c = np.asarray(ExternalEnsembleBackend(ens).generate(ref, 0)[0], float)
+        moved = np.linalg.norm(c - _SHAPE, axis=1)
+        assert moved[4] > 2.0, "the displaced atom should still be displaced"
+        assert np.delete(moved, 4).max() < 1.5, "the rest should sit on the reference"
+
+    def test_reflection_is_never_introduced(self, tmp_path):
+        """An improper rotation preserves RMSD while inverting chirality, so the
+        fit must be constrained to a proper rotation."""
+        ref = tmp_path / "ref3.pdb"
+        _write3d(ref, _SHAPE)
+        ens = tmp_path / "mirror.pdb"
+        mirrored = _SHAPE * np.array([1.0, 1.0, -1.0])
+        _write3d(ens, _rigid(mirrored))
+
+        c = np.asarray(ExternalEnsembleBackend(ens).generate(ref, 0)[0], float)
+
+        def chirality(a):
+            a = np.asarray(a, float)
+            return float(np.dot(np.cross(a[1] - a[0], a[2] - a[0]), a[3] - a[0]))
+
+        # The frame is a mirror image, and it must stay one: superposing it onto
+        # the reference must not silently flip it back by reflecting.
+        assert np.sign(chirality(c)) == np.sign(chirality(mirrored))

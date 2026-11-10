@@ -175,7 +175,7 @@ class TestBoltzSuperposition:
         This is the Boltz-backend bug in miniature: it folds de novo in its own
         frame, and without superposition every pocket lands in its own cluster.
         """
-        from lacuna.ensemble.boltz_backend import _superpose
+        from lacuna.ensemble.base import superpose as _superpose
 
         rng = np.random.default_rng(0)
         target = rng.normal(size=(40, 3))
@@ -188,7 +188,7 @@ class TestBoltzSuperposition:
         assert np.allclose(out, target, atol=1e-8)
 
     def test_no_reflection_is_introduced(self):
-        from lacuna.ensemble.boltz_backend import _superpose
+        from lacuna.ensemble.base import superpose as _superpose
 
         rng = np.random.default_rng(1)
         target = rng.normal(size=(30, 3))
@@ -199,7 +199,7 @@ class TestBoltzSuperposition:
         assert not np.allclose(out, target, atol=1e-3)
 
     def test_too_few_atoms_returns_unchanged(self):
-        from lacuna.ensemble.boltz_backend import _superpose
+        from lacuna.ensemble.base import superpose as _superpose
 
         mobile = np.ones((2, 3))
         out = _superpose(mobile, np.zeros((2, 3)), np.arange(2))

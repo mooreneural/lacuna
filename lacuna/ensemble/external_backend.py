@@ -28,6 +28,17 @@ quietly corrupt every pocket downstream.
 A frame matching very little of the reference is reported rather than used
 silently, because that almost always means a numbering mismatch rather than a
 genuinely different conformation.
+
+Global frame
+------------
+Every accepted frame is rigid-body superposed onto the reference on its matched
+atoms. Lacuna decides whether two detections are the same site by comparing
+pocket centroids in absolute Cartesian space, so a frame that arrives in its own
+global frame puts each of its pockets in a cluster of its own, leaves the input
+structure's pockets matching nothing, and reports the entire protein as cryptic.
+Multi-model NMR depositions are usually pre-aligned and are unaffected, but a
+molecular dynamics trajectory exported without fitting, and the output of any
+generative model that folds in its own frame, are not.
 """
 
 from __future__ import annotations
@@ -37,16 +48,15 @@ from pathlib import Path
 
 import numpy as np
 
-from lacuna.ensemble.base import EnsembleBackend
+from lacuna.ensemble.base import MIN_MATCH_FRACTION, EnsembleBackend, align_frame
 from lacuna.io.structure import coords_array, iter_model_coords, load_structure
 
 #: Extensions treated as structures when a directory is supplied.
 _SUFFIXES = (".pdb", ".ent", ".cif", ".mmcif")
 
 #: Below this fraction of reference atoms matched, a frame is reported as
-#: suspicious. Chosen loosely: real ensembles of the same protein match almost
-#: everything, so anything this low indicates a mismatch rather than motion.
-_MIN_MATCH_FRACTION = 0.5
+#: suspicious. Shared with the other backends; see ``base.MIN_MATCH_FRACTION``.
+_MIN_MATCH_FRACTION = MIN_MATCH_FRACTION
 
 
 class ExternalEnsembleBackend(EnsembleBackend):
@@ -129,13 +139,13 @@ class ExternalEnsembleBackend(EnsembleBackend):
                     by_res = frame
                     lookup = keys
                 out = base.copy()
-                matched = 0
+                matched_idx: list[int] = []
                 for i, key in enumerate(lookup):
                     got = by_res.get(key)
                     if got is not None:
                         out[i] = got
-                        matched += 1
-                frac = matched / max(len(keys), 1)
+                        matched_idx.append(i)
+                frac = len(matched_idx) / max(len(keys), 1)
                 label = f"{path.name}[model {model_i}]"
                 if frac < _MIN_MATCH_FRACTION:
                     msg = (f"{label} matched only {frac:.0%} of reference atoms; "
@@ -145,6 +155,9 @@ class ExternalEnsembleBackend(EnsembleBackend):
                     warnings.warn(msg, RuntimeWarning, stacklevel=2)
                     self._skipped.append(label)
                     continue
+                # Into the reference frame. See the module docstring: without
+                # this an unaligned trajectory reports the whole protein cryptic.
+                out = align_frame(out, base, matched_idx)
                 conformers.append(out.astype(np.float32))
 
         if not conformers:
