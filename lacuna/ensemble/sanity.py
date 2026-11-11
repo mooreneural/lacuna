@@ -113,17 +113,25 @@ class EnsembleHealth:
         )
 
 
+#: One backbone atom per residue, for each polymer Lacuna handles. Taken
+#: together rather than in preference order. A nucleic structure with a small
+#: bound protein or peptide has enough CA atoms to clear ``_MIN_ATOMS`` on its
+#: own, and judging the ensemble on that subset fails both ways: an unmoved
+#: 71-nucleotide riboswitch beside a 6-residue peptide warns, and the same
+#: input with the RNA exploded by 12 A per atom stays silent. Both reproduced.
+_REPRESENTATIVE_NAMES = ("CA", "C1'")
+
+
 def representative_indices(structure) -> list[int]:
     """Atom indices to measure on: CA for protein, C1' for nucleic acid.
 
     One atom per residue keeps the measurement independent of how many side
     chain atoms a residue happens to carry, so a structure with missing side
-    chains is not judged differently from a complete one.
+    chains is not judged differently from a complete one. Mixed protein and
+    nucleic input contributes both, so neither polymer can mask the other.
     """
-    idx = [i for i, a in enumerate(structure.atoms) if a.name == "CA"]
-    if len(idx) >= _MIN_ATOMS:
-        return idx
-    idx = [i for i, a in enumerate(structure.atoms) if a.name == "C1'"]
+    idx = [i for i, a in enumerate(structure.atoms)
+           if a.name in _REPRESENTATIVE_NAMES]
     if len(idx) >= _MIN_ATOMS:
         return idx
     return list(range(len(structure.atoms)))

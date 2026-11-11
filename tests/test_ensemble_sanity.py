@@ -176,3 +176,77 @@ class TestRepresentativeAtoms:
         idx = representative_indices(st)
         assert len(idx) == 20
         assert all(st.atoms[i].name == "C1'" for i in idx)
+
+
+class TestMixedPolymerRepresentatives:
+    """A nucleic structure with a small bound protein must measure both.
+
+    The first version preferred CA whenever at least ``_MIN_ATOMS`` of them
+    existed, so a 71-nucleotide riboswitch beside a 6-residue peptide was judged
+    entirely on the peptide. That failed in both directions on the same input:
+    an unmoved ensemble warned, and one with the RNA exploded by 12 A per atom
+    stayed silent and reported only that the sampler had collapsed.
+    """
+
+    @staticmethod
+    def _mixed(tmp_path, n_nt: int = 40, n_res: int = 6):
+        """Nucleic chain A, plus a small protein chain P standing 60 A away."""
+        rna = _globule(n_nt, seed=11)
+        pep = _globule(n_res, seed=12) + np.array([60.0, 0.0, 0.0])
+        lines, serial = [], 1
+        for i, p in enumerate(rna):
+            for nm in ("P", "C1'"):
+                lines.append(_ATOM.format(serial=serial, name=nm, res="  A",
+                                          seq=i + 1, x=p[0], y=p[1], z=p[2]))
+                serial += 1
+        for i, p in enumerate(pep):
+            # Chain is fixed to A by the _ATOM template; relabel the tail.
+            for nm in ("N", "CA"):
+                lines.append(_ATOM.format(serial=serial, name=nm, res="ALA",
+                                          seq=500 + i, x=p[0], y=p[1], z=p[2])
+                             .replace(" A 5", " P 5", 1))
+                serial += 1
+        f = tmp_path / "mixed.pdb"
+        f.write_text("\n".join(lines) + "\nEND\n")
+        return load_structure(f), n_nt, n_res
+
+    def test_both_polymers_are_represented(self, tmp_path):
+        st, n_nt, n_res = self._mixed(tmp_path)
+        idx = representative_indices(st)
+        names = [st.atoms[i].name for i in idx]
+        assert len(idx) == n_nt + n_res
+        assert names.count("C1'") == n_nt
+        assert names.count("CA") == n_res
+
+    def test_a_healthy_mixed_ensemble_stays_silent(self, tmp_path):
+        """The false positive: ordinary motion in both polymers, nothing wrong.
+
+        The peptide stands 60 A from the nucleic chain, so judging the ensemble
+        on the peptide alone reads its small local motion as a rigid-body
+        displacement of the whole structure.
+        """
+        st, _, _ = self._mixed(tmp_path)
+        base = coords_array(st)
+        rng = np.random.default_rng(7)
+        sets = [base + rng.normal(scale=0.4, size=base.shape) for _ in range(5)]
+        health = check_ensemble(st, sets)
+        assert health.ok, health.messages
+
+    def test_a_destroyed_nucleic_chain_is_caught(self, tmp_path):
+        """The false negative: the RNA is wrecked while the peptide holds still.
+
+        Measured on the peptide alone this looked like a collapsed sampler.
+        """
+        st, _, _ = self._mixed(tmp_path)
+        base = coords_array(st)
+        rna_atoms = [i for i, a in enumerate(st.atoms) if a.chain_id != "P"]
+        rng = np.random.default_rng(0)
+        sets = []
+        for _ in range(5):
+            c = base.copy()
+            c[rna_atoms] += rng.normal(scale=12.0, size=(len(rna_atoms), 3))
+            sets.append(c)
+        health = check_ensemble(st, sets)
+        assert not health.ok
+        joined = " ".join(health.messages)
+        assert "near-duplicates" not in joined, joined
