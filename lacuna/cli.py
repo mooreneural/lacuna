@@ -336,6 +336,27 @@ def discover(
 
     if not quiet:
         console.print(f"  [dim]Generated {len(coord_sets)} conformers.[/dim]")
+
+    # Every reported quantity is relative to the input structure, so an ensemble
+    # that no longer resembles it makes the whole protein look cryptic without
+    # anything in the output looking wrong. Say so before spending the detection
+    # pass on it. Warn rather than refuse: a genuine large domain motion can trip
+    # the same bars as a broken ensemble.
+    from lacuna.ensemble.sanity import check_ensemble
+
+    _health = check_ensemble(structure, coord_sets)
+    if not _health.ok:
+        console.print("\n[yellow]This ensemble may not describe the input "
+                      "structure:[/yellow]")
+        for _msg in _health.messages:
+            console.print(f"  [yellow]- {_msg}.[/yellow]")
+        console.print(f"  [dim]{_health.summary()}[/dim]")
+        console.print("  [dim]Results are still written. Treat crypticity and "
+                      "apo volume with suspicion until this is explained.[/dim]")
+    elif not quiet:
+        console.print(f"  [dim]{_health.summary()}[/dim]")
+
+    if not quiet:
         console.print("\n[dim]Detecting pockets across ensemble...[/dim]")
 
     # Resolve the per-conformer detector (alpha | p2rank | fusion). p2rank/fusion
