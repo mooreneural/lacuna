@@ -16,6 +16,10 @@ from rich.table import Table
 from lacuna import __version__
 
 console = Console()
+#: Warnings go here instead of stdout. A warning a --quiet caller cannot see
+#: is useless, but one landing in a redirected stdout corrupts whatever is
+#: parsing it. stderr satisfies both.
+err_console = Console(stderr=True)
 
 
 def _resolve_backend(name: str):
@@ -346,13 +350,16 @@ def discover(
 
     _health = check_ensemble(structure, coord_sets)
     if not _health.ok:
-        console.print("\n[yellow]This ensemble may not describe the input "
-                      "structure:[/yellow]")
+        # stderr, not stdout: --quiet promises to suppress progress output,
+        # and a caller parsing stdout should not have to tolerate this
+        # appearing in it. A human on a terminal still sees it either way.
+        err_console.print("\n[yellow]This ensemble may not describe the input "
+                          "structure:[/yellow]")
         for _msg in _health.messages:
-            console.print(f"  [yellow]- {_msg}.[/yellow]")
-        console.print(f"  [dim]{_health.summary()}[/dim]")
-        console.print("  [dim]Results are still written. Treat crypticity and "
-                      "apo volume with suspicion until this is explained.[/dim]")
+            err_console.print(f"  [yellow]- {_msg}.[/yellow]")
+        err_console.print(f"  [dim]{_health.summary()}[/dim]")
+        err_console.print("  [dim]Results are still written. Treat crypticity and "
+                          "apo volume with suspicion until this is explained.[/dim]")
     elif not quiet:
         console.print(f"  [dim]{_health.summary()}[/dim]")
 
