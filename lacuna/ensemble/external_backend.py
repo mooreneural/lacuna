@@ -58,6 +58,40 @@ _SUFFIXES = (".pdb", ".ent", ".cif", ".mmcif")
 #: suspicious. Shared with the other backends; see ``base.MIN_MATCH_FRACTION``.
 _MIN_MATCH_FRACTION = MIN_MATCH_FRACTION
 
+#: Below this fraction of paired residues sharing a residue name, a pairing is
+#: judged wrong. Atom-name counting alone cannot detect a numbering offset,
+#: because every residue carries N/CA/C/O and so matches across a shift.
+_MIN_IDENTITY_FRACTION = 0.9
+
+
+def _residues_in_order(
+    items,
+) -> tuple[list[tuple[str, int]], dict, dict]:
+    """Group ``(chain, res_seq, atom_name) -> value`` pairs into residues.
+
+    Returns the residue keys in the order first seen, each residue's
+    ``atom_name -> value`` map, and each residue's residue name where one is
+    available. File order is observation order, which is what lets a frame be
+    paired positionally when its numbering cannot be trusted.
+    """
+    order: list[tuple[str, int]] = []
+    atoms: dict[tuple[str, int], dict] = {}
+    for key, value in items:
+        rk = (key[0], key[1])
+        if rk not in atoms:
+            order.append(rk)
+            atoms[rk] = {}
+        atoms[rk][key[2]] = value
+    return order, atoms, {}
+
+
+def _identity(ref_names: list[str], frame_names: list[str]) -> float:
+    """Fraction of positionally paired residues that are the same residue type."""
+    if not ref_names:
+        return 0.0
+    same = sum(1 for a, b in zip(ref_names, frame_names) if a == b)
+    return same / min(len(ref_names), max(len(frame_names), 1))
+
 
 class ExternalEnsembleBackend(EnsembleBackend):
     """Read conformers from a file or directory instead of generating them.
@@ -112,8 +146,19 @@ class ExternalEnsembleBackend(EnsembleBackend):
         chain = chain if chain is not None else self.chain
         reference = load_structure(structure_path, chain=chain)
         base = coords_array(reference)
-        keys = [(a.chain_id, a.res_seq, a.name) for a in reference.atoms]
         cap = n_conformers if n_conformers and n_conformers > 0 else None
+
+        # The reference as ordered residues, each owning its atom slots.
+        ref_order: list[tuple[str, int]] = []
+        ref_slots: dict[tuple[str, int], dict[str, int]] = {}
+        ref_name: dict[tuple[str, int], str] = {}
+        for i, a in enumerate(reference.atoms):
+            rk = (a.chain_id, a.res_seq)
+            if rk not in ref_slots:
+                ref_order.append(rk)
+                ref_slots[rk] = {}
+                ref_name[rk] = a.res_name
+            ref_slots[rk][a.name] = i
 
         conformers: list[np.ndarray] = []
         self._skipped = []
@@ -123,30 +168,79 @@ class ExternalEnsembleBackend(EnsembleBackend):
             # label it "A", so filtering on a reference chain of "B" would discard
             # a frame that is in fact the right protein. Deciding per frame needs
             # to see which chains it actually contains.
-            for model_i, frame in enumerate(iter_model_coords(path)):
+            for model_i, (frame, frame_names) in enumerate(
+                    iter_model_coords(path, with_names=True)):
                 if cap is not None and len(conformers) >= cap:
                     return conformers
-                frame_chains = {c for c, _, _ in frame}
+                label = f"{path.name}[model {model_i}]"
+                f_order, f_atoms, _ = _residues_in_order(frame.items())
+                frame_chains = {c for c, _ in f_order}
+
+                # Candidate pairings, tried in order of how much they assume.
+                cands: list[tuple[str, list]] = [
+                    ("numbering", [(rk, rk) for rk in ref_order if rk in f_atoms]),
+                ]
                 if len(frame_chains) == 1 and frame_chains != {chain}:
-                    # One chain, and not the reference's letter: the mapping is
-                    # unambiguous, so match on residue and atom name alone. Doing
-                    # this only for single-chain frames keeps it safe, since with
-                    # two or more chains dropping the chain would silently merge
-                    # residues that share a number across them.
-                    by_res = {(r, n): xyz for (_, r, n), xyz in frame.items()}
-                    lookup = [(a.res_seq, a.name) for a in reference.atoms]
-                else:
-                    by_res = frame
-                    lookup = keys
+                    # One chain under a different letter: the mapping is
+                    # unambiguous, so try the numbers with the letter ignored.
+                    # Only for single-chain frames, since with two or more chains
+                    # dropping the letter would merge residues sharing a number.
+                    only = next(iter(frame_chains))
+                    cands.append(("relabelled chain",
+                                  [(rk, (only, rk[1])) for rk in ref_order
+                                   if (only, rk[1]) in f_atoms]))
+                if len(f_order) == len(ref_order):
+                    # Same residue count: position is a candidate key in its own
+                    # right, and the only one that survives renumbering. aSAM,
+                    # Boltz and AlphaFold all renumber their output from 1, and
+                    # a numbering offset still matches most atom names, because
+                    # every residue carries N/CA/C/O. Residue identity is what
+                    # separates a real pairing from a shifted one.
+                    cands.append(("order", list(zip(ref_order, f_order))))
+
+                chosen = chosen_how = None
+                fallback = None
+                for how, pairing in cands:
+                    if not pairing:
+                        continue
+                    ident = _identity([ref_name[a] for a, _ in pairing],
+                                      [frame_names.get(b, "") for _, b in pairing])
+                    if ident >= _MIN_IDENTITY_FRACTION:
+                        chosen, chosen_how = pairing, how
+                        break
+                    if fallback is None or ident > fallback[0]:
+                        fallback = (ident, how, pairing)
+
+                if chosen is None:
+                    ident = fallback[0] if fallback else 0.0
+                    msg = (f"{label}: no residue pairing agrees with the reference "
+                           f"sequence (best {ident:.0%} of paired residues share a "
+                           "residue name); numbering or sequence differs")
+                    if self.strict:
+                        raise ValueError(msg)
+                    warnings.warn(msg, RuntimeWarning, stacklevel=2)
+                    self._skipped.append(label)
+                    continue
+                if chosen_how == "order":
+                    # Worth saying out loud: the frame's own residue numbers were
+                    # unusable and position was trusted instead. A relabelled
+                    # single chain is the documented case and stays quiet.
+                    warnings.warn(
+                        f"{label}: residue numbers did not agree with the "
+                        "reference sequence, so residues were paired by order; "
+                        "the frame appears to have been renumbered",
+                        RuntimeWarning, stacklevel=2)
+
                 out = base.copy()
                 matched_idx: list[int] = []
-                for i, key in enumerate(lookup):
-                    got = by_res.get(key)
-                    if got is not None:
-                        out[i] = got
-                        matched_idx.append(i)
-                frac = len(matched_idx) / max(len(keys), 1)
-                label = f"{path.name}[model {model_i}]"
+                for rk, fk in chosen:
+                    got = f_atoms.get(fk) or {}
+                    for aname, slot in ref_slots[rk].items():
+                        xyz = got.get(aname)
+                        if xyz is not None:
+                            out[slot] = xyz
+                            matched_idx.append(slot)
+                frac = len(matched_idx) / max(len(base), 1)
                 if frac < _MIN_MATCH_FRACTION:
                     msg = (f"{label} matched only {frac:.0%} of reference atoms; "
                            "residue numbering probably differs")

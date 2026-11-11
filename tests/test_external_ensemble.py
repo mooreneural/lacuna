@@ -61,6 +61,21 @@ def _span(c) -> float:
     return float(np.linalg.norm(np.asarray(c)[-1] - np.asarray(c)[0]))
 
 
+#: A real sequence, not a homopolymer. Residue identity is what distinguishes a
+#: renumbered copy of the same protein from a frame paired across an offset, and
+#: an all-ALA fixture cannot tell those apart.
+_SEQ = ["MET", "GLY", "SER", "THR", "LYS", "VAL", "PHE", "ASP"]
+
+
+def _seq_model(names, scale: float = 1.0, start: int = 1, chain: str = "A") -> str:
+    lines = []
+    for i, nm in enumerate(names):
+        lines.append(_ATOM3.format(serial=i + 1, ch=chain, seq=start + i,
+                                   x=i * 3.8 * scale, y=0.0, z=0.0)
+                     .replace("ALA", nm, 1))
+    return "\n".join(lines)
+
+
 _ATOM3 = ("ATOM  {serial:>5}  CA  ALA {ch}{seq:>4}    "
           "{x:>8.3f}{y:>8.3f}{z:>8.3f}  1.00  0.00           C")
 
@@ -190,32 +205,59 @@ class TestAtomCorrespondence:
         assert c[3][1] == pytest.approx(0.0, abs=1e-3)
         assert c[3][2] == pytest.approx(0.0, abs=1e-3)
 
-    def test_numbering_mismatch_warns_and_is_skipped(self, tmp_path, reference):
-        """Wrong residue numbering is a mismatch, not a conformational change."""
-        good = _multi_model([0.5])
-        # Second file: same atoms renumbered from 500, so nothing matches.
-        bad = _multi_model([0.5], start=500)
+    def test_renumbered_frame_is_paired_by_order(self, tmp_path):
+        """A frame the producing tool renumbered is still the same protein.
+
+        aSAM, Boltz and AlphaFold all renumber their output from 1, and a
+        reference that starts anywhere else then pairs across an offset. The
+        offset still matches most atom NAMES, because every residue carries
+        N/CA/C/O, so atom counting cannot catch it and the old code silently
+        produced conformers tens of Angstroms from the input. With the residue
+        sequence agreeing, position is the right key.
+        """
+        ref = tmp_path / "ref_seq.pdb"
+        ref.write_text(_seq_model(_SEQ, start=16) + "\nEND\n")
+        ens = tmp_path / "renumbered.pdb"
+        # Same sequence, same spacing signature, numbered from 0 instead of 16.
+        ens.write_text(_seq_model(_SEQ, scale=1.1, start=0) + "\nEND\n")
+
+        with pytest.warns(RuntimeWarning, match="paired by order"):
+            got = ExternalEnsembleBackend(ens).generate(ref, 0)
+        assert len(got) == 1
+        assert _span(got[0]) == pytest.approx(
+            (len(_SEQ) - 1) * 3.8 * 1.1, abs=1e-3)
+
+    def test_different_sequence_warns_and_is_skipped(self, tmp_path):
+        """A frame of a different protein must not be paired by position."""
+        ref = tmp_path / "ref_seq.pdb"
+        ref.write_text(_seq_model(_SEQ, start=16) + "\nEND\n")
+        good = _seq_model(_SEQ, scale=1.1, start=16) + "\nEND\n"
+        bad = _seq_model(["TRP"] * len(_SEQ), start=500) + "\nEND\n"
         d = tmp_path / "mixed"
         d.mkdir()
         (d / "a_good.pdb").write_text(good)
         (d / "b_bad.pdb").write_text(bad)
-        with pytest.warns(RuntimeWarning, match="numbering probably differs"):
-            got = ExternalEnsembleBackend(d).generate(reference, 0)
+        with pytest.warns(RuntimeWarning, match="no residue pairing agrees"):
+            got = ExternalEnsembleBackend(d).generate(ref, 0)
         assert len(got) == 1  # only the matching frame survived
 
-    def test_strict_raises_on_mismatch(self, tmp_path, reference):
-        ens = tmp_path / "shifted.pdb"
-        ens.write_text(_multi_model([0.5], start=500))
-        with pytest.raises(ValueError, match="matched only"):
-            ExternalEnsembleBackend(ens, strict=True).generate(reference, 0)
+    def test_strict_raises_on_mismatch(self, tmp_path):
+        ref = tmp_path / "ref_seq.pdb"
+        ref.write_text(_seq_model(_SEQ, start=16) + "\nEND\n")
+        ens = tmp_path / "wrong.pdb"
+        ens.write_text(_seq_model(["TRP"] * len(_SEQ), start=500) + "\nEND\n")
+        with pytest.raises(ValueError, match="no residue pairing agrees"):
+            ExternalEnsembleBackend(ens, strict=True).generate(ref, 0)
 
-    def test_all_frames_unusable_is_an_error(self, tmp_path, reference):
-        ens = tmp_path / "shifted.pdb"
-        ens.write_text(_multi_model([0.5], start=500))
+    def test_all_frames_unusable_is_an_error(self, tmp_path):
+        ref = tmp_path / "ref_seq.pdb"
+        ref.write_text(_seq_model(_SEQ, start=16) + "\nEND\n")
+        ens = tmp_path / "wrong.pdb"
+        ens.write_text(_seq_model(["TRP"] * len(_SEQ), start=500) + "\nEND\n")
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             with pytest.raises(ValueError, match="no usable conformers"):
-                ExternalEnsembleBackend(ens).generate(reference, 0)
+                ExternalEnsembleBackend(ens).generate(ref, 0)
 
 
 class TestChainFiltering:

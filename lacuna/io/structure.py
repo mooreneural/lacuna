@@ -57,7 +57,8 @@ def chain_selector(chain: str | None) -> frozenset[str] | None:
 def iter_model_coords(
     path: str | Path,
     chain: str | None = None,
-) -> "Iterator[dict[tuple[str, int, str], tuple[float, float, float]]]":
+    with_names: bool = False,
+):
     """Yield one atom-keyed coordinate map per model in a structure file.
 
     ``load_structure`` deliberately keeps only the first model, which is the right
@@ -68,6 +69,18 @@ def iter_model_coords(
     Keying rather than positional indexing is what makes external ensembles usable:
     a frame may be missing a disordered loop, or carry residues the reference does
     not, and the caller can still place every atom it recognizes.
+
+    Args:
+        path: Structure file to read.
+        chain: Restrict to these chains; default reads all.
+        with_names: Also yield a residue-name map. Keying on the frame's own
+            residue numbers is only safe if those numbers mean what the
+            reference means by them, and many tools renumber their output from
+            1. Residue names are what lets a caller detect that, because atom
+            names cannot: every residue carries N/CA/C/O and so matches across
+            a numbering shift. When set, each item is a
+            ``(coords, residue_names)`` pair, the second an insertion-ordered
+            map of ``(chain_id, res_seq) -> residue name``.
     """
     path = Path(path)
     want = chain_selector(chain)
@@ -79,19 +92,22 @@ def iter_model_coords(
 
     for model in bio_struct.get_models():
         coords: dict[tuple[str, int, str], tuple[float, float, float]] = {}
+        names: dict[tuple[str, int], str] = {}
         for chain_obj in model.get_chains():
             if want is not None and chain_obj.get_id() not in want:
                 continue
             for res in chain_obj.get_residues():
                 if res.get_id()[0] != " ":
                     continue  # HETATM / water, as elsewhere in this module
+                names.setdefault(
+                    (chain_obj.get_id(), res.get_id()[1]), res.get_resname().strip())
                 for atom in res.get_atoms():
                     key = (chain_obj.get_id(), res.get_id()[1], atom.get_name().strip())
                     if key not in coords:  # first altloc wins
                         x, y, z = atom.get_coord()
                         coords[key] = (float(x), float(y), float(z))
         if coords:
-            yield coords
+            yield (coords, names) if with_names else coords
 
 
 def load_structure(path: str | Path, chain: str | None = None) -> Structure:
