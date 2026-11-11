@@ -173,8 +173,8 @@ def main():
               help="Maximum number of pockets to report.")
 @click.option(
     "--rank-by", "rank_by",
-    type=click.Choice(["learned", "learned-plm", "crypticity", "druggability",
-                       "persistence", "balanced"]),
+    type=click.Choice(["learned", "learned-plm", "learned-fused", "crypticity",
+                       "druggability", "persistence", "balanced"]),
     default="learned", show_default=True,
     help=(
         "Pocket ranking strategy. 'learned' (default) uses the fitted ranker and "
