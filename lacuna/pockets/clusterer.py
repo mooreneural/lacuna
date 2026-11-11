@@ -34,6 +34,26 @@ from lacuna.models import Pocket, PocketCluster
 from lacuna.pockets.scorer import score_pocket
 
 _DBSCAN_EPS = 5.0    # Å - pockets within 5 Å centroid distance are the same pocket
+
+# EXPERIMENTAL, local only. `apo_volume` was the largest frame-0 pocket *assigned
+# to this cluster*, so the greedy pass could file a site's input pocket under a
+# neighbouring cluster and leave this one reading 0.0. Measured consequences: 70%
+# of CryptoBench test-fold candidates read 0.0, and because `opening` is then
+# exactly 1.0, `crypticity` collapses to `max_druggability`. On GPR84 (8J1A) the
+# same physical site is reported twice, at rank 1 with apo 0.0 and crypticity
+# 0.906 and at rank 3 with apo 311.0 and crypticity 0.131, the two centroids 4.5 Å
+# apart. When this is set, apo_volume is instead the largest frame-0 pocket whose
+# centroid lies within APO_SEARCH_A of the cluster centroid, regardless of which
+# cluster the greedy pass filed it under. Set to None to restore 1.4.0 behaviour.
+#
+# MEASURED AND DISABLED. Turning this on made crypticity MORE inverted against
+# the true-site label, not less, and it moves `apo_vol` and `cryp` off the
+# distribution the shipped weights were fitted on. Left here as a record of
+# what was tried; do not re-enable without refitting the ranker.
+# This is not free: `apo_vol` and `cryp` are both ranker features, and the shipped
+# weights were fitted against the membership-based values, so turning this on
+# moves the ranker off its training distribution. Measure before shipping.
+APO_SEARCH_A: float | None = None
 # A pocket is cryptic when its crypticity score clears this bar. The score, not
 # persistence, is the right signal: persistence counts how many ensemble
 # conformers show the pocket, and a genuine cryptic site that the sampler opens
@@ -467,6 +487,65 @@ def _chain_id(label: str) -> str:
     return chain
 
 
+#: Build a cluster's lining as a strict majority of the conformers it appears
+#: in, counting distinct conformers. Set False to restore the pre-1.4.1 rule.
+#:
+#: The old rule counted MEMBER POCKETS against a threshold of
+#: ``len(conformer_set) * 0.5``, two different units, and because the count is
+#: an integer the bar was really ``ceil(C/2)`` member pockets for a cluster
+#: present in C conformers. That is not a 50% consensus at small C:
+#:
+#:   C = 1   bar 0.5, so every residue of the single member survives
+#:   C = 2   bar 1.0, so the result is the UNION of both members, strictly
+#:           larger than either one
+#:
+#: Measured on 3373 clusters from 150 CryptoBench targets: clusters with C <= 2
+#: are 35.8% of all clusters and 21.8% of top-five clusters, and for every one
+#: of the 1208 of them the lining equalled the union of its members. At C >= 3
+#: that happens for 1.9%. The unit mismatch itself turned out to be near-null,
+#: since members per conformer is exactly 1.0 for 97.8% of clusters, so the
+#: integer bar is the part that mattered.
+#:
+#: A strict majority (``> C/2`` distinct conformers) makes the rule mean the
+#: same thing at every C, and turns the C = 2 union into an intersection.
+#: ``residue_propensity`` already counts this way; see the comment there.
+CONSENSUS_STRICT_MAJORITY = True
+
+
+def _consensus_residues(members, conformer_set) -> list[str]:
+    """Residues lining a cluster in a majority of the conformers it appears in.
+
+    Counts DISTINCT conformers per residue, not member pockets: one conformer
+    can contribute several member pockets to a cluster and must not vote twice.
+    """
+    seen: dict[str, set[int]] = {}
+    for p in members:
+        for label in p.lining_residues:
+            seen.setdefault(label, set()).add(p.conformer_idx)
+    n_conf = len(conformer_set)
+    if not CONSENSUS_STRICT_MAJORITY:
+        from collections import Counter
+
+        counts: Counter[str] = Counter()
+        for p in members:
+            for label in p.lining_residues:
+                counts[label] += 1
+        bar = n_conf * 0.5
+        return sorted(r for r, c in counts.items() if c >= bar)
+    # Strict majority. At C = 1 the lone member is all there is, so its residues
+    # stand; at C = 2 this requires both, which is the intersection.
+    majority = sorted(r for r, c in seen.items() if len(c) * 2 > n_conf)
+    if majority or not seen:
+        return majority
+    # No residue reached a majority, which means the members disagree about
+    # where this pocket is. Returning nothing would emit a cluster with no
+    # lining, and a site with no residues cannot be scored, docked or read, so
+    # fall back to the residues the members agree on most. Measured at 4 of
+    # 2268 clusters on the CryptoBench test fold.
+    best = max(len(c) for c in seen.values())
+    return sorted(r for r, c in seen.items() if len(c) == best)
+
+
 def _chain_shares(lining_residues: list[str]) -> dict[str, float]:
     """Fraction of the lining contributed by each chain."""
     if not lining_residues:
@@ -639,6 +718,13 @@ def cluster_pockets(
 
     centroids = np.array([p.centroid for p in all_pockets])  # (N, 3)
 
+    # Every frame-0 pocket, pooled across clusters, for the APO_SEARCH_A lookup.
+    _apo = [p for p in all_pockets if p.conformer_idx == 0]
+    _apo_centroids = (
+        np.array([p.centroid for p in _apo]) if _apo else np.empty((0, 3))
+    )
+    _apo_volumes = np.array([p.volume_a3 for p in _apo]) if _apo else np.empty(0)
+
     # Greedy single-pass centroid merging, NOT DBSCAN and NOT union-find: each
     # pocket joins the nearest existing cluster mean within eps or seeds a new one,
     # so the result depends on the order pockets are pooled in.
@@ -679,22 +765,22 @@ def cluster_pockets(
         apo_members = [p.volume_a3 for p in members if p.conformer_idx == 0]
         apo_volume = float(max(apo_members)) if apo_members else 0.0
 
+        # See APO_SEARCH_A. Ask where the input's cavity actually is rather than
+        # which cluster the greedy pass happened to file it under.
+        if APO_SEARCH_A is not None and _apo_centroids.size:
+            near = (
+                np.linalg.norm(_apo_centroids - mean_c, axis=1) <= APO_SEARCH_A
+            )
+            if near.any():
+                apo_volume = max(apo_volume, float(_apo_volumes[near].max()))
+
         crypticity = compute_crypticity(apo_volume, volume_max, max_drug_score)
 
         # Persistence: unique conformers that have this pocket
         conformer_set = sorted({p.conformer_idx for p in members})
         persistence = len(conformer_set) / max(n_conformers, 1)
 
-        # Consensus lining residues: appear in ≥ 50% of conformers with this pocket
-        from collections import Counter
-        res_counts: Counter[str] = Counter()
-        for p in members:
-            for r in p.lining_residues:
-                res_counts[r] += 1
-        threshold = len(conformer_set) * 0.5
-        consensus_residues = sorted(
-            r for r, cnt in res_counts.items() if cnt >= threshold
-        )
+        consensus_residues = _consensus_residues(members, conformer_set)
 
         chain_shares = _chain_shares(consensus_residues)
         is_interface = sum(

@@ -265,3 +265,91 @@ class TestLearnedRanker:
         # Both orders are valid rankings of the same clusters.
         assert {c.centroid for c in by_cryp} == {c.centroid for c in by_learned}
         assert all(c.rank == i + 1 for i, c in enumerate(by_learned))
+
+
+class TestConsensusLining:
+    """A cluster's lining is a majority vote over the conformers it appears in.
+
+    The rule this replaced counted MEMBER POCKETS against a threshold of
+    `len(conformer_set) * 0.5`, two different units, and because the count is an
+    integer the real bar was `ceil(C/2)` member pockets. That is not a 50%
+    consensus at small C: at C = 1 nothing is filtered, and at C = 2 the bar is
+    one member, so the result is the UNION of both, strictly larger than either.
+    Clusters at C <= 2 are 36% of all clusters.
+    """
+
+    @staticmethod
+    def _cluster(linings):
+        """One cluster from co-located pockets, one per conformer."""
+        from lacuna.pockets.clusterer import cluster_pockets as cp
+        pockets = [
+            _make_pocket((0.0, 0.1 * i, 0.0), conformer_idx=i, lining=lin)
+            for i, lin in enumerate(linings)
+        ]
+        clusters = cp([[p] for p in pockets], n_conformers=len(pockets))
+        assert len(clusters) == 1, "fixture must produce a single cluster"
+        return clusters[0]
+
+    def test_two_conformers_intersect_rather_than_union(self):
+        """The bug, directly. Shared residues only, not everything either saw."""
+        c = self._cluster([["ALA1:A", "GLY2:A", "SER3:A"],
+                           ["GLY2:A", "SER3:A", "THR4:A"]])
+        assert c.lining_residues == ["GLY2:A", "SER3:A"]
+
+    def test_single_conformer_keeps_its_own_residues(self):
+        """With one member there is nothing to take a majority over."""
+        c = self._cluster([["ALA1:A", "GLY2:A", "SER3:A"]])
+        assert c.lining_residues == ["ALA1:A", "GLY2:A", "SER3:A"]
+
+    def test_three_conformers_need_two(self):
+        c = self._cluster([["ALA1:A", "GLY2:A"],
+                           ["ALA1:A", "SER3:A"],
+                           ["ALA1:A", "GLY2:A"]])
+        # ALA1 in 3, GLY2 in 2, SER3 in 1.
+        assert c.lining_residues == ["ALA1:A", "GLY2:A"]
+
+    def test_four_conformers_need_three(self):
+        """A strict majority, so an even split does not carry."""
+        c = self._cluster([["ALA1:A", "GLY2:A"], ["ALA1:A", "GLY2:A"],
+                           ["ALA1:A", "SER3:A"], ["ALA1:A", "SER3:A"]])
+        # ALA1 in 4, GLY2 in 2 of 4, SER3 in 2 of 4: neither half carries.
+        assert c.lining_residues == ["ALA1:A"]
+
+    def test_a_conformer_does_not_vote_twice(self):
+        """One conformer can contribute several member pockets to a cluster.
+
+        Counting member pockets lets a single conformer carry a residue over the
+        bar on its own, which is what the old numerator did.
+        """
+        from lacuna.pockets.clusterer import cluster_pockets as cp
+        # Conformer 0 contributes two nearby pockets, conformer 1 one.
+        a = _make_pocket((0.0, 0.0, 0.0), conformer_idx=0,
+                         lining=["ALA1:A", "GLY2:A"])
+        b = _make_pocket((1.0, 0.0, 0.0), conformer_idx=0,
+                         lining=["ALA1:A", "GLY2:A"])
+        d = _make_pocket((0.5, 0.0, 0.0), conformer_idx=1, lining=["ALA1:A"])
+        clusters = cp([[a, b], [d]], n_conformers=2)
+        assert len(clusters) == 1
+        # GLY2 was seen by one conformer of two, so it must not reach a majority
+        # even though two member pockets carried it.
+        assert clusters[0].lining_residues == ["ALA1:A"]
+
+    def test_never_returns_an_empty_lining(self):
+        """A site with no residues cannot be scored, docked or read."""
+        c = self._cluster([["ALA1:A"], ["GLY2:A"], ["SER3:A"], ["THR4:A"]])
+        # Every residue is in 1 of 4 conformers, so no majority exists; the
+        # fallback keeps the residues the members agree on most.
+        assert c.lining_residues
+        assert len(c.lining_residues) == 4
+
+    def test_the_old_rule_is_still_reachable(self):
+        """Kept so the change can be measured, and reverted if it has to be."""
+        from lacuna.pockets import clusterer as cl
+        try:
+            cl.CONSENSUS_STRICT_MAJORITY = False
+            c = self._cluster([["ALA1:A", "GLY2:A", "SER3:A"],
+                               ["GLY2:A", "SER3:A", "THR4:A"]])
+            # The old bar at C = 2 was one member pocket, i.e. the union.
+            assert c.lining_residues == ["ALA1:A", "GLY2:A", "SER3:A", "THR4:A"]
+        finally:
+            cl.CONSENSUS_STRICT_MAJORITY = True
