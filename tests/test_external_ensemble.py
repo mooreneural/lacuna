@@ -397,3 +397,57 @@ class TestGlobalFrame:
         # The frame is a mirror image, and it must stay one: superposing it onto
         # the reference must not silently flip it back by reflecting.
         assert np.sign(chirality(c)) == np.sign(chirality(mirrored))
+
+
+class TestRelabelledChainNeedsSingleChainReference:
+    """Ignoring the chain letter is only safe when there is one on each side.
+
+    The fallback existed for the common case of a predictor emitting one chain
+    labelled "A" where the reference calls it "B". It checked only that the
+    FRAME had one chain, so a multi-chain reference fed a single-chain frame
+    mapped every reference chain's residue n onto that one frame chain's residue
+    n: chains B and C silently received chain A's coordinates. On 1HGT (chains
+    H, I, L) against its own ensemble relabelled to a single chain Z, that
+    accepted frames at 3.285 A where the same coordinates under chain H gave
+    1.022 A, and the residue-name check could not see it because the dominant
+    chain carried the pairing.
+    """
+
+    def _two_chain_ref(self, tmp_path):
+        ref = tmp_path / "ref.pdb"
+        ref.write_text(_seq_model(_SEQ, start=1, chain="A") + "\n"
+                       + _seq_model(_SEQ, start=1, chain="B") + "\nEND\n")
+        return ref
+
+    def test_single_chain_frame_is_refused_for_a_multi_chain_reference(self, tmp_path):
+        ref = self._two_chain_ref(tmp_path)
+        ens = tmp_path / "ens.pdb"
+        # One chain Z holding residues 1-8. Under the old rule this paired with
+        # BOTH reference chains and was accepted without a word.
+        ens.write_text(_seq_model(_SEQ, scale=1.1, start=1, chain="Z") + "\nEND\n")
+        with pytest.raises(ValueError, match="no usable conformers"):
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                ExternalEnsembleBackend(ens).generate(ref, 0)
+
+    def test_a_correctly_labelled_multi_chain_frame_still_works(self, tmp_path):
+        ref = self._two_chain_ref(tmp_path)
+        ens = tmp_path / "ens.pdb"
+        ens.write_text(_seq_model(_SEQ, scale=1.1, start=1, chain="A") + "\n"
+                       + _seq_model(_SEQ, scale=1.1, start=1, chain="B") + "\nEND\n")
+        got = ExternalEnsembleBackend(ens).generate(ref, 0)
+        assert len(got) == 1
+        assert len(got[0]) == 2 * len(_SEQ)
+
+    def test_single_chain_relabelling_still_works_for_a_single_chain_reference(
+            self, tmp_path):
+        """The case the fallback is for, which must keep working."""
+        ref = tmp_path / "ref.pdb"
+        ref.write_text(_seq_model(_SEQ, start=1, chain="B") + "\nEND\n")
+        ens = tmp_path / "ens.pdb"
+        ens.write_text(_seq_model(_SEQ, scale=1.1, start=1, chain="A") + "\nEND\n")
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")  # this path must stay quiet
+            got = ExternalEnsembleBackend(ens).generate(ref, 0)
+        assert len(got) == 1
+        assert _span(got[0]) == pytest.approx((len(_SEQ) - 1) * 3.8 * 1.1, abs=1e-3)

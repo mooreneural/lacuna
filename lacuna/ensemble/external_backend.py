@@ -175,16 +175,25 @@ class ExternalEnsembleBackend(EnsembleBackend):
                 label = f"{path.name}[model {model_i}]"
                 f_order, f_atoms, _ = _residues_in_order(frame.items())
                 frame_chains = {c for c, _ in f_order}
+                ref_chains = {c for c, _ in ref_order}
 
                 # Candidate pairings, tried in order of how much they assume.
                 cands: list[tuple[str, list]] = [
                     ("numbering", [(rk, rk) for rk in ref_order if rk in f_atoms]),
                 ]
-                if len(frame_chains) == 1 and frame_chains != {chain}:
-                    # One chain under a different letter: the mapping is
-                    # unambiguous, so try the numbers with the letter ignored.
-                    # Only for single-chain frames, since with two or more chains
-                    # dropping the letter would merge residues sharing a number.
+                if (len(frame_chains) == 1 and len(ref_chains) == 1
+                        and frame_chains != ref_chains):
+                    # One chain on each side under different letters: the mapping
+                    # is unambiguous, so try the numbers with the letter ignored.
+                    # Both sides have to be single-chain. A multi-chain reference
+                    # fed a single-chain frame would otherwise map every reference
+                    # chain's residue n onto that one frame chain's residue n,
+                    # handing chains B and C chain A's coordinates with no
+                    # warning: on 1HGT (chains H, I, L) against its own ensemble
+                    # relabelled to a single chain Z, that accepted frames at
+                    # 3.285 A where the same coordinates under chain H give
+                    # 1.022 A. The residue-name check cannot catch it, because
+                    # the dominant chain carries the pairing.
                     only = next(iter(frame_chains))
                     cands.append(("relabelled chain",
                                   [(rk, (only, rk[1])) for rk in ref_order
