@@ -242,3 +242,57 @@ class TestSpringSoftening:
         _, freqs_uniform = backend._compute_modes(ca)
         _, freqs_soft = backend._compute_modes(ca, gamma=gamma)
         assert not np.allclose(freqs_uniform, freqs_soft)
+
+
+class TestMsaServerIsOptional:
+    """--no-msa-server has to reach the backend, and the default has to be stated.
+
+    BoltzBackend defaults use_msa_server to True and the CLI constructed it with
+    no arguments, so --backend boltz sent the query sequence to
+    https://api.colabfold.com with no flag to stop it and nothing in the help
+    text, README or CHANGELOG saying so. --backend auto tries boltz first, so on
+    any machine where the boltz package imports, a plain discover would have
+    made that call.
+    """
+
+    def test_the_flag_reaches_the_backend(self):
+        from lacuna.cli import _resolve_backend
+
+        assert _resolve_backend("boltz", msa_server=True).use_msa_server is True
+        assert _resolve_backend("boltz", msa_server=False).use_msa_server is False
+
+    def test_the_default_is_on_and_documented(self):
+        from click.testing import CliRunner
+
+        from lacuna.cli import main
+
+        out = CliRunner().invoke(main, ["discover", "--help"]).output
+        assert "--no-msa-server" in out
+        assert "api.colabfold.com" in out, "the network call must be disclosed"
+
+    def test_single_sequence_mode_omits_the_msa_from_the_yaml(self, tmp_path):
+        """Boltz reads 'msa: empty' as single-sequence; omitting it fetches."""
+        from lacuna.ensemble.boltz_backend import BoltzBackend
+
+        # A full N/CA/C backbone, because the sequence comes from PPBuilder,
+        # which chains residues on the C-to-N distance and sees nothing in a
+        # CA-only fixture. Pitch 4.31 A puts that distance at 1.33 A.
+        atom = ("ATOM  {s:>5}  {n:<3} {r} A{q:>4}    "
+                "{x:>8.3f}   0.000   0.000  1.00  0.00           {e}")
+        rows, serial = [], 1
+        for i, res in enumerate(["ALA", "GLY", "SER", "THR"]):
+            for name, dx, el in (("N", 0.0, "N"), ("CA", 1.46, "C"),
+                                 ("C", 2.98, "C")):
+                rows.append(atom.format(s=serial, n=name, r=res, q=i + 1,
+                                        x=4.31 * i + dx, e=el))
+                serial += 1
+        pdb = tmp_path / "p.pdb"
+        pdb.write_text("\n".join(rows) + "\nEND\n")
+
+        from lacuna.io.structure import load_structure
+        assert load_structure(pdb).sequence, "fixture gave no sequence"
+
+        off = BoltzBackend(use_msa_server=False)._write_input_yaml(pdb, tmp_path)
+        assert "msa: empty" in off.read_text()
+        on = BoltzBackend(use_msa_server=True)._write_input_yaml(pdb, tmp_path)
+        assert "msa: empty" not in on.read_text()

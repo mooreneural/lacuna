@@ -46,7 +46,7 @@ class _CleanErrors(click.Group):
             raise click.ClickException(str(e) or type(e).__name__) from e
 
 
-def _resolve_backend(name: str):
+def _resolve_backend(name: str, msa_server: bool = True):
     if name == "random":
         from lacuna.ensemble.random_backend import RandomBackend
         return RandomBackend()
@@ -61,7 +61,7 @@ def _resolve_backend(name: str):
         return OpenMMBackend()
     elif name == "boltz":
         from lacuna.ensemble.boltz_backend import BoltzBackend
-        return BoltzBackend()
+        return BoltzBackend(use_msa_server=msa_server)
     else:
         raise click.BadParameter(
             f"Unknown backend '{name}'. Choose: random, nma, rna-nma, openmm, boltz")
@@ -84,7 +84,7 @@ _BACKEND_REQUIRES = {
 }
 
 
-def _auto_backend(structure=None):
+def _auto_backend(structure=None, msa_server: bool = True):
     """Pick the best available backend at runtime.
 
     Nucleic-acid input takes the RNA elastic network, and that routing is the
@@ -111,7 +111,7 @@ def _auto_backend(structure=None):
             return _resolve_backend("rna-nma")
     for name in ("boltz", "openmm", "nma", "random"):
         if all(_installed(m) for m in _BACKEND_REQUIRES[name]):
-            return _resolve_backend(name)
+            return _resolve_backend(name, msa_server=msa_server)
     raise RuntimeError("No ensemble backend available.")
 
 
@@ -169,6 +169,16 @@ def main():
               help="Write the generated conformational ensemble as a multi-model "
                    "PDB (<input_stem>_ensemble.pdb); model 1 is the input "
                    "structure, the rest are the generated conformers.")
+@click.option("--msa-server/--no-msa-server", "msa_server", default=True,
+              show_default=True,
+              help="Only affects --backend boltz (including via --backend "
+                   "auto). Boltz-2 builds a multiple sequence alignment by "
+                   "sending the query sequence to the public ColabFold "
+                   "server at https://api.colabfold.com, which needs network "
+                   "access and discloses the sequence to a third party. It "
+                   "improves loop accuracy. --no-msa-server runs Boltz "
+                   "single-sequence instead: local and faster, noisier in "
+                   "loops.")
 @click.option("--top", default=10, show_default=True,
               help="Maximum number of pockets to report.")
 @click.option(
@@ -251,6 +261,7 @@ def discover(
     emit_conformers: bool,
     top: int,
     rank_by: str,
+    msa_server: bool,
     min_crypticity: float,
     quiet: bool,
     homodimer: bool,
@@ -354,10 +365,10 @@ def discover(
                 cap = f", first {conformers}" if conformers > 0 else ""
                 console.print(f"\n[dim]Reading ensemble from {ensemble_source}{cap}...[/dim]")
         elif backend == "auto":
-            be = _auto_backend(structure)
+            be = _auto_backend(structure, msa_server=msa_server)
             backend = be.name
         else:
-            be = _resolve_backend(backend)
+            be = _resolve_backend(backend, msa_server=msa_server)
 
         if not quiet and ensemble_source is None:
             console.print(f"\n[dim]Generating {conformers} conformers with '{backend}' backend...[/dim]")
