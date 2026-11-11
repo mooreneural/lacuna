@@ -120,9 +120,12 @@ def load_structure(path: str | Path, chain: str | None = None) -> Structure:
             Default loads all chains.
 
     Raises:
-        ValueError: if none of the named chains is present in the file. An
-            empty Structure would otherwise be returned and fail later
-            somewhere that cannot say which chain was missing.
+        ValueError: if none of the named chains is present in the file, or if
+            the file holds no polymer atoms at all. An empty Structure would
+            otherwise be returned and fail later somewhere that cannot say
+            which chain was missing, or inside a numpy reduction in the
+            detector, which reports only "zero-size array to reduction
+            operation minimum".
     """
     path = Path(path)
     suffix = path.suffix.lower()
@@ -184,6 +187,22 @@ def load_structure(path: str | Path, chain: str | None = None) -> Structure:
             "chain %r matched nothing in %s; the file has %s. Returning an "
             "empty structure here is what made these entries disappear from "
             "benchmarks instead of failing." % (chain, path.name, present or "no chains"))
+
+    if not atoms:
+        # Say which of the two reasons it was, because they need different
+        # fixes. Without this the first numpy reduction in the detector raises
+        # "zero-size array to reduction operation minimum which has no
+        # identity", which names neither the file nor the problem. Reached by a
+        # non-structure file given a .pdb name, a .csv, a header-only PDB, and
+        # a file holding only HETATM or water records.
+        n_het = sum(1 for m in bio_struct.get_models()
+                    for c in m.get_chains() for r in c.get_residues()
+                    if r.get_id()[0] != " ")
+        why = (f"it has {n_het} non-polymer residues (HETATM or water) and no "
+               "polymer ones" if n_het else
+               "no ATOM records were parsed, so it is probably not a structure "
+               "file")
+        raise ValueError(f"{path.name} contains no polymer atoms: {why}.")
 
     # Build one-letter sequences per chain
     ppb = PPBuilder()

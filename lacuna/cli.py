@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -20,6 +21,29 @@ console = Console()
 #: is useless, but one landing in a redirected stdout corrupts whatever is
 #: parsing it. stderr satisfies both.
 err_console = Console(stderr=True)
+
+
+#: Exception types that mean the input or the invocation was wrong, rather than
+#: that Lacuna has a defect. These reach the user as one line instead of a stack
+#: trace: a traceback is the right output for a bug and the wrong output for a
+#: file that is not a structure. Every one of these already carries a message
+#: written for a person to read. Set LACUNA_TRACEBACK=1 to get the traceback
+#: back, which is what you want when a message turns out to be hiding a defect.
+_USER_ERRORS = (ValueError, OSError)
+
+
+class _CleanErrors(click.Group):
+    """A click group that reports bad input as a message, not a traceback."""
+
+    def invoke(self, ctx):
+        try:
+            return super().invoke(ctx)
+        except click.ClickException:
+            raise
+        except _USER_ERRORS as e:
+            if os.environ.get("LACUNA_TRACEBACK"):
+                raise
+            raise click.ClickException(str(e) or type(e).__name__) from e
 
 
 def _resolve_backend(name: str):
@@ -91,7 +115,7 @@ def _auto_backend(structure=None):
     raise RuntimeError("No ensemble backend available.")
 
 
-@click.group()
+@click.group(cls=_CleanErrors)
 @click.version_option(version=__version__, prog_name="lacuna")
 def main():
     """Lacuna - cryptic binding pocket discovery via conformational ensemble analysis.
@@ -105,7 +129,8 @@ def main():
 
 
 @main.command()
-@click.argument("input_path", type=click.Path(exists=True, path_type=Path))
+@click.argument("input_path",
+                type=click.Path(exists=True, dir_okay=False, path_type=Path))
 @click.option(
     "--backend", "-b",
     type=click.Choice(["auto", "random", "nma", "rna-nma", "openmm", "boltz"]),
@@ -126,7 +151,8 @@ def main():
 )
 @click.option("--conformers", "-n", default=20, show_default=True,
               help="Number of conformers to generate.")
-@click.option("--output", "-o", type=click.Path(path_type=Path), default=None,
+@click.option("--output", "-o",
+              type=click.Path(file_okay=False, path_type=Path), default=None,
               help="Output DIRECTORY, which always receives pocket_report.json "
                    "(default: <input_stem>_lacuna/).")
 @click.option("--min-druggability", default=0.0, show_default=True,
@@ -289,7 +315,7 @@ def discover(
                 console.print(
                     "  [yellow]--homodimer: no BIOMT symmetry records found. "
                     "For dimer-interface pockets, download the biological assembly "
-                    "PDB from RCSB (use the 'Download Files → Biological Assembly' option).[/yellow]"
+                    "PDB from RCSB (use the 'Download Files > Biological Assembly' option).[/yellow]"
                 )
 
         if not quiet:
@@ -522,13 +548,16 @@ def discover(
 
 
 @main.command("dock-prep")
-@click.argument("report_path", type=click.Path(exists=True, path_type=Path))
-@click.argument("protein_path", type=click.Path(exists=True, path_type=Path))
+@click.argument("report_path",
+                type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.argument("protein_path",
+                type=click.Path(exists=True, dir_okay=False, path_type=Path))
 @click.option("--format", "fmt",
               type=click.Choice(["boltz", "vina", "pdb", "all"]),
               default="all", show_default=True,
               help="Docking tool output format.")
-@click.option("--output", "-o", type=click.Path(path_type=Path), default=None)
+@click.option("--output", "-o",
+              type=click.Path(file_okay=False, path_type=Path), default=None)
 @click.option("--top", default=5, show_default=True,
               help="Prepare files for top N pockets.")
 def dock_prep(
@@ -547,7 +576,16 @@ def dock_prep(
     from lacuna.io.writers import write_boltz_constraint, write_vina_box, write_pocket_pdb
     from lacuna.models import PocketCluster
 
-    report = json.loads(report_path.read_text())
+    try:
+        report = json.loads(report_path.read_text())
+    except json.JSONDecodeError as e:
+        # Name the file. The bare decoder message is "Expecting value: line 1
+        # column 1 (char 0)", which does not say which of the two path arguments
+        # was wrong, and swapping them is the easy mistake to make.
+        raise ValueError(
+            f"{report_path.name} is not valid JSON ({e}). The first argument is "
+            "the pocket_report.json written by 'lacuna discover', the second is "
+            "the protein structure.") from e
     structure = load_structure(protein_path)
 
     output_dir = output or report_path.parent / "docking_inputs"
