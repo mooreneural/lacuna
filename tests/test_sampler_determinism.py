@@ -9,7 +9,8 @@ against one thread: 2 ensembles were bit-identical, 56 differed by more than
 0.1 A and the worst by 24 A. Downstream, 17 of 46 targets produced different
 candidate pockets.
 
-There were two independent causes, and the tests are split the same way.
+There were two independent causes, and a third that only symmetric assemblies
+have. The tests are split the same way.
 
   sign        An eigenvector is defined only up to sign, and the sign LAPACK
               returns varies with threading. A conformer is a seeded Gaussian
@@ -20,23 +21,32 @@ There were two independent causes, and the tests are split the same way.
               in single precision and its thread-dependent rounding was large
               enough to see. In float64 with the sign pinned, 181 of the 184
               are bit-identical and the other three agree to 2.4e-7 A.
+  degeneracy  Modes that share an eigenvalue (any structure with a three-fold
+              or higher axis has them) come back in an arbitrary basis of the
+              space they span, which no sign rule can pin. Assemblies with an
+              exact four-fold axis still differed by up to 5.8 A between
+              thread counts after the two fixes above. Each degenerate set
+              now gets a basis computed from its projector.
 
 A unit test cannot change the thread count of the process it runs in, so most
 of these replace ``eigh`` with a stand-in that returns what a differently
-threaded LAPACK would: the same vectors with other signs, or with other
-rounding. The last test does it for real, in two subprocesses.
+threaded LAPACK would: the same vectors with other signs, with other rounding,
+or with another basis for each degenerate set. The last two tests do it for
+real, in two subprocesses each.
 
-Two kinds of input are outside what any of this can fix, and so outside these
-tests: degenerate modes (exact three-fold or higher symmetry) and a network so
-under-constrained that zero modes fill the eigenvalue window. Both are
-described in the ``nma_backend`` module docstring. The fixtures here are
-checked to be neither, see ``_well_posed``.
+One kind of input is outside what any of this can fix: a network so
+under-constrained that zero modes fill the eigenvalue window. It is described
+in the ``nma_backend`` module docstring, and the test for it is that the
+sampler warns. The fixtures for the sign and precision tests are checked to be
+neither that nor degenerate, see ``_well_posed``; the symmetric fixtures are
+checked to be degenerate.
 """
 from __future__ import annotations
 
 import os
 import subprocess
 import sys
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -45,7 +55,7 @@ import scipy.linalg
 
 import lacuna
 from lacuna.ensemble import nma_backend
-from lacuna.ensemble.nma_backend import NMABackend, canonical_sign
+from lacuna.ensemble.nma_backend import NMABackend, canonical_basis, canonical_sign
 from lacuna.io.structure import coords_array, load_structure
 from lacuna.nucleic.anm import RNAAnmBackend
 
@@ -155,7 +165,8 @@ def _well_posed(backend, beads: np.ndarray) -> None:
     Exactly six zero modes (a rigid network), a full set of kept modes, and
     kept eigenvalues separated from each other and from the first one dropped.
     Without this a later edit to a fixture could make it degenerate, and the
-    tests below would then be asserting something no sign rule can deliver.
+    sign and precision tests would then pass or fail on the strength of the
+    canonical basis instead of the thing they are named for.
     """
     values = scipy.linalg.eigvalsh(backend._hessian(beads))
     assert int((np.abs(values) < 1e-9 * values[-1]).sum()) == 6, "fixture is not rigid"
@@ -594,6 +605,437 @@ def test_conformers_of_a_symmetric_structure_survive_solver_rounding(
     assert _worst(plain_a, plain_b) > 1e-3
 
 
+# ------------------------------------------------------------------ degenerate modes
+
+def _fourfold(xyz):
+    """(x, y, z) -> (-y, x, z): a quarter turn about z, exact in decimal and in binary."""
+    x, y, z = xyz
+    return (-y, x, z)
+
+
+def _threefold(xyz):
+    """(x, y, z) -> (y, z, x): a third of a turn about the (1, 1, 1) diagonal, exact."""
+    x, y, z = xyz
+    return (y, z, x)
+
+
+def _assembly(tmp_path: Path, name: str, parts, cells, origin, spacing, operation,
+              copies: int, residue, seed: int) -> Path:
+    """One jittered chain and its images under an exact symmetry operation.
+
+    The operation is applied to the rounded coordinates and only permutes or
+    negates them, so the copies are symmetric to the last bit in the file and
+    in float32, the way an assembly built from crystallographic operators
+    along a cell axis is.
+    """
+    rng = np.random.default_rng(seed)
+    chain = []
+    for num, cell in enumerate(cells, start=1):
+        centre = (np.asarray(origin) + spacing * np.array(cell, dtype=float)
+                  + rng.uniform(-0.5, 0.5, 3))
+        for atom_name, element, xyz in _residue(rng, centre, parts, 0.2):
+            chain.append((atom_name, num, xyz, element))
+    atoms = []
+    for copy in range(copies):
+        atoms += [(atom_name, residue(num), "ABCD"[copy], num, xyz, el)
+                  for atom_name, num, xyz, el in chain]
+        chain = [(atom_name, num, operation(xyz), el) for atom_name, num, xyz, el in chain]
+    return _write_pdb(tmp_path / name, atoms)
+
+
+@pytest.fixture
+def tetramer_pdb(tmp_path: Path) -> Path:
+    """Four chains about an exact four-fold axis along z (C4)."""
+    cells = [(i, j, k) for i in range(2) for j in range(2) for k in range(2)]
+    return _assembly(tmp_path, "tetramer.pdb", _AMINO[:3], cells, (2.5, 2.5, 0.0), 3.8,
+                     _fourfold, 4, lambda num: "ALA", seed=5)
+
+
+@pytest.fixture
+def trimer_pdb(tmp_path: Path) -> Path:
+    """Three chains about an exact three-fold axis along the body diagonal (C3)."""
+    cells = [(i, j, k) for i in range(2) for j in range(2) for k in range(3)]
+    return _assembly(tmp_path, "trimer.pdb", _AMINO[:3], cells, (5.0, -1.0, -4.0), 3.8,
+                     _threefold, 3, lambda num: "ALA", seed=5)
+
+
+@pytest.fixture
+def rna_trimer_pdb(tmp_path: Path) -> Path:
+    """Three RNA chains about an exact three-fold axis (C3), three beads a nucleotide."""
+    cells = [(i, j, 0) for i in range(2) for j in range(2)]
+    return _assembly(tmp_path, "rna_trimer.pdb", _NUCLEOTIDE, cells, (5.0, 0.0, -4.0), 6.0,
+                     _threefold, 3, lambda num: "ACGU"[num % 4], seed=3)
+
+
+_SYMMETRIC = {"tetramer": "tetramer_pdb", "trimer": "trimer_pdb", "rna_trimer": "rna_trimer_pdb"}
+
+
+def _symmetric(request, kind):
+    """(backend, path, float32 coordinates, bead indices) of a symmetric fixture."""
+    backend = RNAAnmBackend() if kind.startswith("rna") else NMABackend()
+    path = request.getfixturevalue(_SYMMETRIC[kind])
+    base, index = _beads(backend, path)
+    return backend, path, base, index
+
+
+def _tied_runs(values, rtol=1e-9):
+    """Inclusive (start, stop) runs of eigenvalues equal to ``rtol``, longer than one."""
+    runs, start = [], 0
+    for i in range(1, len(values) + 1):
+        if i == len(values) or values[i] - values[i - 1] > rtol * abs(values[i]):
+            if i - 1 > start:
+                runs.append((start, i - 1))
+            start = i
+    return runs
+
+
+def _rotate_tied(seed: int, rtol: float = 1e-9):
+    """What another thread count does to degenerate modes: the same space, another basis.
+
+    Every run of eigenvalues equal to ``rtol`` gets its eigenvectors multiplied
+    by a seeded random orthogonal matrix, reflections included.
+    """
+    def transform(values, vectors):
+        rng = np.random.default_rng(seed)
+        for start, stop in _tied_runs(values, rtol):
+            q, _ = np.linalg.qr(rng.normal(size=(stop - start + 1,) * 2))
+            vectors[:, start:stop + 1] = vectors[:, start:stop + 1] @ q
+        return values, vectors
+    return transform
+
+
+def _assert_same_to_rounding(ensemble_a, ensemble_b) -> None:
+    """Equal up to float64 rounding that tipped a float32 coordinate: one unit
+    in the last place, or 1e-9 A for a coordinate that close to zero."""
+    assert len(ensemble_a) == len(ensemble_b)
+    for a, b in zip(ensemble_a, ensemble_b):
+        gap = np.abs(a.astype(np.float64) - b.astype(np.float64))
+        ulp = np.spacing(np.maximum(np.abs(a), np.abs(b))).astype(np.float64)
+        assert (gap <= np.maximum(ulp, 1e-9)).all(), "worst difference %.3g A" % gap.max()
+
+
+def _random_subspace(rng, d: int, size: int) -> np.ndarray:
+    """(d, size) orthonormal rows."""
+    q, _ = np.linalg.qr(rng.normal(size=(size, d)))
+    return q.T.copy()
+
+
+@pytest.mark.parametrize("d", [1, 2, 3, 5])
+def test_the_canonical_basis_is_an_orthonormal_basis_of_the_same_space(d):
+    vectors = _random_subspace(np.random.default_rng(d), d, 60)
+    basis = canonical_basis(vectors)
+    assert basis.dtype == np.float64 and basis.shape == vectors.shape
+    np.testing.assert_allclose(basis @ basis.T, np.eye(d), atol=1e-13)
+    np.testing.assert_allclose(basis.T @ basis, vectors.T @ vectors, atol=1e-13)
+
+
+@pytest.mark.parametrize("d", [2, 3, 5])
+def test_the_canonical_basis_does_not_depend_on_the_basis_it_is_given(d):
+    """The whole point: any basis of the space goes in, one basis comes out."""
+    rng = np.random.default_rng(100 + d)
+    vectors = _random_subspace(rng, d, 60)
+    expected = canonical_basis(vectors)
+    for _ in range(5):
+        q, _ = np.linalg.qr(rng.normal(size=(d, d)))
+        np.testing.assert_allclose(canonical_basis(q @ vectors), expected, atol=1e-13)
+    # The input is not modified.
+    np.testing.assert_array_equal(vectors, _random_subspace(np.random.default_rng(100 + d), d, 60))
+
+
+def test_each_canonical_vector_is_a_projected_axis_and_positive_on_it():
+    """Pivoted Cholesky of the projector, stated the slow way."""
+    vectors = _random_subspace(np.random.default_rng(8), 3, 40)
+    basis = canonical_basis(vectors)
+    projector = vectors.T @ vectors
+    for vector in basis:
+        pivot = int(np.argmax(np.diag(projector)))
+        expected = projector[pivot] / np.sqrt(projector[pivot, pivot])
+        np.testing.assert_allclose(vector, expected, atol=1e-13)
+        assert vector[pivot] > 0
+        projector = projector - np.outer(expected, expected)
+
+
+def test_empty_and_single_vector_inputs_to_the_canonical_basis():
+    assert canonical_basis(np.zeros((0, 12))).shape == (0, 12)
+    vector = _random_subspace(np.random.default_rng(2), 1, 12)
+    basis = canonical_basis(-vector)
+    np.testing.assert_allclose(np.abs(basis), np.abs(vector), atol=1e-15)
+    assert basis[0, np.abs(vector[0]).argmax()] > 0
+
+
+def test_tied_eigenvalues_are_grouped_into_runs(monkeypatch):
+    monkeypatch.setattr(nma_backend, "_DEGENERACY_RTOL", 1e-4)
+    values = np.array([0.0, 1.0, 1.0 + 5e-5, 1.0 + 1e-4, 2.0, 3.0, 3.0, 4.0])
+    runs = nma_backend._degenerate_runs
+    assert runs(values, 1, 5) == [(1, 3), (4, 4), (5, 6)]
+    # A run is reported whole wherever the range cuts it, at either end.
+    assert runs(values, 2, 5) == [(1, 3), (4, 4), (5, 6)]
+    assert runs(values, 4, 4) == [(4, 4)]
+    # Neighbours 2e-4 apart are not tied, and a chain of ties is one run.
+    assert runs(np.array([1.0, 1.0002, 1.0004]), 0, 2) == [(0, 0), (1, 1), (2, 2)]
+    assert runs(np.array([1.0, 1.00009, 1.00018]), 0, 0) == [(0, 2)]
+
+
+@pytest.mark.parametrize("kind", sorted(_SYMMETRIC))
+def test_the_symmetric_fixtures_really_have_degenerate_modes(request, kind):
+    """What makes the fixtures a test of anything: a rigid network whose
+    sampled modes include pairs with one eigenvalue, to rounding."""
+    backend, _, base, index = _symmetric(request, kind)
+    values = scipy.linalg.eigvalsh(backend._hessian(base[index]))
+    assert int((np.abs(values) < 1e-9 * values[-1]).sum()) == 6, "fixture is not rigid"
+    sampled = values[6:6 + backend.n_modes + 1]
+    gaps = np.diff(sampled) / sampled[1:]
+    assert (gaps < 1e-9).sum() >= 2, "fixture has no degenerate pairs"
+    assert gaps[gaps >= 1e-9].min() > 1e-3, "fixture has a gap that is neither"
+
+
+@pytest.mark.parametrize("kind", sorted(_SYMMETRIC))
+def test_conformers_do_not_depend_on_the_basis_eigh_returns_for_degenerate_modes(
+        monkeypatch, request, kind):
+    """A three-fold or four-fold assembly, solved once, sampled from that
+    solution and from the same solution with every degenerate pair turned to
+    another basis. The float64 arithmetic differs by rounding only, so the
+    conformers agree to a float32 unit in the last place."""
+    backend, path, _, _ = _symmetric(request, kind)
+    plain, first = _generate(monkeypatch, backend, path, 6)
+    assert _tied_runs(first.solution[0][6:16]), "nothing to rotate"
+    for seed in (1, 2, 3):
+        turned, _ = _generate(monkeypatch, backend, path, 6, _rotate_tied(seed), first.solution)
+        _assert_same_to_rounding(plain, turned)
+
+    # Control: with degenerate sets left as the solver returned them, the same
+    # rotation gives a visibly different ensemble.
+    monkeypatch.setattr(nma_backend, "_DEGENERACY_RTOL", -1.0)
+    plain, _ = _generate(monkeypatch, backend, path, 6, None, first.solution)
+    turned, _ = _generate(monkeypatch, backend, path, 6, _rotate_tied(1), first.solution)
+    assert _worst(plain, turned) > 1e-3
+
+
+def test_degenerate_modes_are_still_normal_modes_of_the_network(request):
+    """The canonical basis replaces eigenvectors by other eigenvectors: every
+    returned mode satisfies H v = lambda v, the modes are orthonormal, and the
+    frequencies are the solver's."""
+    backend, _, base, index = _symmetric(request, "tetramer")
+    beads = base[index].astype(np.float64)
+    modes, freqs = backend._compute_modes(beads)
+    hessian = backend._hessian(beads)
+    np.testing.assert_allclose(modes @ modes.T, np.eye(len(modes)), atol=1e-12)
+    np.testing.assert_allclose(modes @ hessian, freqs[:, None] * modes, atol=1e-11)
+    np.testing.assert_allclose(freqs, scipy.linalg.eigvalsh(hessian)[6:6 + len(freqs)],
+                               rtol=1e-10)
+    np.testing.assert_array_equal(modes, canonical_sign(modes))
+
+
+def test_the_tie_rule_holds_inside_a_degenerate_set(monkeypatch, request):
+    """Under a four-fold axis the projector onto a degenerate pair has the
+    same diagonal entry on four symmetry-related coordinates. Lean the
+    solver's vectors towards one chain and then another, by far more than
+    rounding and far less than the tolerance: the basis must not move. With
+    the tolerance at zero the pivot follows the lean and the basis jumps."""
+    backend, path, _, _ = _symmetric(request, "tetramer")
+
+    def lean(chain):
+        def transform(values, vectors):
+            quarter = vectors.shape[0] // 4
+            vectors[chain * quarter:(chain + 1) * quarter] *= 1 + 1e-9
+            return values, vectors
+        return transform
+
+    first, stand_in = _generate(monkeypatch, backend, path, 6, lean(0))
+    for chain in (1, 2, 3):
+        other, _ = _generate(monkeypatch, backend, path, 6, lean(chain), stand_in.solution)
+        assert _worst(first, other) < 1e-5
+
+    monkeypatch.setattr(nma_backend, "_SIGN_TIE_RTOL", 0.0)
+    ensembles = [_generate(monkeypatch, backend, path, 6, lean(chain), stand_in.solution)[0]
+                 for chain in range(4)]
+    assert max(_worst(ensembles[0], other) for other in ensembles[1:]) > 1e-3
+
+
+def test_a_degenerate_set_cut_by_n_modes_is_cut_the_same_way_every_time(monkeypatch, request):
+    """The trimer's tenth and eleventh modes are a degenerate pair, so the
+    default ten modes take one vector out of a two-dimensional space. Which
+    one must not depend on the solver's basis either."""
+    backend, path, base, index = _symmetric(request, "trimer")
+    values = scipy.linalg.eigvalsh(backend._hessian(base[index]))
+    assert abs(values[16] - values[15]) < 1e-12 * values[16], "fixture: modes 10 and 11 not a pair"
+    assert values[15] - values[14] > 1e-3 * values[15]
+
+    stand_in = _ReplayEigh()
+    monkeypatch.setattr(nma_backend, "eigh", stand_in)
+    modes, _ = backend._compute_modes(base[index])
+    for seed in (1, 2, 3):
+        stand_in.transform = _rotate_tied(seed)
+        turned, _ = backend._compute_modes(base[index])
+        np.testing.assert_allclose(turned, modes, atol=1e-12)
+    # The vector kept lies in the pair's space.
+    pair = stand_in.solution[1][:, 15:17]
+    np.testing.assert_allclose(pair @ (pair.T @ modes[-1]), modes[-1], atol=1e-12)
+
+
+def test_broken_symmetry_is_still_one_degenerate_set(monkeypatch, request):
+    """Symmetry that is exact in the molecule is approximate in a file. Noise
+    of 1e-7 A splits the pairs by far less than the tolerance, the solver's
+    vectors inside each pair are then decided by its rounding, and the
+    ensemble must not follow them."""
+    backend, _, base, index = _symmetric(request, "tetramer")
+    noisy = base.astype(np.float64) + 1e-7 * np.random.default_rng(4).normal(size=base.shape)
+    values = scipy.linalg.eigvalsh(backend._hessian(noisy[index]))[6:17]
+    gaps = np.diff(values) / values[1:]
+    assert ((gaps > 1e-12) & (gaps < 1e-6)).sum() >= 2, "noise did not split the pairs"
+
+    stand_in = _ReplayEigh()
+    monkeypatch.setattr(nma_backend, "eigh", stand_in)
+    plain = backend._sample_ensemble(noisy, noisy[index], 6)
+    stand_in.transform = _rotate_tied(7, rtol=1e-6)
+    turned = backend._sample_ensemble(noisy, noisy[index], 6)
+    _assert_same_to_rounding(plain, turned)
+
+    # Control: left to the solver, the same two solutions are angstroms apart.
+    monkeypatch.setattr(nma_backend, "_DEGENERACY_RTOL", -1.0)
+    stand_in.transform = lambda values, vectors: (values, vectors)
+    plain = backend._sample_ensemble(noisy, noisy[index], 6)
+    stand_in.transform = _rotate_tied(7, rtol=1e-6)
+    turned = backend._sample_ensemble(noisy, noisy[index], 6)
+    assert _worst(plain, turned) > 1e-3
+
+
+def test_modes_without_a_tie_are_left_to_the_solver(monkeypatch, protein_pdb, dimer_pdb):
+    """No degenerate set, no canonical basis: an ordinary structure, and one
+    with a two-fold axis, get the solver's own eigenvectors with the sign
+    fixed, exactly as before degenerate sets were handled."""
+    def refuse(vectors):
+        raise AssertionError("canonical_basis called on a structure with no degenerate modes")
+
+    for path in (protein_pdb, dimer_pdb):
+        backend = NMABackend()
+        base, index = _beads(backend, path)
+        with_rule, stand_in = _generate(monkeypatch, backend, path, 4)
+        monkeypatch.setattr(nma_backend, "canonical_basis", refuse)
+        monkeypatch.setattr(nma_backend, "_DEGENERACY_RTOL", -1.0)
+        without, _ = _generate(monkeypatch, backend, path, 4, None, stand_in.solution)
+        assert _same(with_rule, without)
+        assert len(stand_in.inputs) == 1, "one eigensolve per call"
+        monkeypatch.undo()
+
+
+def _centred_pentagon() -> np.ndarray:
+    """Six beads in a plane: nine zero modes, then a degenerate pair."""
+    angle = 2 * np.pi * np.arange(5) / 5
+    ring = np.stack([5.0 * np.cos(angle), 5.0 * np.sin(angle), np.zeros(5)], axis=1)
+    return np.concatenate([np.zeros((1, 3)), ring])
+
+
+class _CountingEigh:
+    """The real solver, with every requested window recorded and tied sets rotated."""
+
+    def __init__(self, seed=None):
+        self.windows = []
+        self.transform = _rotate_tied(seed) if seed is not None else None
+
+    def __call__(self, a, subset_by_index=None, **kwargs):
+        self.windows.append(tuple(subset_by_index))
+        values, vectors = scipy.linalg.eigh(a, subset_by_index=subset_by_index, **kwargs)
+        if self.transform is not None:
+            values, vectors = self.transform(values, vectors)
+        return values, vectors
+
+
+def test_a_degenerate_set_at_the_edge_of_the_window_is_fetched_whole(monkeypatch):
+    """With one mode asked for, the window is ten eigenvalues: nine zero modes
+    and the first of a degenerate pair. Its partner is outside. The solve is
+    repeated with a wider window, and the mode returned is then the same
+    whatever basis the solver gives the pair."""
+    beads = _centred_pentagon()
+    backend = NMABackend(n_modes=1)
+    values = scipy.linalg.eigvalsh(backend._hessian(beads))
+    assert int((np.abs(values) < 1e-9 * values[-1]).sum()) == 9
+    assert abs(values[10] - values[9]) < 1e-12 * values[10] < values[11] - values[10]
+
+    counting = _CountingEigh()
+    monkeypatch.setattr(nma_backend, "eigh", counting)
+    modes, freqs = backend._compute_modes(beads)
+    assert counting.windows == [(0, 9), (0, 17)]
+    assert modes.shape == (1, 18) and freqs.shape == (1,)
+    for seed in (1, 2, 3):
+        monkeypatch.setattr(nma_backend, "eigh", _CountingEigh(seed))
+        turned, _ = backend._compute_modes(beads)
+        np.testing.assert_allclose(turned, modes, atol=1e-12)
+
+    # Control: with the pair left to the solver, its basis comes straight through.
+    monkeypatch.setattr(nma_backend, "_DEGENERACY_RTOL", -1.0)
+    results = []
+    for seed in (1, 2, 3):
+        monkeypatch.setattr(nma_backend, "eigh", _CountingEigh(seed))
+        results.append(backend._compute_modes(beads)[0])
+    assert max(np.abs(r - results[0]).max() for r in results[1:]) > 1e-3
+
+
+def test_a_wider_window_does_not_change_which_modes_are_chosen(monkeypatch):
+    """Zero modes are told from vibrations relative to the largest eigenvalue
+    of the original window. If the second, wider solve fed that filter, asking
+    for more eigenvalues would raise the bar and could drop a soft mode. Here
+    the eigenvalues beyond the original window are made a million times
+    larger: the mode chosen and its frequency must not notice."""
+    beads = _centred_pentagon()
+    backend = NMABackend(n_modes=1)
+    modes, freqs = backend._compute_modes(beads)
+
+    def stiff_beyond_the_window(a, subset_by_index=None, **kwargs):
+        values, vectors = scipy.linalg.eigh(a, subset_by_index=subset_by_index, **kwargs)
+        values[11:] *= 1e6            # past the window (10) and the pair's partner
+        return values, vectors
+
+    monkeypatch.setattr(nma_backend, "eigh", stiff_beyond_the_window)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        stiff_modes, stiff_freqs = backend._compute_modes(beads)
+    np.testing.assert_allclose(stiff_modes, modes, atol=1e-12)
+    np.testing.assert_allclose(stiff_freqs, freqs, rtol=1e-12)
+
+
+# ------------------------------------------------------------------ what cannot be fixed
+
+def test_a_network_with_no_vibration_in_the_window_warns(tmp_path):
+    """Thirty pairs of beads far apart from each other: 30 springs, 150 zero
+    modes. The 46 lowest eigenvalues are all zero, there is nothing to sample,
+    and the caller is told so instead of being handed rigid-body noise."""
+    rng = np.random.default_rng(1)
+    beads = []
+    for k in range(30):
+        centre = 40.0 * np.array([k % 5, (k // 5) % 3, k // 15], dtype=float)
+        beads += [centre, centre + rng.normal(size=3) * 2.0 + np.array([3.0, 0.0, 0.0])]
+    backend = NMABackend()
+    with pytest.warns(RuntimeWarning, match="under-constrained"):
+        modes, freqs = backend._compute_modes(np.array(beads))
+    assert modes.shape == (backend.n_modes, 180) and (freqs > 0).all()
+
+    # No springs at all is the same case.
+    with pytest.warns(RuntimeWarning, match="under-constrained"):
+        backend._compute_modes(100.0 * np.arange(8)[:, None] * np.ones(3))
+
+    # So is a straight rod, whose only vibrations are along its length. Its
+    # zero modes come out as rounding noise of either sign, and the positive
+    # ones pass the relative filter for vibrations: it is the scale of the
+    # Hessian that gives them away.
+    rod = 3.8 * np.arange(60)[:, None] * np.array([0.36, 0.48, 0.8])
+    window = scipy.linalg.eigh(backend._hessian(rod), subset_by_index=[0, 45], eigvals_only=True)
+    assert (window > np.abs(window).max() * 1e-3).any() and np.abs(window).max() < 1e-12
+    with pytest.warns(RuntimeWarning, match="under-constrained"):
+        backend._compute_modes(rod)
+
+
+@pytest.mark.parametrize("kind", ["protein", "dimer", "rna", "tetramer", "trimer", "rna_trimer"])
+def test_an_ordinary_structure_does_not_warn(request, kind):
+    if kind in _SYMMETRIC:
+        backend, path, _, _ = _symmetric(request, kind)
+    else:
+        backend, path = _backend(kind), request.getfixturevalue(kind + "_pdb")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        backend.generate(path, 2)
+
+
 # ------------------------------------------------------------------ what did not change
 
 @pytest.mark.parametrize("kind", ["protein", "dimer", "rna"])
@@ -740,6 +1182,20 @@ def _ensemble_at(threads: int, pdb: Path, out: Path):
                             env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
 
+def _assert_one_thread_and_four_agree(pdb: Path, tmp_path: Path) -> None:
+    outs = [tmp_path / "t1.npy", tmp_path / "t4.npy"]
+    children = [_ensemble_at(t, pdb, out) for t, out in zip((1, 4), outs)]
+    for child in children:
+        log = child.communicate(timeout=300)[0].decode(errors="replace")
+        assert child.returncode == 0, log
+    one, four = (np.load(out) for out in outs)
+
+    assert one.dtype == four.dtype == np.float32 and one.shape == four.shape
+    gap = np.abs(one.astype(np.float64) - four.astype(np.float64))
+    ulp = np.spacing(np.maximum(np.abs(one), np.abs(four))).astype(np.float64)
+    assert (gap <= np.maximum(ulp, 1e-9)).all(), "worst difference %.3g A" % gap.max()
+
+
 @pytest.mark.skipif(not KRAS.exists(), reason="KRAS_G12D.pdb not available")
 def test_one_blas_thread_and_four_give_the_same_ensemble(tmp_path):
     """The defect itself, run for real: the same structure at two thread counts.
@@ -753,14 +1209,46 @@ def test_one_blas_thread_and_four_give_the_same_ensemble(tmp_path):
     more. On a BLAS that ignores these variables the two runs are the same run
     and this passes without testing anything.
     """
-    outs = [tmp_path / "t1.npy", tmp_path / "t4.npy"]
-    children = [_ensemble_at(t, KRAS, out) for t, out in zip((1, 4), outs)]
-    for child in children:
-        log = child.communicate(timeout=300)[0].decode(errors="replace")
-        assert child.returncode == 0, log
-    one, four = (np.load(out) for out in outs)
+    _assert_one_thread_and_four_agree(KRAS, tmp_path)
 
-    assert one.dtype == four.dtype == np.float32 and one.shape == four.shape
-    gap = np.abs(one.astype(np.float64) - four.astype(np.float64))
-    ulp = np.spacing(np.maximum(np.abs(one), np.abs(four))).astype(np.float64)
-    assert (gap <= np.maximum(ulp, 1e-9)).all(), "worst difference %.3g A" % gap.max()
+
+def _kras_tetramer(path: Path) -> Path:
+    """KRAS and three images of it about an exact four-fold axis along z.
+
+    The chain is moved off the axis far enough to leave a pore and near enough
+    for neighbours to touch, rounded to the three decimals of the file, and
+    then turned by (x, y, z) -> (-y, x, z), which is exact. This is what
+    ``--homodimer`` produces from a crystal whose four-fold lies along a cell
+    axis, and its modes include degenerate pairs.
+    """
+    lines = [line for line in KRAS.read_text().splitlines() if line.startswith("ATOM")]
+    xyz = np.array([[float(line[30:38]), float(line[38:46]), float(line[46:54])]
+                    for line in lines])
+    xyz = np.round(xyz - xyz.mean(axis=0) + np.array([24.0, 0.0, 0.0]), 3)
+    out = []
+    for copy in range(4):
+        out += ["%s%s%s%8.3f%8.3f%8.3f%s" % (line[:21], "ABCD"[copy], line[22:30], x, y, z,
+                                             line[54:])
+                for line, (x, y, z) in zip(lines, xyz)]
+        xyz = np.stack([-xyz[:, 1], xyz[:, 0], xyz[:, 2]], axis=1)
+    path.write_text("\n".join(out) + "\nEND\n")
+    return path
+
+
+@pytest.mark.skipif(not KRAS.exists(), reason="KRAS_G12D.pdb not available")
+def test_one_blas_thread_and_four_give_the_same_ensemble_of_a_fourfold_assembly(tmp_path):
+    """The same, on a structure with an exact four-fold axis.
+
+    Here the sign rule and double precision are not enough: the solver returns
+    a different basis of every degenerate pair at each thread count, and on
+    the machine this was written on the ensemble moved by 2.7 A between one
+    thread and four until degenerate sets were given a canonical basis.
+    """
+    pdb = _kras_tetramer(tmp_path / "kras_c4.pdb")
+    backend = NMABackend()
+    base, index = _beads(backend, pdb)
+    values = scipy.linalg.eigvalsh(backend._hessian(base[index]),
+                                   subset_by_index=[0, 6 + backend.n_modes])
+    assert int((np.abs(values) < 1e-9 * values[-1]).sum()) == 6, "assembly is not one rigid network"
+    assert _tied_runs(values[6:]), "assembly has no degenerate modes among the sampled ones"
+    _assert_one_thread_and_four_agree(pdb, tmp_path)
