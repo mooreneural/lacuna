@@ -11,7 +11,13 @@ nothing on screen says so. This module refuses that input instead.
 Only the bead selection is overridden. The Hessian, the mode sampling and the
 bead-to-all-atom propagation are Lacuna's own methods called unchanged, so a
 protein-versus-RNA comparison measures the beads rather than two different
-implementations.
+implementations. The sampling loop is ``NMABackend._sample_ensemble`` as well,
+so an RNA ensemble is reproducible across machines on the same terms as a
+protein one (float64 throughout, canonical mode signs, float32 only in the
+finished conformer), with the same two exceptions, which are spelled out in
+``lacuna.ensemble.nma_backend``: a structure with a three-fold or higher
+symmetry axis, and a network so under-constrained that its zero modes fill the
+whole window of eigenvalues the sampler asks for.
 
 Parameters follow Pinamonti et al., NAR 2015 (doi:10.1093/nar/gkv708), the only
 systematic bead-and-cutoff scan for RNA. Three of its results contradict the
@@ -147,15 +153,10 @@ class RNAAnmBackend(NMABackend):
                 f"({info['n_nucleotide']} nucleotide, {info['n_protein']} protein). "
                 f"Unknown residues: {info['unknown_residues'][:8]}")
 
-        bead_coords = base_coords[idx]
-        modes, freqs = self._compute_modes(bead_coords)
-
-        conformers = []
-        for i in range(n_conformers):
-            amplitude = (i + 1) / n_conformers * self.max_rmsd
-            displaced = self._sample_ca(bead_coords, modes, freqs, amplitude, seed=i)
-            conformers.append(self._propagate(base_coords, bead_coords, displaced))
-        return conformers
+        # The loop the protein backend runs, not a copy of it. A copy is how
+        # this path would end up sampling or rounding differently from the
+        # protein one without anything saying so.
+        return self._sample_ensemble(base_coords, base_coords[idx], n_conformers)
 
 
 def network_report(structure_path: Path, bead_set: str = DEFAULT_BEAD_SET,
