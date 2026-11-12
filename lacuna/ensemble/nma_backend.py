@@ -50,9 +50,10 @@ about 1e-4 A of zero, where the float32 grid is that fine. Measured on 184
 structures between 1, 2, 8 and the default number of threads, and between a
 Windows and a Linux build: at most 40 of 26 million coordinates differed, and
 none by more than 1.9e-6 A. The solver's share of that rounding grows as two
-sampled eigenvalues approach each other, which makes these one-unit
-disagreements more frequent; the next section is about where that stops being
-rounding.
+sampled eigenvalues approach each other (to nearly 1e-9 A on the symmetric
+assemblies of the next section, where they come within 1e-3 of each other),
+which makes these one-unit disagreements more frequent; the next section is
+about where that stops being rounding.
 
 Degenerate modes
 ----------------
@@ -91,10 +92,11 @@ assemblies with seeded noise of 0 to 0.01 A added to break the symmetry by a
 known amount (80 cases, 1 and 2 threads against the default): left to the
 solver, 13 cases moved by more than 1e-5 A and the worst by 5.7 A; with a
 tolerance of 1e-6, 126,600 coordinates still differed, by up to four float32
-units; with 1e-4, 3,811 of 80 million differed and none by more than one
-unit, which is the residue described under "Reproducibility". Ordinary
-structures stay well clear of the tolerance: across 749 CryptoBench
-train-fold chains the closest two sampled eigenvalues are 2.4e-3 apart.
+units; with 1e-4, 3,811 of 80 million differed, none by more than 7.7e-6 A,
+and no coordinate larger than 1 A by more than one unit, which is the residue
+described under "Reproducibility". Ordinary structures stay well clear of the
+tolerance: across 749 CryptoBench train-fold chains the closest two sampled
+eigenvalues are 2.4e-3 apart.
 
 When the group of the last sampled mode runs to the edge of the eigenvalue
 window, the solve is repeated with twice the window, so that a group is never
@@ -112,10 +114,11 @@ sampling. When they fill the whole window of eigenvalues that
 ``_compute_modes`` requests (40 or more of them at the default ``n_modes``),
 nothing in the window is a vibration and what gets sampled is an arbitrary
 basis of the null space, rigid-body motion included. A predicted model whose
-disordered regions are drawn as long extended ribbons does this. No basis
-rule can help, because the window is an arbitrary slice of a larger null
-space, so this case is detected and reported with a ``RuntimeWarning``
-instead.
+disordered regions are drawn as long extended ribbons does this: of 157
+structures in the benchmark cache, the two it happens to are AlphaFold models
+of GPCRs with more than a hundred zero modes each. No basis rule can help,
+because the window is an arbitrary slice of a larger null space, so this case
+is detected and reported with a ``RuntimeWarning`` instead.
 """
 
 from __future__ import annotations

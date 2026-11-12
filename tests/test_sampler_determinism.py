@@ -1014,15 +1014,27 @@ def test_a_network_with_no_vibration_in_the_window_warns(tmp_path):
     with pytest.warns(RuntimeWarning, match="under-constrained"):
         backend._compute_modes(100.0 * np.arange(8)[:, None] * np.ones(3))
 
-    # So is a straight rod, whose only vibrations are along its length. Its
-    # zero modes come out as rounding noise of either sign, and the positive
-    # ones pass the relative filter for vibrations: it is the scale of the
-    # Hessian that gives them away.
+
+def test_zero_modes_that_pass_the_filter_as_noise_still_warn(monkeypatch):
+    """A straight rod vibrates only along its length, so its 46 lowest
+    eigenvalues are all zero modes. They come out of the solver as rounding
+    noise of either sign, and whichever are positive pass the filter for
+    vibrations, which is relative to the largest eigenvalue in the window. It
+    is the scale of the Hessian that gives them away. The noise is made
+    positive here, as another build of LAPACK could return it, so that the
+    filter alone would see nothing wrong."""
     rod = 3.8 * np.arange(60)[:, None] * np.array([0.36, 0.48, 0.8])
-    window = scipy.linalg.eigh(backend._hessian(rod), subset_by_index=[0, 45], eigvals_only=True)
-    assert (window > np.abs(window).max() * 1e-3).any() and np.abs(window).max() < 1e-12
+    backend = NMABackend()
+
+    def positive_noise(a, subset_by_index=None, **kwargs):
+        values, vectors = scipy.linalg.eigh(a, subset_by_index=subset_by_index, **kwargs)
+        assert np.abs(values).max() < 1e-12, "the window is not all zero modes"
+        return np.sort(np.abs(values) + 1e-18), vectors
+
+    monkeypatch.setattr(nma_backend, "eigh", positive_noise)
     with pytest.warns(RuntimeWarning, match="under-constrained"):
-        backend._compute_modes(rod)
+        modes, freqs = backend._compute_modes(rod)
+    assert modes.shape[1] == 180 and 1 <= len(modes) <= backend.n_modes
 
 
 @pytest.mark.parametrize("kind", ["protein", "dimer", "rna", "tetramer", "trimer", "rna_trimer"])
