@@ -191,14 +191,21 @@ class TestNMABackend:
         base = coords_array(load_structure(large_pdb))
         backend = NMABackend()
         ca = base[[a.serial for a in load_structure(large_pdb).atoms if a.name == "CA"]]
+        ones = np.ones((len(ca), len(ca)))
 
-        # An all-ones spring matrix must reproduce the uniform network. (Tolerance
-        # is float32-scale: the default gamma=None path keeps strength as a Python
-        # float, while an explicit ndarray promotes the Hessian dtype.)
+        # An all-ones spring matrix must reproduce the uniform network, and now
+        # does so exactly: both paths build the same float64 Hessian bit for
+        # bit, and a mode has one sign, so the modes are compared as they are.
+        # This used to compare magnitudes at float32 tolerance (rtol 1e-3),
+        # for two reasons that no longer hold: gamma=None kept the Hessian in
+        # float32 while an ndarray promoted it to float64, and the sign of a
+        # mode was whichever one LAPACK returned.
+        np.testing.assert_array_equal(backend._hessian(ca), backend._hessian(ca, ones))
         modes0, freqs0 = backend._compute_modes(ca)
-        modes1, freqs1 = backend._compute_modes(ca, gamma=np.ones((len(ca), len(ca))))
-        np.testing.assert_allclose(freqs0, freqs1, rtol=1e-4, atol=1e-6)
-        np.testing.assert_allclose(np.abs(modes0), np.abs(modes1), rtol=1e-3, atol=1e-3)
+        modes1, freqs1 = backend._compute_modes(ca, gamma=ones)
+        assert modes0.dtype == modes1.dtype == np.float64
+        np.testing.assert_allclose(freqs0, freqs1, rtol=1e-12, atol=0)
+        np.testing.assert_allclose(modes0, modes1, rtol=0, atol=1e-9)
 
 class TestOpenMMBackend:
     """OpenMM implicit-MD backend - skipped when openmm/pdbfixer are absent."""
