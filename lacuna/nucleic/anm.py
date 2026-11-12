@@ -13,11 +13,12 @@ bead-to-all-atom propagation are Lacuna's own methods called unchanged, so a
 protein-versus-RNA comparison measures the beads rather than two different
 implementations. The sampling loop is ``NMABackend._sample_ensemble`` as well,
 so an RNA ensemble is reproducible across machines on the same terms as a
-protein one (float64 throughout, canonical mode signs, float32 only in the
-finished conformer), with the same two exceptions, which are spelled out in
-``lacuna.ensemble.nma_backend``: a structure with a three-fold or higher
-symmetry axis, and a network so under-constrained that its zero modes fill the
-whole window of eigenvalues the sampler asks for.
+protein one (float64 throughout, canonical mode signs, a canonical basis for
+the degenerate modes of a symmetric assembly, float32 only in the finished
+conformer), with the same exception, which is spelled out in
+``lacuna.ensemble.nma_backend`` and raises a warning: a network so
+under-constrained that its zero modes fill the whole window of eigenvalues the
+sampler asks for.
 
 Parameters follow Pinamonti et al., NAR 2015 (doi:10.1093/nar/gkv708), the only
 systematic bead-and-cutoff scan for RNA. Three of its results contradict the
