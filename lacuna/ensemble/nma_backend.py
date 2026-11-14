@@ -15,7 +15,8 @@ with an elastic network model. Biophys. J. 80(1):505-515.
 Reproducibility
 ---------------
 Every pocket Lacuna reports is carved out of these conformers, so one structure
-has to give one ensemble on every machine. The obstacle is the eigensolver: its
+has to give the same pockets on every machine, which takes conformers that
+agree to within float32 rounding. The obstacle is the eigensolver: its
 output depends on how many threads BLAS runs, in two independent ways, and both
 used to reach the conformers. (A third way, which only symmetric assemblies
 meet, has its own section below.)
@@ -116,9 +117,11 @@ nothing in the window is a vibration and what gets sampled is an arbitrary
 basis of the null space, rigid-body motion included. A predicted model whose
 disordered regions are drawn as long extended ribbons does this: of 157
 structures in the benchmark cache, the two it happens to are AlphaFold models
-of GPCRs with more than a hundred zero modes each. No basis rule can help,
-because the window is an arbitrary slice of a larger null space, so this case
-is detected and reported with a ``RuntimeWarning`` instead.
+of GPCRs with more than a hundred zero modes each. The sign and basis rules
+above do not reach this case, because the window is an arbitrary slice of a
+larger null space, so such an ensemble is not reproducible across thread
+counts. It is not covered here: it is detected and reported with a
+``RuntimeWarning``.
 """
 
 from __future__ import annotations
@@ -304,12 +307,15 @@ class NMABackend(EnsembleBackend):
     Gaussian-weighted interpolation. Physically grounded alternative to
     RandomBackend - generates hinge/breathing motions rather than random noise.
 
-    The ensemble is a function of the input coordinates and the parameters
-    below and of nothing else, the BLAS thread count included. See
-    "Reproducibility" in the module docstring for what that rests on,
-    "Degenerate modes" for how symmetric assemblies are kept inside it, and
-    "What this does not cover" for the one kind of input it fails on, which
-    raises a warning.
+    The pocket report built from the ensemble is identical at every BLAS
+    thread count and between a Windows and a Linux build. The conformer
+    coordinates themselves agree to float32 rounding: on an ordinary
+    structure about one coordinate in a million differs, by one unit in its
+    last place (a few units for a coordinate that lies almost at zero). See
+    "Reproducibility" in the module docstring for what that rests on and for
+    the measured bounds, "Degenerate modes" for how symmetric assemblies are
+    kept inside it, and "What this does not cover" for the one kind of input
+    that is outside it, which raises a warning.
 
     Parameters
     ----------
@@ -540,7 +546,7 @@ class NMABackend(EnsembleBackend):
                 # rounding noise around zero, and what gets sampled is the
                 # null space in whatever basis LAPACK returned, rigid-body
                 # motion included ("What this does not cover" in the module
-                # docstring). Nothing below can repair that, so say so.
+                # docstring). The rules below do not cover that, so say so.
                 warnings.warn(
                     "elastic network is under-constrained: its zero modes fill "
                     f"the {n_window} lowest eigenvalues, so there is no "
