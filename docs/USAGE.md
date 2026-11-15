@@ -81,6 +81,33 @@ NMA runtime is sub-second to about 6s per protein on a laptop CPU.
 > detection over NMA. A proper apo-templated integration with sequence-based
 > residue mapping is planned; until then NMA is the recommended backend.
 
+### Reproducibility
+
+With the default `nma` backend, the same input and options give the same
+`pocket_report.json` at any BLAS thread count and on Windows and Linux. There
+is nothing to configure: no thread variable to pin and no seed to pass. The
+conformer coordinates behind the report agree to float32 rounding (about one
+coordinate in a million differs, by one unit in its last place), which is below
+anything the pocket analysis can see. Nucleic-acid input and symmetric
+assemblies built with `--homodimer` are covered by the same guarantee.
+
+Reports differ from those 1.4.0 wrote for the same input, because every
+ensemble is drawn by the new sampler and a pocket's lining residues follow the
+majority rule described in the changelog. Results are comparable within a
+release, so re-run earlier structures with 1.5.0 before comparing them with new
+ones.
+
+One kind of input is outside the guarantee, and Lacuna says so when it meets
+it. If the elastic network is under-constrained, so that it has no vibration to
+sample, the run prints a `RuntimeWarning` beginning "elastic network is
+under-constrained" and still writes a report, but that ensemble is not
+physically meaningful and is not reproducible between machines. In practice
+this is a predicted model whose disordered regions are drawn as long extended
+ribbons.
+
+The guarantee is for the `nma` backend. `openmm` and `boltz` depend on their own
+libraries and hardware.
+
 ## Outputs
 
 | File | Description |

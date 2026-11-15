@@ -187,6 +187,12 @@ protein structure handed to that backend raises rather than silently degrading.
   rank is a hypothesis worth testing, not a validated site.
 - **Persistence matters.** A pocket appearing in two of twenty conformers is
   weaker evidence than one appearing in eighteen, even at a similar rank.
+- **Results are reproducible.** With the default backend the same input gives
+  the same report at any thread count and on Windows and Linux, so a colleague
+  re-running the command gets the same pockets. The one exception announces
+  itself: if a run prints a `RuntimeWarning` that the elastic network is
+  under-constrained, the ensemble is not physically meaningful, so say that
+  instead of reporting its pockets.
 - Lacuna is at **statistical parity with P2Rank**, not better: +2.8% on the
   CryptoBench test fold with a paired interval of [-4.4, +9.4] that includes zero.
   Do not claim superiority.

@@ -66,6 +66,12 @@ is reported against the random-ordering baseline in
 top-five hit is close to free and a bare percentage there says little. These
 nucleic-acid figures were measured with 1.3.0.
 
+**The same input gives the same report on every machine.** Since 1.5.0 the
+default backend writes an identical `pocket_report.json` at any BLAS thread
+count and on Windows and Linux, uses about a third of the memory on large
+structures, and runs faster. See
+[Reproducibility](docs/USAGE.md#reproducibility).
+
 ## Install
 
 ```bash
