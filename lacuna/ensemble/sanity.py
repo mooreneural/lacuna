@@ -8,7 +8,7 @@ resembles the input makes every pocket look newly opened, and ``crypticity``
 collapses to druggability. The failure is silent: the report is well formed, the
 numbers are in range, and the whole protein is cryptic.
 
-That has now happened four separate ways in this project.
+Four kinds of input produce it.
 
 * An externally supplied ensemble that was never superposed onto the reference.
   Six real sites became 28 clusters, 93% of them flagged cryptic, with median
@@ -17,9 +17,9 @@ That has now happened four separate ways in this project.
   19 A conformers from a fold that was correct to 0.92 A.
 * Structures repaired with terminal residues built as extended tails, which took
   one 90-residue chain from a radius of gyration of 15.4 A to 24.9 A.
-* An aSAM ensemble sampled at 600 K, where the chain is unfolding (radius of
-  gyration 1.66x the input, 26 A from it) and Lacuna reported 151 cryptic
-  pockets per target without complaint.
+* An ensemble sampled at a temperature where the chain is unfolding (radius of
+  gyration 1.66x the input, 26 A from it), which gives 151 cryptic pockets per
+  target.
 
 Three measurements separate those from a healthy ensemble, and none of them
 needs to know where the conformers came from.
@@ -46,10 +46,11 @@ needs to know where the conformers came from.
     coordinate sets by hand bypasses the backends entirely.
 
 Thresholds were calibrated on 12 CryptoBench targets across five ensembles of
-known quality: Lacuna's NMA default and aSAM at 250 and 320 K, where the fold is
-intact and recovery matches the default, against aSAM at 450 and 600 K, where
-recovery falls to 5 and 1 of 12. Drift separated them cleanly, worst healthy
-0.243 against best unhealthy 0.294, so the bar sits between at 0.27.
+known quality: the NMA default and two externally generated ensembles in which
+the fold is intact and recovery matches the default, against two in which the
+chain is unfolding and recovery falls to 5 and 1 of 12. Drift separated them
+cleanly, worst healthy 0.243 against best unhealthy 0.294, so the bar sits
+between at 0.27.
 
 This warns rather than refuses. A genuine large hinge or interdomain motion can
 exceed these bars legitimately, and that is a case worth looking at rather than

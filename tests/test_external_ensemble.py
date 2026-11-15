@@ -284,8 +284,8 @@ class TestChainRelabelling:
 
     AlphaFlow, AlphaFold, ESMFold and Boltz all do this, so a reference whose
     chain of interest is "B" would otherwise match nothing and the whole ensemble
-    would be discarded as a numbering mismatch. That is what happened on the first
-    real AlphaFlow target tried (BRAF, CryptoBench annotates chain B).
+    would be discarded as a numbering mismatch. BRAF in CryptoBench, annotated on
+    chain B, is such a case.
     """
 
     def _chain(self, text: str, chain: str) -> str:

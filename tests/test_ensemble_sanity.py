@@ -94,7 +94,7 @@ class TestHealthyEnsemble:
 
 class TestDrift:
     def test_an_ensemble_far_from_the_input_is_reported(self, protein):
-        """aSAM at 600 K: 26 A from a structure whose radius of gyration is 18."""
+        """Unfolding ensemble: 26 A from a structure whose radius of gyration is 18."""
         st, base = protein
         rng = np.random.default_rng(7)
         wandered = [np.asarray(base, float) + rng.normal(scale=8.0, size=np.shape(base))

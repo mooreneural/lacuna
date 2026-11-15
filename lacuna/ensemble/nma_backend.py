@@ -515,7 +515,7 @@ class NMABackend(EnsembleBackend):
             # A maximum has no order of operations, so no rounding of its own.
             stiffest = float(hessian.diagonal().max()) if n else 0.0
 
-            # Partial eigendecomposition - only the lowest n_request modes.
+            # Partial eigendecomposition: only the lowest n_request modes.
             #
             # eigh reads the lower triangle and LAPACK wants Fortran order, so
             # a C-ordered matrix is copied before it is factored, which doubles

@@ -35,24 +35,12 @@ from lacuna.pockets.scorer import score_pocket
 
 _DBSCAN_EPS = 5.0    # Å - pockets within 5 Å centroid distance are the same pocket
 
-# EXPERIMENTAL, local only. `apo_volume` was the largest frame-0 pocket *assigned
-# to this cluster*, so the greedy pass could file a site's input pocket under a
-# neighbouring cluster and leave this one reading 0.0. Measured consequences: 70%
-# of CryptoBench test-fold candidates read 0.0, and because `opening` is then
-# exactly 1.0, `crypticity` collapses to `max_druggability`. On GPR84 (8J1A) the
-# same physical site is reported twice, at rank 1 with apo 0.0 and crypticity
-# 0.906 and at rank 3 with apo 311.0 and crypticity 0.131, the two centroids 4.5 Å
-# apart. When this is set, apo_volume is instead the largest frame-0 pocket whose
-# centroid lies within APO_SEARCH_A of the cluster centroid, regardless of which
-# cluster the greedy pass filed it under. Set to None to restore 1.4.0 behaviour.
-#
-# MEASURED AND DISABLED. Turning this on made crypticity MORE inverted against
-# the true-site label, not less, and it moves `apo_vol` and `cryp` off the
-# distribution the shipped weights were fitted on. Left here as a record of
-# what was tried; do not re-enable without refitting the ranker.
-# This is not free: `apo_vol` and `cryp` are both ranker features, and the shipped
-# weights were fitted against the membership-based values, so turning this on
-# moves the ranker off its training distribution. Measure before shipping.
+# `apo_volume` is the largest frame-0 pocket assigned to this cluster. When this
+# is set, it is instead the largest frame-0 pocket whose centroid lies within
+# APO_SEARCH_A of the cluster centroid, whichever cluster that pocket was
+# assigned to. Off by default: `apo_vol` and `cryp` are ranker features and the
+# shipped weights were fitted on the membership-based values, so enabling it
+# requires refitting the ranker.
 APO_SEARCH_A: float | None = None
 # A pocket is cryptic when its crypticity score clears this bar. The score, not
 # persistence, is the right signal: persistence counts how many ensemble
