@@ -48,13 +48,14 @@ Writes `pocket_report.json` into `<input_stem>_lacuna/`, ranked best first.
 `alpha`, the geometric detector, which only proposes candidates where there is a
 concavity, and a cryptic site in its apo form frequently has none. Pooling both
 detectors, held out on CryptoBench, takes coverage from 68.5% to 86.4% and
-top-five recovery from 57.1% to 73.9%. It picks the matching ranker
-automatically. The default stays `alpha` for backwards compatibility, not because
-it is the better choice.
+top-five recovery from 57.1% to 73.9% (measured with 1.4.0). It picks the
+matching ranker automatically. The default stays `alpha` for backwards
+compatibility, not because it is the better choice.
 
-It costs time: on 1AKE at ten conformers, 2.4 s for alpha against 20.7 s for
-surface-fusion, of which about half is the sequence pass. Use plain
-`lacuna discover protein.pdb` when screening many structures and speed dominates.
+It costs time: on 1AKE at ten conformers, 2.3 s for alpha against 20.7 s for
+surface-fusion (the surface-fusion time measured with 1.4.0), of which about
+half is the sequence pass. Use plain `lacuna discover protein.pdb` when
+screening many structures and speed dominates.
 
 ## Choosing options
 
@@ -63,11 +64,11 @@ surface-fusion, of which about half is the sequence pass. Use plain
 `learned` is the fitted ranker and roughly doubles recovery over the analytic
 rules. Use `learned-plm` if the `plm` extra is installed: it adds protein language
 model features and is the strongest option, reaching 66.1% top-five recovery on
-the CryptoBench test fold against 55.6% for `learned`. Use `crypticity` only when
-you specifically want sites that open a lot relative to the input. Do not switch
-to `druggability` for always-open orthosteric sites: `learned` beats it there by
-+20.1 points on COACH420 (docs/BENCHMARKS.md). `druggability` is the legacy
-pre-model rule, kept for reproducibility.
+the CryptoBench test fold (measured with 1.4.0) against 57.8% for `learned`. Use
+`crypticity` only when you specifically want sites that open a lot relative to
+the input. Do not switch to `druggability` for always-open orthosteric sites:
+`learned` beats it there by +22.9 points on COACH420 (docs/BENCHMARKS.md).
+`druggability` is the legacy pre-model rule, kept for reproducibility.
 
 **Conformers** (`--conformers`, default 20)
 
@@ -145,16 +146,16 @@ returns the same table and the same report files as protein. The only visible
 difference is two extra lines saying it detected nucleic acid and dropped
 hydrogens.
 
-What to expect, all measured on held-out structures. Ranking is quoted against
-the random-ordering baseline it has to beat to mean anything, because on a short
-RNA with a handful of clusters a top-5 hit is close to free:
+What to expect, all measured on held-out structures with 1.3.1. Ranking is
+quoted against the random-ordering baseline it has to beat to mean anything,
+because on a short RNA with a handful of clusters a top-5 hit is close to free:
 
 | Input | What happens |
 |---|---|
 | RNA, site open in the input | top-5 in 67%, against a 47% baseline (660 structures) |
 | RNA, site shut in the input | top-5 in 61%, against a 50% baseline (61 structures) |
 | RNA 62 to 459 nt | site found at all in 87% (detection, independent of ranking) |
-| protein | unchanged, to the bit |
+| protein | not affected by the nucleic-acid correction |
 
 **Do not tell an RNA user the old advice that the true site "lands around rank
 10" and the list should be read far down.** That was the signature of a defect,
@@ -168,7 +169,7 @@ Still true: a 400 nt RNA yields 40 or more clusters where a 30-mer yields a
 handful, so quote top-10 above 200 nt rather than top-5. The correction shortens
 that distance, it does not remove it.
 
-Runtime on CPU, 20 conformers: about 1 s at 25 nt, 6 s at 200 nt, 31 s at 459 nt.
+Runtime on CPU, 20 conformers: about 1.4 s at 25 nt, 5.6 s at 200 nt, 27 s at 459 nt.
 
 Say plainly what this is NOT. There are no validated cryptic RNA pockets in the
 strict protein sense, and this tool recovers shallow sites a single structure

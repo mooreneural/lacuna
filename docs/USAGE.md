@@ -58,7 +58,7 @@ for c in clusters[:5]:
 
 | Backend | Install | Quality | Speed | Notes |
 |---------|---------|---------|-------|-------|
-| `nma` | built-in | good | ~0.1s/conf | Elastic-network normal modes (default) |
+| `nma` | built-in | good | ~0.01s/conf | Elastic-network normal modes (default) |
 | `openmm` | `lacuna[openmm]` | good | ~2s/conf | Implicit-solvent MD, 100ps |
 | `boltz` | `lacuna[boltz]` | experimental | ~100s/protein (GPU) | Diffusion sampling, noisy (see note) |
 | `random` | built-in | baseline | ~0.04s/conf | Gaussian backbone perturbation |
@@ -70,7 +70,7 @@ The `nma` backend samples physically meaningful collective motions, the same
 hinge-bending and breathing modes that open cryptic pockets in nature, without
 requiring a GPU or a force field. It is the zero-dependency default.
 
-NMA runtime is sub-second to about 7s per protein on a laptop CPU.
+NMA runtime is sub-second to about 6s per protein on a laptop CPU.
 **[Per-size timing →](BENCHMARKS.md#speed-nma-backend-no-gpu)**
 
 > **Boltz backend status, honestly.** The `boltz` backend runs Boltz-2 diffusion
@@ -101,8 +101,8 @@ the lining and at least 3 residues.
 
 Read the flag in the direction it was measured. On the CryptoBench test fold
 63.6% of proposed pockets are interfacial, rising to 73.6% of the top five, while
-only 14.8% of annotated sites are. It is a reason to look harder at a candidate
-before trusting it, not a reason to prefer one.
+only 14.8% of annotated sites are (measured with 1.4.0). It is a reason to look
+harder at a candidate before trusting it, not a reason to prefer one.
 
 ### `residue_propensity`
 
@@ -125,7 +125,7 @@ as 0.0.
 This is the quantity most cryptic-site predictors are evaluated on, as
 per-residue ROC-AUC and AUPRC, so it is what to use when comparing Lacuna against
 CryptoBench, PocketMiner, UniPocket or similar. On the CryptoBench held-out test
-fold (n=231) it reaches **AUROC 0.774 and AUPRC 0.345**, against 0.249 AUPRC for
+fold (n=231) it reaches **AUROC 0.766 and AUPRC 0.340**, against 0.249 AUPRC for
 the same scorer run on the input structure alone and 0.115 for a burial
 neighbour count. See `docs/BENCHMARKS.md`.
 
@@ -146,17 +146,20 @@ Accepts PDB or mmCIF from any predictor or database:
 ## Worked example: K-Ras switch-II
 
 ```bash
-# Download K-Ras apo from RCSB; the NMA default recovers switch-II at rank 3
+# Download K-Ras apo (4OBE) from RCSB and run the NMA default
 lacuna discover 4OBE.pdb \
     --conformers 20 \
     --emit-boltz-constraints \
     --output kras_pockets/
 
-# pocket_0_constraint.yaml is ready; add your SMILES:
+# One pocket_N_constraint.yaml is written per reported pocket, numbered from 0
+# in rank order. Pick the pocket by its lining residues in pocket_report.json:
+# the switch-II pocket is the one lined by V9, Q61, R68, M72, H95, Y96 and Q99
+# of chain A. Add your SMILES to that file:
 #   - ligand:
 #       id: L
 #       smiles: YOUR_SMILES_HERE
-boltz predict kras_pockets/pocket_0_constraint.yaml
+boltz predict kras_pockets/pocket_N_constraint.yaml
 ```
 
 See [`examples/kras_cryptic.py`](../examples/kras_cryptic.py) for a fully

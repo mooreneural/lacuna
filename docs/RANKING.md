@@ -2,9 +2,9 @@
 
 `--rank-by` selects how sites are ordered once they have been detected and
 clustered. Ordering is where most recoverable performance lives: across the
-candidate set Lacuna generates, some cluster clears the criterion for 73.7% of
-test-fold structures against the 66.1% the PLM-assisted ranker surfaces in the
-top five.
+candidate set Lacuna generates, some cluster clears the criterion for 72.8% of
+test-fold structures against the 57.8% the default ranker surfaces in the top
+five (66.1% for the PLM-assisted ranker, measured with 1.4.0).
 
 ## Strategies
 
@@ -35,17 +35,19 @@ other 22 weights are shared. See `_NUCLEIC_RANKER_WEIGHTS` in
 on structures with no protein in them, so a protein carrying an incidental
 nucleotide keeps the protein weighting.
 
-On CryptoBench's test fold it recovers 55.6% against 17.8% for the analytic
-`crypticity` rule it replaced, rising to 66.1% with `learned-plm`.
+On CryptoBench's test fold it recovers 57.8% against 30.6% for the analytic
+`crypticity` rule it replaced. `learned-plm` reaches 66.1% (measured with
+1.4.0).
 
 Because it is fitted on within-structure pairs, **its scores carry no
 cross-structure calibration**. They order candidates inside one structure and
 should not be compared or thresholded across different targets.
 
-**On the curated 22-target set the ordering reverses.** `persistence` and
-`balanced` reach 13/22 where `learned` reaches 10/22, though at n=22 the
-intervals overlap heavily. If your targets resemble the classic literature case
-studies more than CryptoBench, the analytic strategies are worth trying.
+**On the curated 22-target set the ordering reverses.** `balanced` and
+`persistence` reach 14/22 and 13/22 where `learned` reaches 9/22, though at
+n=22 the intervals overlap heavily. If your targets resemble the classic
+literature case studies more than CryptoBench, the analytic strategies are
+worth trying.
 **[Full ablation →](BENCHMARKS.md#ranking-strategies)**
 
 ## The PLM-assisted ranker

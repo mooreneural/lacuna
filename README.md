@@ -63,7 +63,8 @@ structures. On RNA sites with no detectable cavity in the input, the ensemble
 takes "found at all" from 44% to 73%, which is the case it exists for. Ranking
 is reported against the random-ordering baseline in
 [docs/RANKING.md](docs/RANKING.md), because on a short RNA with few candidates a
-top-five hit is close to free and a bare percentage there says little.
+top-five hit is close to free and a bare percentage there says little. These
+nucleic-acid figures were measured with 1.3.0.
 
 ## Install
 
@@ -92,9 +93,10 @@ model weights.
 
 <p align="center"><em>Apo BCL-XL (1LXL): a Lacuna-detected pocket (blue) opening onto the
 groove where ABT-737 (orange, from the holo structure 2YXJ) binds, a site never shown to
-the detector. With <code>--detector surface-fusion</code> this site is recovered at rank 2,
-Jaccard 0.36, centroid 5.6 Å. The default <code>alpha</code> detector places it third and
-does not clear the size-robust bar, which is the specialisation this release is about.</em></p>
+the detector. With <code>--detector surface-fusion</code> and its sequence model this site
+was recovered at rank 2, Jaccard 0.36, centroid 5.6 Å (measured with 1.4.0). The default
+<code>alpha</code> detector finds it at rank 6 (Jaccard 0.52, centroid 4.8 Å), just outside
+the top five, which is the case the surface-fusion detector is for.</em></p>
 
 ## Quick start
 
@@ -138,7 +140,7 @@ and AutoDock Vina boxes ready for docking. Full options in
 
 ## Results
 
-On CryptoBench's designated test fold, Lacuna recovers **55.6%** of known
+On CryptoBench's designated test fold, Lacuna recovers **57.8%** of known
 cryptic sites in its top five with the zero-dependency default and **66.1%**
 with the optional PLM-assisted ranker, and the true site is present in the
 candidate set for up to 92% of structures.
@@ -150,7 +152,7 @@ size-robust criterion (Jaccard >= 0.25, or centroid within 4 A of the site).
 
 | Configuration | Top-5 recovery | Site found (coverage) |
 |---|:--:|:--:|
-| Default (CPU-only, zero-dependency) | 55.6% | 73.7% |
+| Default (CPU-only, zero-dependency) | 57.8% | 72.8% |
 | + PLM reranker | 66.1% | 73.7% |
 | `surface-fusion` detector | 73.9%¹ | 86.4%¹ |
 | Union across detectors | n/a | **92.2%** |
@@ -158,25 +160,29 @@ size-robust criterion (Jaccard >= 0.25, or centroid within 4 A of the site).
 ¹ Held-out surface-fusion evaluation at 5 conformers (n=184); the other rows use
 the 20-conformer cohort (n=180).
 
+The default row was re-measured with 1.5.0 (104/180 in the top five, 131/180
+covered). The PLM-reranker, `surface-fusion` and union rows were measured with
+1.4.0.
+
 ### Per-residue recovery
 
 Top-5 is what a user acts on, but most cryptic-site predictors are scored
 per-residue instead, so since v1.4.0 Lacuna reports that too. Same held-out
-CryptoBench fold, n=231 targets and 76,633 residues:
+CryptoBench fold, n=231 targets and 76,633 residues, re-measured with 1.5.0:
 
 | scorer | AUROC | AUPRC |
 |---|:--:|:--:|
-| **20 conformers** | **0.774** | **0.345** |
+| **20 conformers** | **0.766** | **0.340** |
 | input structure only | 0.697 | 0.249 |
 | burial neighbour count | 0.586 | 0.115 |
 | random expectation | 0.500 | 0.067 |
 
 The second row is the one worth reading twice: the same scorer on the deposited
 coordinates alone reaches 0.249, so the conformational ensemble is doing real
-work rather than restating the input. The third row is the control that matters,
-since a cavity-lining score could easily be a re-description of how buried a
-residue is. Paired over targets the propensity beats burial by **+0.229 AUPRC**
-(95% CI +0.199 to +0.261).
+work rather than restating the input (paired over targets, +0.092 AUPRC, 95% CI
++0.069 to +0.115). The third row is the control that matters, since a
+cavity-lining score could easily be a re-description of how buried a residue
+is. Paired over targets the propensity beats burial by **+0.225 AUPRC**.
 
 **[Full results, including head-to-head comparisons and where Lacuna loses →](docs/BENCHMARKS.md)**
 

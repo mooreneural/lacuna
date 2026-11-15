@@ -1,7 +1,7 @@
 # Benchmarks: full detail
 
 Per-target breakdowns, ablations and timings behind the headline results in the
-[README](../README.md#benchmarks). Every number here is reproducible with the
+[README](../README.md#results). Every number here is reproducible with the
 command shown; each benchmark script prints the full per-metric breakdown
 (centroid, Jaccard at 0.20/0.25/0.30, and legacy recall) when you run it.
 
@@ -9,37 +9,52 @@ Unless stated otherwise: NMA backend, 20 conformers, the default `learned`
 ranker, top-5, and the size-robust criterion (Jaccard ≥ 0.25 **or** centroid
 ≤ 4 Å).
 
+The tables for the default configuration (independent validation, per-residue
+propensity, the head-to-head, the curated set, ranking strategies, the controls,
+COACH420 and speed) were re-measured with 1.5.0. The `learned-plm` and
+`surface-fusion` figures, the MDpocket row, and the design studies under
+"Why the clustering radius is 2 Å", "Where the remaining gap is" and "Training
+and re-fitting the ranker" were measured with 1.4.0 or earlier and are kept as
+the record of each design choice; each is marked where it appears.
+
 ## Independent validation
 
 Default `learned` strategy, with the optional PLM-assisted ranker in the last
-column.
+column. The `learned-plm` column was measured with 1.4.0 and not re-run for
+1.5.0, because it needs the `plm` extra.
 
-| Benchmark | N | `learned` (default) | Legacy recall | `learned-plm` | Notes |
+| Benchmark | N | `learned` (default) | Legacy recall | `learned-plm` (1.4.0) | Notes |
 |-----------|--:|:-----------:|:-------------:|:-------------:|-------|
-| CryptoBench (designated test fold) | 180 | **55.6%** | 77% | **66.1%** | largest and most diverse; the headline |
-| PocketMiner | 45 | **73%** (33/45) | 84% | **80%** (36/45) | per-residue cryptic labels |
-| Curated apo/holo set (this repo) | 22 | **45%** (10/22) | 68% | 41% (9/22) | hand-picked literature cryptic pairs |
-| COACH420 | 286 | **87%** (248/286) | 93% | not measured | *general* holo sites, not cryptic |
+| CryptoBench (designated test fold) | 180 | **57.8%** (104/180) | 73% | **66.1%** | largest and most diverse; the headline |
+| PocketMiner | 45 | **69%** (31/45) | 82% | **80%** (36/45) | per-residue cryptic labels |
+| Curated apo/holo set (this repo) | 22 | **41%** (9/22) | 64% | 41% (9/22) | hand-picked literature cryptic pairs |
+| COACH420 | 286 | **89%** (254/286) | 93% | not measured | *general* holo sites, not cryptic |
+
+The CryptoBench row is scored by `compare_detectors_cryptobench.py`, which
+applies the Jaccard term alone so that every detector in the head-to-head below
+is scored identically. `cryptobench_benchmark.py` applies both terms of the
+criterion and prints 107/180 (59.4%) for the same structures.
 
 COACH420 appears twice in this document with two different denominators, and
 both are correct. This table reports Lacuna standing alone, so it uses every
-structure Lacuna scored: 248/286. The head-to-head against P2Rank below, under
+structure Lacuna scored: 254/286. The head-to-head against P2Rank below, under
 "COACH420: general binding sites, and where Lacuna's specialisation shows",
 pairs the two tools on the 144 structures *both* of them scored, because an
 unpaired comparison would let a difference in which structures each tool
-happened to handle masquerade as a difference in the tools. The rate is the same
-either way (86.8% paired, 86.7% standalone); the larger denominator only narrows
-the interval, from 95% CI [80.2, 91.9] to [82.2, 90.4].
+happened to handle masquerade as a difference in the tools. The rate is close
+either way (89.6% paired, 88.8% standalone); the larger denominator only narrows
+the interval, from 95% CI [83.4, 94.1] to [84.6, 92.2].
 
-With `--detector surface-fusion` the same 287-structure COACH420 run reaches
-**96.5%** (277/287, 95% CI [93.7, 98.3]), against 86.7% for the default `alpha`
-detector. That detector is not the default and is not folded into the table
-above, which reports the zero-dependency default throughout.
+With `--detector surface-fusion` and its sequence model, a COACH420 run on 287
+structures reached **96.5%** (277/287, 95% CI [93.7, 98.3]), against 86.7%
+(248/286) for the default `alpha` detector in the same run. That pair was
+measured with 1.4.0 and not re-run for 1.5.0, because the sequence model needs
+the `plm` extra. That detector is not the default and is not folded into the
+table above, which reports the zero-dependency default throughout.
 
-On the curated 22 the default edges out the PLM-assisted ranker, 10/22 against
-9/22. At that sample size the difference is one structure and means nothing on
-its own, but it is a reminder that the PLM-assisted ranker's advantage is
-established on CryptoBench and does not automatically transfer.
+On the curated 22 the default and the PLM-assisted ranker are level at 9/22.
+It is a reminder that the PLM-assisted ranker's advantage is established on
+CryptoBench and does not automatically transfer.
 
 Datasets: PocketMiner (Meller et al. 2023, *Nat. Commun.*); CryptoBench (Škrhák
 et al. 2025, *Bioinformatics*). The CryptoBench split follows the dataset's own
@@ -55,7 +70,7 @@ deliberately enriched for the large-motion sites this pipeline handles worst.
 ### Reproducing these numbers
 
 ```bash
-python benchmarks/cryptic_benchmark.py --category cryptic     # curated set (~4 min)
+python benchmarks/cryptic_benchmark.py --category cryptic     # curated set (~1 min)
 python benchmarks/pocketminer_benchmark.py                    # PocketMiner (auto-downloads)
 python benchmarks/cryptobench_benchmark.py                    # CryptoBench test fold (~10 min)
 python benchmarks/compare_detectors_cryptobench.py --analyze  # the head-to-head table
@@ -63,7 +78,7 @@ python benchmarks/compare_mdpocket.py --folds test            # vs MDpocket (nee
 python benchmarks/verify_recall_gaming.py                     # why Jaccard, not recall
 ```
 
-## Per-residue propensity (v1.4.0)
+## Per-residue propensity
 
 Top-k pocket recovery is what a user reads, but it is not what this subfield
 reports. CryptoBench's own paper, PocketMiner, UniPocket and zPocket all score
@@ -72,13 +87,13 @@ CryptoBench, PR-AUC in PocketMiner, average precision in UniPocket and zPocket).
 Until 1.4.0 Lacuna emitted no per-residue score and so could not appear on those
 tables at all.
 
-CryptoBench held-out test fold, n=231 targets, 76,633 residues. Labels are the
-union of `apo_pocket_selection` per chain. The aggregation form was selected on
-the train folds and then applied unchanged.
+CryptoBench held-out test fold, n=231 targets, 76,633 residues, re-measured
+with 1.5.0. Labels are the union of `apo_pocket_selection` per chain. The
+aggregation form was selected on the train folds and then applied unchanged.
 
 | scorer | AUROC | AUPRC |
 |---|:--:|:--:|
-| `residue_propensity`, 20 conformers | **0.774** [0.747, 0.800] | **0.345** [0.313, 0.377] |
+| `residue_propensity`, 20 conformers | **0.766** [0.737, 0.793] | **0.340** [0.308, 0.373] |
 | `residue_propensity`, input structure only | 0.697 | 0.249 |
 | burial neighbour count | 0.586 | 0.115 |
 | random expectation | 0.500 | 0.067 |
@@ -89,13 +104,13 @@ then over proteins, which is the convention zPocket uses and which stops large
 proteins dominating. CryptoBench's published table pools every residue into one
 curve instead: its paper does not say so, but its evaluation code concatenates
 all proteins before computing the curve, and the pooled figures reproduce its
-Table 5. Pooled the same way, this scorer gives **AUROC 0.813 and AUPRC 0.237**,
+Table 5. Pooled the same way, this scorer gives **AUROC 0.807 and AUPRC 0.227**,
 and that is the number to set beside CryptoBench's:
 
 | method (pooled per-residue) | AUC | AUPRC |
 |---|:--:|:--:|
 | CryptoBench pLM-NN, CB-full | 0.86 | 0.36 |
-| **`residue_propensity`, 20 conformers** | **0.813** | **0.237** |
+| **`residue_propensity`, 20 conformers** | **0.807** | **0.227** |
 | P2Rank, CB-P2RANK-apo | 0.81 | 0.21 |
 | PocketMiner, CB-PM | 0.76 | 0.19 |
 
@@ -109,17 +124,19 @@ component.
 **The burial row is the load-bearing control.** A score built from cavity lining
 could be a restatement of how buried a residue is, which would make it a
 geometric re-description rather than new information. Paired over targets, the
-propensity beats burial by **+0.188 AUROC** (95% CI +0.164 to +0.211) and
-**+0.229 AUPRC** (+0.199 to +0.261).
+propensity beats burial by **+0.180 AUROC** and **+0.225 AUPRC**. The burial
+row does not use the ensemble and is carried over from 1.4.0, where the paired
+intervals were +0.164 to +0.211 and +0.199 to +0.261.
 
 This is also the clearest evidence that the conformational ensemble carries
-information the input structure does not: 0.345 against 0.249 for the same
-scorer on the deposited coordinates alone. The gap survives a stricter label
-definition using only the main holo partner, 0.312 against 0.216.
+information the input structure does not: 0.340 against 0.249 for the same
+scorer on the deposited coordinates alone, a paired difference of +0.092
+(95% CI +0.069 to +0.115). The gap survives a stricter label definition using
+only the main holo partner, 0.304 against 0.216.
 
 Scope, stated because it is narrow: this measures where cryptic sites *are*, not
-how well pockets are ordered. It does not change any top-k number below, and the
-ranker is untouched in 1.4.0.
+how well pockets are ordered. It does not change any top-k number below, and it
+leaves the ranker untouched.
 
 ## Success criterion
 
@@ -131,11 +148,11 @@ any residue with an atom within 5 A of the detected cavity.
 
 Recall is deliberately not the headline. It is size-gameable: a large pocket
 engulfs a small known site and scores high recall while sitting nowhere near it.
-Ordering candidates by volume alone reaches 77.7% under a recall threshold of
-0.30 but only 52.0% under Jaccard at 0.25, and the learned ranker scores 77.7%
-under recall as well, so measured that way it is indistinguishable from sorting
-by size (`benchmarks/verify_recall_gaming.py`). Both numbers print side by side
-in every benchmark script.
+Ordering candidates by volume alone reaches 74.9% under a recall threshold of
+0.30 but only 53.1% under Jaccard at 0.25, and the learned ranker scores 73.7%
+under recall, so measured that way it is indistinguishable from sorting by size
+(`benchmarks/verify_recall_gaming.py`). Both numbers print side by side in
+every benchmark script.
 
 ## Head-to-head: four detectors, one criterion
 
@@ -144,29 +161,28 @@ Lacuna uses, so that row isolates detection, aggregation and ranking rather than
 the sampler. fpocket and P2Rank are single-structure tools and see the apo
 structure, which is their intended usage.
 
-All rows paired on the same 180 structures, and every Lacuna number
-re-measured end to end after the last change to the ranker weights. An earlier
-revision of this table mixed measurements taken days apart, which is why the
-figures moved slightly.
+All rows are paired on the same 180 structures. The default `learned` row and
+the comparisons against it in the text below were re-measured with 1.5.0. The
+`learned-plm` and MDpocket rows, and the last column, were measured with 1.4.0:
+they need the `plm` extra and MDpocket, and MDpocket is fed Lacuna's ensemble,
+so its row has to be re-run with the new sampler. fpocket and P2Rank read the
+apo structure only, so their rows do not depend on the Lacuna release.
 
-| Detector | Size-robust top-5 | Legacy recall | Paired vs `learned-plm` |
+| Detector | Size-robust top-5 | Legacy recall | Paired vs `learned-plm` (1.4.0) |
 |----------|:-----------------:|:-------------:|-----------------------------|
-| **Lacuna** (`learned-plm`) | **66.1% (119/180)** | 82% | - |
+| **Lacuna** (`learned-plm`, 1.4.0) | **66.1% (119/180)** | 82% | - |
 | P2Rank | 63.3% (114/180) | 82% | +2.8% CI[-4.4, +9.4], includes zero |
-| **Lacuna** (`learned`, default) | **55.6% (100/180)** | 77% | +10.6% CI[+6.1, +15.0] |
-| MDpocket (best of 10 configs) | 43.9% (79/180) | - | +22.2% CI[+14.4, +30.0] |
+| **Lacuna** (`learned`, default) | **57.8% (104/180)** | 73% | +10.6% CI[+6.1, +15.0], with `learned` at 55.6% in 1.4.0 |
+| MDpocket (best of 10 configs, 1.4.0) | 43.9% (79/180) | - | +22.2% CI[+14.4, +30.0] |
 | fpocket | 43.6% (78/179) | 32% | +22.9% CI[+14.5, +31.3] |
 
 The PLM-assisted ranker is level with P2Rank: the interval on the difference spans
 zero, so parity is the claim, not a win.
 
-**The default trails P2Rank by 7.8 points (CI -15.0 to -0.6, excluding zero.)**
-That is a change from what this file said previously. Before the
-conformer-invariant refit the default scored 56.7% with a wider interval that
-included zero, and it was described as indistinguishable from P2Rank. Refitting
-cost about a point and tightened the interval, so the difference is now
-resolvable and the earlier description no longer holds. The default still beats
-MDpocket by +11.7% (CI +3.9 to +19.4) and fpocket by +12.3%.
+**The default is 5.6 points behind P2Rank, with an interval that includes zero
+(CI -12.2 to +1.1; 104 against 114 of 180).** It is ahead of fpocket by +14.4
+points (CI +6.7 to +22.2; 104 against 78 of 180). Against MDpocket the 1.4.0
+measurement was +11.7% (CI +3.9 to +19.4).
 
 ### Cohort note: 180 here, 178 in the preprint
 
@@ -179,7 +195,10 @@ paired. The PLM-assisted ranker scores **66.1% (119/180)** here and **66.3%
 set, not a change in the software.
 
 Union of `learned-plm` and P2Rank: 76.1%, with 23 structures recovered by Lacuna
-alone. Union of all five detectors: 79.4%. The tools remain complementary.
+alone. Union of all five detectors: 79.4%. Both are 1.4.0 measurements. For the
+default ranker on 1.5.0, the union with P2Rank is 71.7% (129/180), with 15
+structures recovered by Lacuna alone, and the union of the default, fpocket and
+P2Rank is 76.7% (138/180). The tools remain complementary.
 
 MDpocket is the closest relative of this work and the fair ensemble baseline. It
 emits an occupancy grid rather than a ranked list, so its intended workflow is
@@ -197,19 +216,19 @@ python benchmarks/compare_detectors_cryptobench.py --analyze
 python benchmarks/compare_mdpocket.py --folds test     # needs mdpocket on PATH
 ```
 
-## Curated cryptic set: 10 / 22
+## Curated cryptic set: 9 / 22
 
 Hand-assembled from published cryptic-pocket case studies, and the hardest of
 the three benchmarks despite being the smallest: it is deliberately enriched for
 the large-motion sites this pipeline handles worst.
 
-| Metric | `learned` (default) | `learned-plm` |
+| Metric | `learned` (default) | `learned-plm` (1.4.0) |
 |--------|--------|--------|
-| Size-robust (Jaccard ≥ 0.25 or centroid ≤ 4 Å) | **10/22 (45%)** | 9/22 (41%) |
-| Legacy recall (≥ 30% or centroid ≤ 4 Å) | 15/22 (68%) | - |
+| Size-robust (Jaccard ≥ 0.25 or centroid ≤ 4 Å) | **9/22 (41%)** | 9/22 (41%) |
+| Legacy recall (≥ 30% or centroid ≤ 4 Å) | 14/22 (64%) | - |
 
-The default edges out the PLM-assisted ranker here by a single structure, the
-opposite ordering to CryptoBench. One structure at n=22 means nothing by itself,
+The default and the PLM-assisted ranker are level here, where on CryptoBench the
+PLM-assisted ranker is ahead. A level score at n=22 proves little by itself,
 but it is worth stating that the PLM-assisted ranker's advantage is established on
 CryptoBench and does not automatically carry over.
 
@@ -220,15 +239,14 @@ Coarse literature labels for the dominant motion that opens each site.
 | Mechanism | Recovered | Misses |
 |-----------|:---------:|--------|
 | sidechain | 2/4 | 1M47, 1HMV |
-| loop | 2/6 | 1NB4, 2ERK, 2OZR, 1RTC |
-| helix | 3/7 | 3CS9, 1LXL, 1G5M, 1JWP |
-| hinge | 1/2 | 1V4S |
-| interface | 1/3 | 2HBQ, 1ZJH |
+| loop | 3/6 | 1NB4, 2OZR, 1RTC |
+| helix | 2/7 | 2SRC, 3CS9, 1LXL, 1G5M, 1JWP |
+| hinge | 2/2 | none |
+| interface | 0/3 | 2HBQ, 3MAP, 1ZJH |
 
-Hinge and interface sites were previously 0/2 and 0/3; both now recover one
-target. They remain the weakest classes, which is expected: a harmonic
-elastic-network ensemble cannot generate large inter-domain or inter-subunit
-motions. Dimer-interface pockets are partly addressable with `--homodimer`
+Both hinge sites are recovered. Interface sites are the weakest class, which is
+expected: a harmonic elastic-network ensemble cannot generate large
+inter-subunit motions. Dimer-interface pockets are partly addressable with `--homodimer`
 (reads BIOMT records and builds the biological assembly), though this
 benchmark's single-chain-referenced scoring does not credit them.
 
@@ -243,28 +261,28 @@ python benchmarks/cryptic_benchmark.py --category cryptic --top-n 20   # detecti
 
 | Strategy | Description | Curated 22 |
 |----------|-------------|:----------:|
-| `persistence` | legacy persistence × druggability | **13/22 (59%)** |
-| `balanced` | druggability with a mild persistence bonus | **13/22 (59%)** |
+| `persistence` | legacy persistence × druggability | 13/22 (59%) |
+| `balanced` | druggability with a mild persistence bonus | **14/22 (64%)** |
 | `druggability` | peak open-state composite druggability | 11/22 (50%) |
-| `learned` (default) | fitted linear ranker over 23 features | 10/22 (45%) |
+| `learned` (default) | fitted linear ranker over 23 features | 9/22 (41%) |
 | `crypticity` | most cryptic sites first (previous default) | 7/22 (32%) |
 
 **The default is not the winner here, and that is worth stating plainly.** On
-CryptoBench's test fold (n=180) `learned` recovers 55.6% against 17.8% for
-`crypticity`, an interval-separated gap on the largest and most diverse
-benchmark, which is why it ships as the default. On this 22-target set the
-ordering reverses. At n=22 the confidence intervals overlap heavily
-(`persistence` [41%, 77%] vs `learned` [23%, 68%]), so the two results are not
-formally in conflict, but the honest reading is that the learned ranker is tuned
-to CryptoBench's distribution while the analytic rules do better on the classic
-literature targets. If your proteins resemble the latter, try
-`--rank-by persistence`.
+CryptoBench's test fold (n=180) `learned` recovers 57.8% against 30.6% for
+`crypticity`, an interval-separated gap (+27.2 points, CI +20.6 to +34.4) on the
+largest and most diverse benchmark, which is why it ships as the default. On
+this 22-target set the ordering reverses. At n=22 the confidence intervals
+overlap heavily (`persistence` [41%, 77%] vs `learned` [18%, 64%]), so the two
+results are not formally in conflict, but the honest reading is that the learned
+ranker is tuned to CryptoBench's distribution while the analytic rules do better
+on the classic literature targets. If your proteins resemble the latter, try
+`--rank-by balanced` or `--rank-by persistence`.
 
 ## Orthosteric / conformational controls
 
 | Category | Result | Notes |
 |----------|--------|-------|
-| Orthosteric | 4/6 | lysozyme, HIV-1 protease, DHFR, HIF-2α (1.0 Å centroid); misses thrombin, trypsin (1S0Q numbering) |
+| Orthosteric | 4/6 | lysozyme, HIV-1 protease, DHFR, HIF-2α (1.1 Å centroid); misses thrombin, trypsin (1S0Q numbering) |
 | Conformational | 0/1 | adenylate kinase open→closed |
 
 Orthosteric recovery improved from 3/6. The single conformational target
@@ -287,38 +305,43 @@ tools are paired on the 144 structures each of them scored.
 | Detector | COACH420 (general, holo) | CryptoBench test fold (cryptic, apo) |
 |----------|:------------------------:|:------------------------------------:|
 | P2Rank | **93.8%** (135/144) | 63.3% |
-| Lacuna (`learned-plm`) | not measured | **66.1%** |
-| Lacuna (`learned`) | 86.8% (125/144) | 55.6% |
+| Lacuna (`learned-plm`, 1.4.0) | not measured | **66.1%** |
+| Lacuna (`learned`) | 89.6% (129/144) | 57.8% |
 | Lacuna (`druggability`) | 66.7% (96/144) | - |
 
 The COACH420 column was run with `learned`, the geometry-only strategy, so that
 is the row to compare against P2Rank here; `learned-plm` has not been run on this
-dataset. Paired on the 144 structures, `learned` trails P2Rank by **-6.9%
-(CI -12.5 to -1.4, excludes zero)**, while on cryptic sites `learned-plm` is
-nominally ahead of P2Rank (+2.8 points, an interval that spans zero).
+dataset. Paired on the 144 structures, `learned` is **4.2 points behind P2Rank
+(129 against 135; CI -9.0 to +0.7, an interval that includes zero)**, while on
+cryptic sites `learned-plm` is nominally ahead of P2Rank (+2.8 points, an
+interval that spans zero).
 
-**Each tool wins or ties on the task it was built for.** P2Rank is a
-general-purpose predictor and is genuinely better at finding sites that are
-already open; Lacuna's ensemble machinery buys nothing when nothing needs to
-open. The honest reading of "parity with P2Rank" is therefore that parity holds
-on cryptic sites specifically, and that a general-purpose detector should be
-preferred for general-purpose work. Union of the two is 95.8%.
+**The two tools are close on both tasks.** P2Rank is a general-purpose
+predictor and is nominally ahead on sites that are already open, where Lacuna's
+ensemble machinery has nothing to add because nothing needs to open; on cryptic
+sites the nominal order reverses for `learned-plm`. Neither difference is
+resolved at these sample sizes. For general-purpose work a single-structure
+detector reaches the same place without an ensemble and is the simpler choice.
+Union of the two is 95.8% (138/144).
 
-Absolute recovery is *higher* here than on CryptoBench (86.8% vs 55.6% for the
+Absolute recovery is *higher* here than on CryptoBench (89.6% vs 57.8% for the
 same strategy) simply because an open pocket is easier to find than a shut one.
 Cross-dataset comparisons of the headline number are not meaningful; only the
 within-dataset paired differences are.
 
 ### The `learned` ranker also wins on always-open sites
 
-`learned` beats `druggability` by **+20.1% (CI +13.2 to +27.1)** on COACH420.
-Earlier documentation advised `--rank-by druggability` for orthosteric and
-general pocket finding. That advice predated the learned ranker and was wrong by
-20 points; `learned` is now the right default for both cryptic and general work.
+`learned` beats `druggability` by **+22.9 points (CI +15.3 to +30.6)** on
+COACH420, paired on the same 144 structures (129 against 96). Earlier
+documentation advised `--rank-by druggability` for orthosteric and general
+pocket finding. That advice predated the learned ranker; `learned` is the right
+default for both cryptic and general work.
 
 ```bash
-python benchmarks/coach420_benchmark.py --limit 150
-python benchmarks/compare_p2rank_coach420.py --limit 150   # needs P2Rank on PATH
+python benchmarks/coach420_benchmark.py --out coach420_full.json   # all 300 entries: the 286-structure headline
+python benchmarks/coach420_benchmark.py --limit 150                # the paired tables (145 scored, 144 shared with P2Rank)
+python benchmarks/coach420_benchmark.py --limit 150 --rank-by druggability
+python benchmarks/compare_p2rank_coach420.py --limit 150           # needs P2Rank on PATH
 ```
 
 ## Why the clustering radius is 2 Å
@@ -352,12 +375,18 @@ change to detection constants requires refitting via
 
 ## Where the remaining gap is
 
-Some cluster in the candidate set clears the criterion for 73.7% of test-fold
-structures, against the 66.1% that `learned-plm` reaches in the top 5 (55.6%
-for the default). The site is usually found
-and then out-ranked, and most of the loss sits just outside the cutoff: the
-correct cluster is at rank 6-8 for 14 structures, and top-8 recovery is already
-64.8%.
+Some cluster in the candidate set clears the criterion for 72.8% of test-fold
+structures (131/180), against the 57.8% the default reaches in the top 5 (66.1%
+for `learned-plm`, measured with 1.4.0). The site is usually found
+and then out-ranked, and part of the loss sits just outside the cutoff: the
+correct cluster is at rank 6-8 for 8 structures, and top-8 recovery is
+62.2% (112/180).
+
+The rest of this section, down to the speed table, is the analysis behind the
+companion preprint and the record of each design study. It was measured with
+1.4.0 or earlier, largely on the `learned-plm` candidate pool, and is kept as
+measured. For orientation, on 1.5.0 the three-detector coverage union below
+reads 89.9% (161/179), with 10.1% missed by all three.
 
 ### The field can already see most cryptic sites; nobody can rank them
 
@@ -709,16 +738,29 @@ returns rRNA nucleotides and rejects every entry for the wrong reason.
 ## Speed (NMA backend, no GPU)
 
 Wall clock for the full pipeline (ensemble generation, per-conformer detection,
-clustering, scoring, ranking) at 20 conformers on a laptop CPU.
+clustering, scoring, ranking) at 20 conformers on a laptop CPU. Median of three
+runs, with 1.4.0 timed back to back on the same machine.
 
-| Protein | Residues | Time |
-|---------|---------:|-----:|
-| Interleukin-2 (1M47) | 122 | 0.7s |
-| T4 lysozyme (1L90) | 162 | 0.9s |
-| K-Ras (4OBE) | 339 | 1.1s |
-| Glucokinase (1V4S) | 448 | 3.8s |
-| PKM2 (1ZJH) | 507 | 4.5s |
-| HIV-1 RT (1HMV) | 536 (chain A) | 7.3s |
+| Protein | Residues | 1.4.0 | 1.5.0 |
+|---------|---------:|------:|------:|
+| Interleukin-2 (1M47) | 122 | 0.64s | 0.59s |
+| T4 lysozyme (1L90) | 162 | 0.84s | 0.76s |
+| K-Ras (4OBE) | 169 (chain A) | 1.03s | 0.84s |
+| K-Ras (4OBE) | 339 (both chains) | 2.61s | 1.83s |
+| Glucokinase (1V4S) | 448 | 3.52s | 2.93s |
+| PKM2 (1ZJH) | 507 | 4.36s | 3.87s |
+| HIV-1 RT (1HMV) | 536 (chain A) | 6.96s | 5.91s |
+
+The sampler itself is where the difference comes from. Ensemble generation
+alone, 20 conformers, peak memory of the process and time:
+
+| Residues | Peak memory, 1.4.0 | Peak memory, 1.5.0 | Time, 1.4.0 | Time, 1.5.0 |
+|---------:|-------------------:|-------------------:|------------:|------------:|
+| 339 | 154 MB | 105 MB | 0.89s | 0.23s |
+| 507 | 151 MB | 103 MB | 1.05s | 0.31s |
+| 1,327 | 558 MB | 239 MB | 6.6s | 2.1s |
+| 2,056 | 1,137 MB | 435 MB | 15.0s | 7.7s |
+| 3,724 | 3,563 MB | 1,202 MB | 73.4s | 49.5s |
 
 The geometric descriptors added for the ranker cost roughly 15% of detection
 time and reuse grids the detector already builds.

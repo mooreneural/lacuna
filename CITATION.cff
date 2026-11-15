@@ -22,12 +22,13 @@ abstract: >
   within-structure pairs. Ensemble generation is pluggable: normal mode
   analysis by default, with implicit-solvent molecular dynamics, Boltz-2
   diffusion sampling, or a user-supplied ensemble as alternatives. On the
-  designated CryptoBench test fold it recovers 55.6% of cryptic sites in its
-  top five, rising to 66.1% with an optional PLM-assisted ranker, and 73%,
-  45% and 87% on the PocketMiner set, a curated set of literature apo/holo
-  pairs, and COACH420 respectively. The default backend completes in a median
-  of 2.6 seconds per chain on one CPU core. Outputs are docking-ready Boltz
-  YAML constraints, AutoDock Vina boxes and pseudoatom PDB files.
+  designated CryptoBench test fold it recovers 57.8% of cryptic sites in its
+  top five (66.1% with an optional PLM-assisted ranker, measured with version
+  1.4.0), and 69%, 41% and 89% on the PocketMiner set, a curated set of
+  literature apo/holo pairs, and COACH420 respectively. The default backend
+  completes in a median of 2.6 seconds per chain on one CPU core. Outputs are
+  docking-ready Boltz YAML constraints, AutoDock Vina boxes and pseudoatom PDB
+  files.
 keywords:
   - cryptic-pockets
   - binding-site-prediction

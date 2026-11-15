@@ -6,8 +6,8 @@
     ],
     "n_known": 12,
     "jaccard": 0.182,
-    "recall": 0.5,
-    "centroid_A": 7.52,
+    "recall": 0.333,
+    "centroid_A": 7.79,
     "robust": false
   },
   {
@@ -16,10 +16,10 @@
       "GDP"
     ],
     "n_known": 16,
-    "jaccard": 0.024,
-    "recall": 0.062,
-    "centroid_A": 10.31,
-    "robust": false
+    "jaccard": 0.524,
+    "recall": 0.688,
+    "centroid_A": 4.0,
+    "robust": true
   },
   {
     "id": "1a4kH",
@@ -27,9 +27,9 @@
       "FRA"
     ],
     "n_known": 12,
-    "jaccard": 0.667,
+    "jaccard": 0.625,
     "recall": 0.833,
-    "centroid_A": 2.68,
+    "centroid_A": 2.51,
     "robust": true
   },
   {
@@ -38,9 +38,9 @@
       "FKA"
     ],
     "n_known": 8,
-    "jaccard": 0.174,
+    "jaccard": 0.211,
     "recall": 0.5,
-    "centroid_A": 8.21,
+    "centroid_A": 8.06,
     "robust": false
   },
   {
@@ -49,10 +49,10 @@
       "PAP"
     ],
     "n_known": 16,
-    "jaccard": 0.115,
-    "recall": 0.188,
-    "centroid_A": 11.31,
-    "robust": false
+    "jaccard": 0.391,
+    "recall": 0.562,
+    "centroid_A": 5.3,
+    "robust": true
   },
   {
     "id": "1atlA",
@@ -60,9 +60,9 @@
       "0QI"
     ],
     "n_known": 16,
-    "jaccard": 0.577,
-    "recall": 0.938,
-    "centroid_A": 2.96,
+    "jaccard": 0.552,
+    "recall": 1.0,
+    "centroid_A": 3.37,
     "robust": true
   },
   {
@@ -72,9 +72,9 @@
       "OAA"
     ],
     "n_known": 33,
-    "jaccard": 0.381,
-    "recall": 0.485,
-    "centroid_A": 3.7,
+    "jaccard": 0.302,
+    "recall": 0.394,
+    "centroid_A": 4.0,
     "robust": true
   },
   {
@@ -83,9 +83,9 @@
       "TPD"
     ],
     "n_known": 15,
-    "jaccard": 0.448,
+    "jaccard": 0.565,
     "recall": 0.867,
-    "centroid_A": 2.51,
+    "centroid_A": 2.6,
     "robust": true
   },
   {
@@ -94,9 +94,9 @@
       "N25"
     ],
     "n_known": 19,
-    "jaccard": 0.8,
-    "recall": 0.842,
-    "centroid_A": 3.49,
+    "jaccard": 0.75,
+    "recall": 0.789,
+    "centroid_A": 3.34,
     "robust": true
   },
   {
@@ -105,9 +105,9 @@
       "PT1"
     ],
     "n_known": 14,
-    "jaccard": 0.722,
-    "recall": 0.929,
-    "centroid_A": 0.9,
+    "jaccard": 0.667,
+    "recall": 0.857,
+    "centroid_A": 1.21,
     "robust": true
   },
   {
@@ -117,9 +117,9 @@
       "DAA"
     ],
     "n_known": 33,
-    "jaccard": 0.889,
-    "recall": 0.97,
-    "centroid_A": 1.42,
+    "jaccard": 0.686,
+    "recall": 0.727,
+    "centroid_A": 3.1,
     "robust": true
   },
   {
@@ -128,9 +128,9 @@
       "NDP"
     ],
     "n_known": 25,
-    "jaccard": 0.476,
-    "recall": 0.8,
-    "centroid_A": 1.68,
+    "jaccard": 0.4,
+    "recall": 0.72,
+    "centroid_A": 4.24,
     "robust": true
   },
   {
@@ -139,9 +139,9 @@
       "PP8"
     ],
     "n_known": 27,
-    "jaccard": 0.567,
-    "recall": 0.63,
-    "centroid_A": 3.93,
+    "jaccard": 0.516,
+    "recall": 0.593,
+    "centroid_A": 4.26,
     "robust": true
   },
   {
@@ -150,9 +150,9 @@
       "IMU"
     ],
     "n_known": 19,
-    "jaccard": 0.452,
+    "jaccard": 0.487,
     "recall": 1.0,
-    "centroid_A": 3.11,
+    "centroid_A": 3.49,
     "robust": true
   },
   {
@@ -161,9 +161,9 @@
       "UDP"
     ],
     "n_known": 21,
-    "jaccard": 0.483,
-    "recall": 0.667,
-    "centroid_A": 4.01,
+    "jaccard": 0.556,
+    "recall": 0.714,
+    "centroid_A": 3.25,
     "robust": true
   },
   {
@@ -172,9 +172,9 @@
       "BGC"
     ],
     "n_known": 13,
-    "jaccard": 0.75,
-    "recall": 0.923,
-    "centroid_A": 3.22,
+    "jaccard": 0.688,
+    "recall": 0.846,
+    "centroid_A": 3.63,
     "robust": true
   },
   {
@@ -183,9 +183,9 @@
       "CLQ"
     ],
     "n_known": 11,
-    "jaccard": 0.037,
-    "recall": 0.091,
-    "centroid_A": 12.56,
+    "jaccard": 0.074,
+    "recall": 0.182,
+    "centroid_A": 12.65,
     "robust": false
   },
   {
@@ -196,9 +196,9 @@
       "IMP"
     ],
     "n_known": 45,
-    "jaccard": 0.6,
+    "jaccard": 0.643,
     "recall": 1.0,
-    "centroid_A": 1.31,
+    "centroid_A": 1.64,
     "robust": true
   },
   {
@@ -207,9 +207,9 @@
       "PTS"
     ],
     "n_known": 17,
-    "jaccard": 0.548,
-    "recall": 1.0,
-    "centroid_A": 1.64,
+    "jaccard": 0.552,
+    "recall": 0.941,
+    "centroid_A": 1.71,
     "robust": true
   },
   {
@@ -220,9 +220,9 @@
       "GLA"
     ],
     "n_known": 15,
-    "jaccard": 0.278,
-    "recall": 0.667,
-    "centroid_A": 5.6,
+    "jaccard": 0.36,
+    "recall": 0.6,
+    "centroid_A": 3.85,
     "robust": true
   },
   {
@@ -231,9 +231,9 @@
       "BT3"
     ],
     "n_known": 20,
-    "jaccard": 0.364,
-    "recall": 0.85,
-    "centroid_A": 3.28,
+    "jaccard": 0.321,
+    "recall": 0.45,
+    "centroid_A": 4.21,
     "robust": true
   },
   {
@@ -242,9 +242,9 @@
       "BPP"
     ],
     "n_known": 19,
-    "jaccard": 0.444,
-    "recall": 0.842,
-    "centroid_A": 3.18,
+    "jaccard": 0.55,
+    "recall": 0.737,
+    "centroid_A": 3.33,
     "robust": true
   },
   {
@@ -253,9 +253,9 @@
       "HBI"
     ],
     "n_known": 8,
-    "jaccard": 0.375,
+    "jaccard": 0.353,
     "recall": 0.75,
-    "centroid_A": 5.7,
+    "centroid_A": 5.92,
     "robust": true
   },
   {
@@ -264,9 +264,9 @@
       "APU"
     ],
     "n_known": 22,
-    "jaccard": 0.667,
-    "recall": 1.0,
-    "centroid_A": 2.99,
+    "jaccard": 0.308,
+    "recall": 0.364,
+    "centroid_A": 6.67,
     "robust": true
   },
   {
@@ -275,9 +275,9 @@
       "DXC"
     ],
     "n_known": 16,
-    "jaccard": 0.941,
-    "recall": 1.0,
-    "centroid_A": 2.42,
+    "jaccard": 0.667,
+    "recall": 0.875,
+    "centroid_A": 2.71,
     "robust": true
   },
   {
@@ -287,9 +287,9 @@
       "SHR"
     ],
     "n_known": 40,
-    "jaccard": 0.479,
-    "recall": 0.575,
-    "centroid_A": 3.23,
+    "jaccard": 0.538,
+    "recall": 0.7,
+    "centroid_A": 2.3,
     "robust": true
   },
   {
@@ -298,9 +298,9 @@
       "BZC"
     ],
     "n_known": 13,
-    "jaccard": 0.556,
+    "jaccard": 0.526,
     "recall": 0.769,
-    "centroid_A": 1.48,
+    "centroid_A": 1.44,
     "robust": true
   },
   {
@@ -311,7 +311,7 @@
     "n_known": 23,
     "jaccard": 0.69,
     "recall": 0.87,
-    "centroid_A": 1.45,
+    "centroid_A": 1.86,
     "robust": true
   },
   {
@@ -320,9 +320,9 @@
       "E20"
     ],
     "n_known": 19,
-    "jaccard": 0.528,
-    "recall": 1.0,
-    "centroid_A": 3.07,
+    "jaccard": 0.524,
+    "recall": 0.947,
+    "centroid_A": 2.64,
     "robust": true
   },
   {
@@ -331,9 +331,9 @@
       "A4P"
     ],
     "n_known": 25,
-    "jaccard": 0.464,
-    "recall": 0.88,
-    "centroid_A": 2.67,
+    "jaccard": 0.4,
+    "recall": 0.72,
+    "centroid_A": 3.7,
     "robust": true
   },
   {
@@ -342,9 +342,9 @@
       "394"
     ],
     "n_known": 25,
-    "jaccard": 0.594,
+    "jaccard": 0.633,
     "recall": 0.76,
-    "centroid_A": 3.03,
+    "centroid_A": 2.98,
     "robust": true
   },
   {
@@ -353,9 +353,9 @@
       "CDP"
     ],
     "n_known": 20,
-    "jaccard": 0.625,
-    "recall": 0.75,
-    "centroid_A": 0.87,
+    "jaccard": 0.583,
+    "recall": 0.7,
+    "centroid_A": 1.78,
     "robust": true
   },
   {
@@ -364,9 +364,9 @@
       "RPR"
     ],
     "n_known": 21,
-    "jaccard": 0.472,
-    "recall": 0.81,
-    "centroid_A": 3.25,
+    "jaccard": 0.516,
+    "recall": 0.762,
+    "centroid_A": 3.56,
     "robust": true
   },
   {
@@ -375,10 +375,10 @@
       "PR1"
     ],
     "n_known": 19,
-    "jaccard": 0.556,
-    "recall": 0.789,
-    "centroid_A": 2.88,
-    "robust": true
+    "jaccard": 0.03,
+    "recall": 0.053,
+    "centroid_A": 14.12,
+    "robust": false
   },
   {
     "id": "1f4eA",
@@ -386,9 +386,9 @@
       "TPR"
     ],
     "n_known": 17,
-    "jaccard": 0.324,
-    "recall": 0.706,
-    "centroid_A": 6.36,
+    "jaccard": 0.375,
+    "recall": 0.529,
+    "centroid_A": 5.3,
     "robust": true
   },
   {
@@ -397,9 +397,9 @@
       "TP3"
     ],
     "n_known": 14,
-    "jaccard": 0.556,
-    "recall": 0.929,
-    "centroid_A": 3.38,
+    "jaccard": 0.261,
+    "recall": 0.857,
+    "centroid_A": 4.15,
     "robust": true
   },
   {
@@ -408,9 +408,9 @@
       "TP4"
     ],
     "n_known": 21,
-    "jaccard": 0.6,
-    "recall": 0.714,
-    "centroid_A": 2.93,
+    "jaccard": 0.44,
+    "recall": 0.667,
+    "centroid_A": 2.62,
     "robust": true
   },
   {
@@ -419,9 +419,9 @@
       "NAD"
     ],
     "n_known": 24,
-    "jaccard": 0.667,
-    "recall": 1.0,
-    "centroid_A": 3.15,
+    "jaccard": 0.741,
+    "recall": 0.833,
+    "centroid_A": 1.19,
     "robust": true
   },
   {
@@ -431,9 +431,9 @@
       "NAA"
     ],
     "n_known": 25,
-    "jaccard": 0.568,
-    "recall": 1.0,
-    "centroid_A": 4.24,
+    "jaccard": 0.48,
+    "recall": 0.96,
+    "centroid_A": 2.55,
     "robust": true
   },
   {
@@ -444,7 +444,7 @@
     "n_known": 18,
     "jaccard": 0.394,
     "recall": 0.722,
-    "centroid_A": 4.74,
+    "centroid_A": 4.6,
     "robust": true
   },
   {
@@ -453,9 +453,9 @@
       "LNL"
     ],
     "n_known": 17,
-    "jaccard": 0.438,
+    "jaccard": 0.467,
     "recall": 1.0,
-    "centroid_A": 2.3,
+    "centroid_A": 2.8,
     "robust": true
   },
   {
@@ -464,9 +464,9 @@
       "SB3"
     ],
     "n_known": 11,
-    "jaccard": 0.733,
+    "jaccard": 0.786,
     "recall": 1.0,
-    "centroid_A": 2.3,
+    "centroid_A": 1.98,
     "robust": true
   },
   {
@@ -475,9 +475,9 @@
       "UD1"
     ],
     "n_known": 22,
-    "jaccard": 0.63,
-    "recall": 0.955,
-    "centroid_A": 2.6,
+    "jaccard": 0.64,
+    "recall": 1.0,
+    "centroid_A": 3.87,
     "robust": true
   },
   {
@@ -486,9 +486,9 @@
       "F6R"
     ],
     "n_known": 26,
-    "jaccard": 0.413,
+    "jaccard": 0.396,
     "recall": 0.731,
-    "centroid_A": 5.9,
+    "centroid_A": 6.69,
     "robust": true
   },
   {
@@ -497,9 +497,9 @@
       "A3P"
     ],
     "n_known": 5,
-    "jaccard": 0.211,
+    "jaccard": 0.2,
     "recall": 0.8,
-    "centroid_A": 7.46,
+    "centroid_A": 7.38,
     "robust": false
   },
   {
@@ -508,9 +508,9 @@
       "BSB"
     ],
     "n_known": 15,
-    "jaccard": 0.448,
+    "jaccard": 0.591,
     "recall": 0.867,
-    "centroid_A": 2.76,
+    "centroid_A": 1.48,
     "robust": true
   },
   {
@@ -520,9 +520,9 @@
       "TZP"
     ],
     "n_known": 21,
-    "jaccard": 0.467,
+    "jaccard": 0.52,
     "recall": 1.0,
-    "centroid_A": 3.62,
+    "centroid_A": 3.69,
     "robust": true
   },
   {
@@ -531,9 +531,9 @@
       "UD1"
     ],
     "n_known": 30,
-    "jaccard": 0.585,
-    "recall": 0.8,
-    "centroid_A": 4.29,
+    "jaccard": 0.488,
+    "recall": 0.667,
+    "centroid_A": 5.17,
     "robust": true
   },
   {
@@ -542,9 +542,9 @@
       "3GP"
     ],
     "n_known": 13,
-    "jaccard": 0.75,
-    "recall": 0.923,
-    "centroid_A": 4.16,
+    "jaccard": 0.769,
+    "recall": 0.769,
+    "centroid_A": 2.75,
     "robust": true
   },
   {
@@ -555,8 +555,8 @@
     ],
     "n_known": 42,
     "jaccard": 0.51,
-    "recall": 0.595,
-    "centroid_A": 4.79,
+    "recall": 0.619,
+    "centroid_A": 5.0,
     "robust": true
   },
   {
@@ -566,9 +566,9 @@
       "GLC"
     ],
     "n_known": 13,
-    "jaccard": 0.065,
-    "recall": 0.231,
-    "centroid_A": 13.13,
+    "jaccard": 0.062,
+    "recall": 0.154,
+    "centroid_A": 12.63,
     "robust": false
   },
   {
@@ -577,9 +577,9 @@
       "433"
     ],
     "n_known": 27,
-    "jaccard": 0.657,
+    "jaccard": 0.519,
     "recall": 1.0,
-    "centroid_A": 2.09,
+    "centroid_A": 1.62,
     "robust": true
   },
   {
@@ -588,9 +588,9 @@
       "FA6"
     ],
     "n_known": 14,
-    "jaccard": 0.737,
+    "jaccard": 0.824,
     "recall": 1.0,
-    "centroid_A": 2.69,
+    "centroid_A": 1.92,
     "robust": true
   },
   {
@@ -601,7 +601,7 @@
     "n_known": 16,
     "jaccard": 0.615,
     "recall": 1.0,
-    "centroid_A": 1.67,
+    "centroid_A": 1.05,
     "robust": true
   },
   {
@@ -610,9 +610,9 @@
       "4SP"
     ],
     "n_known": 19,
-    "jaccard": 0.562,
+    "jaccard": 0.529,
     "recall": 0.947,
-    "centroid_A": 2.83,
+    "centroid_A": 2.66,
     "robust": true
   },
   {
@@ -621,9 +621,9 @@
       "INF"
     ],
     "n_known": 14,
-    "jaccard": 0.452,
+    "jaccard": 0.7,
     "recall": 1.0,
-    "centroid_A": 3.71,
+    "centroid_A": 2.32,
     "robust": true
   },
   {
@@ -632,9 +632,9 @@
       "MLC"
     ],
     "n_known": 24,
-    "jaccard": 0.654,
+    "jaccard": 0.538,
     "recall": 0.875,
-    "centroid_A": 1.65,
+    "centroid_A": 6.91,
     "robust": true
   },
   {
@@ -643,9 +643,9 @@
       "478"
     ],
     "n_known": 14,
-    "jaccard": 0.706,
+    "jaccard": 0.632,
     "recall": 0.857,
-    "centroid_A": 2.32,
+    "centroid_A": 2.36,
     "robust": true
   },
   {
@@ -654,9 +654,9 @@
       "G26"
     ],
     "n_known": 15,
-    "jaccard": 0.522,
+    "jaccard": 0.667,
     "recall": 0.8,
-    "centroid_A": 2.28,
+    "centroid_A": 2.3,
     "robust": true
   },
   {
@@ -665,9 +665,9 @@
       "ATP"
     ],
     "n_known": 20,
-    "jaccard": 0.417,
-    "recall": 1.0,
-    "centroid_A": 3.1,
+    "jaccard": 0.463,
+    "recall": 0.95,
+    "centroid_A": 5.31,
     "robust": true
   },
   {
@@ -676,9 +676,9 @@
       "COC"
     ],
     "n_known": 11,
-    "jaccard": 0.16,
-    "recall": 0.364,
-    "centroid_A": 12.27,
+    "jaccard": 0.034,
+    "recall": 0.091,
+    "centroid_A": 17.94,
     "robust": false
   },
   {
@@ -687,9 +687,9 @@
       "INL"
     ],
     "n_known": 21,
-    "jaccard": 0.633,
+    "jaccard": 0.594,
     "recall": 0.905,
-    "centroid_A": 1.6,
+    "centroid_A": 0.7,
     "robust": true
   },
   {
@@ -700,7 +700,7 @@
     "n_known": 16,
     "jaccard": 0.406,
     "recall": 0.812,
-    "centroid_A": 2.57,
+    "centroid_A": 2.97,
     "robust": true
   },
   {
@@ -710,9 +710,9 @@
       "G3P"
     ],
     "n_known": 20,
-    "jaccard": 0.541,
+    "jaccard": 0.556,
     "recall": 1.0,
-    "centroid_A": 1.33,
+    "centroid_A": 1.56,
     "robust": true
   },
   {
@@ -724,9 +724,9 @@
       "NGA"
     ],
     "n_known": 12,
-    "jaccard": 0.033,
+    "jaccard": 0.03,
     "recall": 0.083,
-    "centroid_A": 12.92,
+    "centroid_A": 13.24,
     "robust": false
   },
   {
@@ -735,9 +735,9 @@
       "BLM"
     ],
     "n_known": 25,
-    "jaccard": 0.182,
-    "recall": 0.32,
-    "centroid_A": 5.6,
+    "jaccard": 0.122,
+    "recall": 0.2,
+    "centroid_A": 8.49,
     "robust": false
   },
   {
@@ -746,9 +746,9 @@
       "ANP"
     ],
     "n_known": 21,
-    "jaccard": 0.645,
-    "recall": 1.0,
-    "centroid_A": 2.04,
+    "jaccard": 0.69,
+    "recall": 0.952,
+    "centroid_A": 1.94,
     "robust": true
   },
   {
@@ -757,9 +757,9 @@
       "AAT"
     ],
     "n_known": 32,
-    "jaccard": 0.727,
-    "recall": 1.0,
-    "centroid_A": 3.27,
+    "jaccard": 0.632,
+    "recall": 0.75,
+    "centroid_A": 2.83,
     "robust": true
   },
   {
@@ -768,9 +768,9 @@
       "U55"
     ],
     "n_known": 13,
-    "jaccard": 0.448,
+    "jaccard": 0.371,
     "recall": 1.0,
-    "centroid_A": 3.15,
+    "centroid_A": 5.04,
     "robust": true
   },
   {
@@ -779,9 +779,9 @@
       "CDC"
     ],
     "n_known": 22,
-    "jaccard": 0.63,
-    "recall": 0.773,
-    "centroid_A": 2.35,
+    "jaccard": 0.469,
+    "recall": 0.682,
+    "centroid_A": 3.24,
     "robust": true
   },
   {
@@ -790,9 +790,9 @@
       "FD2"
     ],
     "n_known": 19,
-    "jaccard": 0.536,
+    "jaccard": 0.6,
     "recall": 0.789,
-    "centroid_A": 1.99,
+    "centroid_A": 2.12,
     "robust": true
   },
   {
@@ -801,9 +801,9 @@
       "MEL"
     ],
     "n_known": 20,
-    "jaccard": 0.727,
-    "recall": 0.85,
-    "centroid_A": 1.96,
+    "jaccard": 0.708,
+    "recall": 0.9,
+    "centroid_A": 2.05,
     "robust": true
   },
   {
@@ -813,8 +813,8 @@
     ],
     "n_known": 18,
     "jaccard": 0.5,
-    "recall": 0.611,
-    "centroid_A": 4.16,
+    "recall": 0.833,
+    "centroid_A": 2.9,
     "robust": true
   },
   {
@@ -823,9 +823,9 @@
       "IAG"
     ],
     "n_known": 18,
-    "jaccard": 0.52,
+    "jaccard": 0.529,
     "recall": 1.0,
-    "centroid_A": 0.85,
+    "centroid_A": 1.15,
     "robust": true
   },
   {
@@ -834,9 +834,9 @@
       "IAV"
     ],
     "n_known": 17,
-    "jaccard": 0.654,
+    "jaccard": 0.773,
     "recall": 1.0,
-    "centroid_A": 0.96,
+    "centroid_A": 1.15,
     "robust": true
   },
   {
@@ -845,9 +845,9 @@
       "PRP"
     ],
     "n_known": 17,
-    "jaccard": 0.607,
+    "jaccard": 0.447,
     "recall": 1.0,
-    "centroid_A": 3.61,
+    "centroid_A": 5.99,
     "robust": true
   },
   {
@@ -856,9 +856,9 @@
       "BMU"
     ],
     "n_known": 18,
-    "jaccard": 0.429,
+    "jaccard": 0.357,
     "recall": 1.0,
-    "centroid_A": 3.61,
+    "centroid_A": 3.39,
     "robust": true
   },
   {
@@ -867,9 +867,9 @@
       "BPY"
     ],
     "n_known": 14,
-    "jaccard": 0.424,
+    "jaccard": 0.5,
     "recall": 1.0,
-    "centroid_A": 2.22,
+    "centroid_A": 1.8,
     "robust": true
   },
   {
@@ -878,9 +878,9 @@
       "DBD"
     ],
     "n_known": 15,
-    "jaccard": 0.522,
-    "recall": 0.8,
-    "centroid_A": 2.42,
+    "jaccard": 0.542,
+    "recall": 0.867,
+    "centroid_A": 2.52,
     "robust": true
   },
   {
@@ -889,9 +889,9 @@
       "F6P"
     ],
     "n_known": 14,
-    "jaccard": 0.167,
+    "jaccard": 0.222,
     "recall": 0.357,
-    "centroid_A": 7.42,
+    "centroid_A": 7.41,
     "robust": false
   },
   {
@@ -901,9 +901,9 @@
       "NAA"
     ],
     "n_known": 21,
-    "jaccard": 0.448,
+    "jaccard": 0.591,
     "recall": 0.619,
-    "centroid_A": 4.48,
+    "centroid_A": 3.24,
     "robust": true
   },
   {
@@ -915,7 +915,7 @@
     "n_known": 14,
     "jaccard": 0.429,
     "recall": 0.643,
-    "centroid_A": 4.44,
+    "centroid_A": 5.26,
     "robust": true
   },
   {
@@ -924,9 +924,9 @@
       "BUL"
     ],
     "n_known": 19,
-    "jaccard": 0.48,
+    "jaccard": 0.481,
     "recall": 0.684,
-    "centroid_A": 2.6,
+    "centroid_A": 3.47,
     "robust": true
   },
   {
@@ -935,9 +935,9 @@
       "HBI"
     ],
     "n_known": 14,
-    "jaccard": 0.48,
-    "recall": 0.857,
-    "centroid_A": 3.39,
+    "jaccard": 0.458,
+    "recall": 0.786,
+    "centroid_A": 4.05,
     "robust": true
   },
   {
@@ -946,9 +946,9 @@
       "NAG"
     ],
     "n_known": 26,
-    "jaccard": 0.556,
-    "recall": 0.577,
-    "centroid_A": 1.84,
+    "jaccard": 0.643,
+    "recall": 0.692,
+    "centroid_A": 4.15,
     "robust": true
   },
   {
@@ -957,9 +957,9 @@
       "FRG"
     ],
     "n_known": 13,
-    "jaccard": 0.421,
-    "recall": 0.615,
-    "centroid_A": 5.84,
+    "jaccard": 0.368,
+    "recall": 0.538,
+    "centroid_A": 6.6,
     "robust": true
   },
   {
@@ -968,9 +968,9 @@
       "IOT"
     ],
     "n_known": 30,
-    "jaccard": 0.462,
-    "recall": 1.0,
-    "centroid_A": 1.43,
+    "jaccard": 0.474,
+    "recall": 0.9,
+    "centroid_A": 4.61,
     "robust": true
   },
   {
@@ -979,9 +979,9 @@
       "BAT"
     ],
     "n_known": 17,
-    "jaccard": 0.5,
-    "recall": 0.765,
-    "centroid_A": 3.53,
+    "jaccard": 0.593,
+    "recall": 0.941,
+    "centroid_A": 3.28,
     "robust": true
   },
   {
@@ -990,9 +990,9 @@
       "PLH"
     ],
     "n_known": 16,
-    "jaccard": 0.889,
-    "recall": 1.0,
-    "centroid_A": 1.72,
+    "jaccard": 0.875,
+    "recall": 0.875,
+    "centroid_A": 2.24,
     "robust": true
   },
   {
@@ -1003,7 +1003,7 @@
     "n_known": 20,
     "jaccard": 0.5,
     "recall": 0.75,
-    "centroid_A": 3.04,
+    "centroid_A": 2.93,
     "robust": true
   },
   {
@@ -1014,7 +1014,7 @@
     "n_known": 21,
     "jaccard": 0.484,
     "recall": 0.714,
-    "centroid_A": 3.26,
+    "centroid_A": 3.08,
     "robust": true
   },
   {
@@ -1023,9 +1023,9 @@
       "SAH"
     ],
     "n_known": 21,
-    "jaccard": 0.714,
+    "jaccard": 0.769,
     "recall": 0.952,
-    "centroid_A": 1.5,
+    "centroid_A": 1.85,
     "robust": true
   },
   {
@@ -1035,9 +1035,9 @@
       "FMN"
     ],
     "n_known": 34,
-    "jaccard": 0.58,
-    "recall": 0.853,
-    "centroid_A": 3.64,
+    "jaccard": 0.528,
+    "recall": 0.941,
+    "centroid_A": 1.76,
     "robust": true
   },
   {
@@ -1046,9 +1046,9 @@
       "COA"
     ],
     "n_known": 26,
-    "jaccard": 0.314,
+    "jaccard": 0.294,
     "recall": 0.462,
-    "centroid_A": 7.39,
+    "centroid_A": 6.62,
     "robust": true
   },
   {
@@ -1059,7 +1059,7 @@
     "n_known": 12,
     "jaccard": 0.0,
     "recall": 0.0,
-    "centroid_A": 19.55,
+    "centroid_A": 26.81,
     "robust": false
   },
   {
@@ -1070,7 +1070,7 @@
     "n_known": 17,
     "jaccard": 0.308,
     "recall": 0.471,
-    "centroid_A": 9.99,
+    "centroid_A": 9.82,
     "robust": true
   },
   {
@@ -1079,9 +1079,9 @@
       "901"
     ],
     "n_known": 21,
-    "jaccard": 0.417,
-    "recall": 0.476,
-    "centroid_A": 6.96,
+    "jaccard": 0.429,
+    "recall": 0.429,
+    "centroid_A": 7.29,
     "robust": true
   },
   {
@@ -1091,9 +1091,9 @@
       "LPR"
     ],
     "n_known": 23,
-    "jaccard": 0.679,
-    "recall": 0.826,
-    "centroid_A": 3.47,
+    "jaccard": 0.488,
+    "recall": 0.87,
+    "centroid_A": 2.71,
     "robust": true
   },
   {
@@ -1114,9 +1114,9 @@
       "TAD"
     ],
     "n_known": 22,
-    "jaccard": 0.56,
-    "recall": 0.636,
-    "centroid_A": 4.2,
+    "jaccard": 0.52,
+    "recall": 0.591,
+    "centroid_A": 4.34,
     "robust": true
   },
   {
@@ -1126,9 +1126,9 @@
       "GLC"
     ],
     "n_known": 12,
-    "jaccard": 0.35,
-    "recall": 0.583,
-    "centroid_A": 6.72,
+    "jaccard": 0.364,
+    "recall": 0.667,
+    "centroid_A": 7.34,
     "robust": true
   },
   {
@@ -1139,7 +1139,7 @@
     "n_known": 15,
     "jaccard": 0.7,
     "recall": 0.933,
-    "centroid_A": 3.85,
+    "centroid_A": 3.93,
     "robust": true
   },
   {
@@ -1148,9 +1148,9 @@
       "NAD"
     ],
     "n_known": 20,
-    "jaccard": 0.6,
-    "recall": 0.75,
-    "centroid_A": 3.79,
+    "jaccard": 0.667,
+    "recall": 0.8,
+    "centroid_A": 3.32,
     "robust": true
   },
   {
@@ -1160,9 +1160,9 @@
       "MGF"
     ],
     "n_known": 24,
-    "jaccard": 0.621,
+    "jaccard": 0.667,
     "recall": 0.75,
-    "centroid_A": 3.78,
+    "centroid_A": 3.93,
     "robust": true
   },
   {
@@ -1171,10 +1171,10 @@
       "ANP"
     ],
     "n_known": 14,
-    "jaccard": 0.125,
-    "recall": 0.357,
-    "centroid_A": 10.94,
-    "robust": false
+    "jaccard": 0.55,
+    "recall": 0.786,
+    "centroid_A": 6.61,
+    "robust": true
   },
   {
     "id": "1p4nA",
@@ -1185,10 +1185,10 @@
       "UMA"
     ],
     "n_known": 20,
-    "jaccard": 0.227,
-    "recall": 0.5,
-    "centroid_A": 7.71,
-    "robust": false
+    "jaccard": 0.36,
+    "recall": 0.45,
+    "centroid_A": 6.4,
+    "robust": true
   },
   {
     "id": "1p5rA",
@@ -1196,9 +1196,9 @@
       "COA"
     ],
     "n_known": 22,
-    "jaccard": 0.364,
+    "jaccard": 0.265,
     "recall": 0.591,
-    "centroid_A": 5.86,
+    "centroid_A": 6.61,
     "robust": true
   },
   {
@@ -1209,7 +1209,7 @@
     "n_known": 14,
     "jaccard": 0.375,
     "recall": 0.643,
-    "centroid_A": 6.33,
+    "centroid_A": 5.93,
     "robust": true
   },
   {
@@ -1219,9 +1219,9 @@
       "FBP"
     ],
     "n_known": 46,
-    "jaccard": 0.365,
-    "recall": 0.413,
-    "centroid_A": 5.87,
+    "jaccard": 0.421,
+    "recall": 0.522,
+    "centroid_A": 5.83,
     "robust": true
   },
   {
@@ -1230,9 +1230,9 @@
       "DCP"
     ],
     "n_known": 6,
-    "jaccard": 0.417,
-    "recall": 0.833,
-    "centroid_A": 5.45,
+    "jaccard": 0.375,
+    "recall": 0.5,
+    "centroid_A": 6.5,
     "robust": true
   },
   {
@@ -1242,9 +1242,9 @@
       "NDG"
     ],
     "n_known": 12,
-    "jaccard": 0.522,
+    "jaccard": 0.545,
     "recall": 1.0,
-    "centroid_A": 3.77,
+    "centroid_A": 3.55,
     "robust": true
   },
   {
@@ -1253,9 +1253,9 @@
       "MID"
     ],
     "n_known": 19,
-    "jaccard": 0.483,
-    "recall": 0.737,
-    "centroid_A": 2.85,
+    "jaccard": 0.517,
+    "recall": 0.789,
+    "centroid_A": 2.76,
     "robust": true
   },
   {
@@ -1264,9 +1264,9 @@
       "0ZG"
     ],
     "n_known": 16,
-    "jaccard": 0.6,
-    "recall": 0.938,
-    "centroid_A": 1.04,
+    "jaccard": 0.56,
+    "recall": 0.875,
+    "centroid_A": 1.22,
     "robust": true
   },
   {
@@ -1275,9 +1275,9 @@
       "HEL"
     ],
     "n_known": 23,
-    "jaccard": 0.333,
-    "recall": 0.522,
-    "centroid_A": 5.42,
+    "jaccard": 0.324,
+    "recall": 0.478,
+    "centroid_A": 5.0,
     "robust": true
   },
   {
@@ -1286,10 +1286,10 @@
       "CAA"
     ],
     "n_known": 23,
-    "jaccard": 0.121,
-    "recall": 0.174,
-    "centroid_A": 11.8,
-    "robust": false
+    "jaccard": 0.406,
+    "recall": 0.565,
+    "centroid_A": 6.75,
+    "robust": true
   },
   {
     "id": "1q8jA",
@@ -1298,9 +1298,9 @@
       "HCS"
     ],
     "n_known": 29,
-    "jaccard": 0.424,
-    "recall": 0.483,
-    "centroid_A": 7.62,
+    "jaccard": 0.406,
+    "recall": 0.448,
+    "centroid_A": 14.64,
     "robust": true
   },
   {
@@ -1309,9 +1309,9 @@
       "846"
     ],
     "n_known": 15,
-    "jaccard": 0.565,
+    "jaccard": 0.65,
     "recall": 0.867,
-    "centroid_A": 2.61,
+    "centroid_A": 2.5,
     "robust": true
   },
   {
@@ -1320,9 +1320,9 @@
       "BPG"
     ],
     "n_known": 17,
-    "jaccard": 0.567,
+    "jaccard": 0.654,
     "recall": 1.0,
-    "centroid_A": 1.09,
+    "centroid_A": 0.93,
     "robust": true
   },
   {
@@ -1333,7 +1333,7 @@
     "n_known": 21,
     "jaccard": 0.625,
     "recall": 0.714,
-    "centroid_A": 3.06,
+    "centroid_A": 3.49,
     "robust": true
   },
   {
@@ -1342,9 +1342,9 @@
       "ZEN"
     ],
     "n_known": 19,
-    "jaccard": 0.577,
+    "jaccard": 0.556,
     "recall": 0.789,
-    "centroid_A": 3.06,
+    "centroid_A": 3.16,
     "robust": true
   },
   {
@@ -1353,9 +1353,9 @@
       "GNT"
     ],
     "n_known": 18,
-    "jaccard": 0.696,
+    "jaccard": 0.615,
     "recall": 0.889,
-    "centroid_A": 3.21,
+    "centroid_A": 3.65,
     "robust": true
   },
   {
@@ -1364,10 +1364,10 @@
       "NCA"
     ],
     "n_known": 12,
-    "jaccard": 0.241,
+    "jaccard": 0.292,
     "recall": 0.583,
-    "centroid_A": 7.5,
-    "robust": false
+    "centroid_A": 6.97,
+    "robust": true
   },
   {
     "id": "1ri1A",
@@ -1376,9 +1376,9 @@
       "SAH"
     ],
     "n_known": 30,
-    "jaccard": 0.722,
-    "recall": 0.867,
-    "centroid_A": 5.13,
+    "jaccard": 0.59,
+    "recall": 0.767,
+    "centroid_A": 4.38,
     "robust": true
   },
   {
@@ -1389,7 +1389,7 @@
     "n_known": 10,
     "jaccard": 0.318,
     "recall": 0.7,
-    "centroid_A": 5.75,
+    "centroid_A": 6.05,
     "robust": true
   },
   {
@@ -1398,9 +1398,9 @@
       "PSB"
     ],
     "n_known": 11,
-    "jaccard": 0.091,
+    "jaccard": 0.087,
     "recall": 0.182,
-    "centroid_A": 11.19,
+    "centroid_A": 11.34,
     "robust": false
   },
   {
@@ -1409,9 +1409,9 @@
       "ADP"
     ],
     "n_known": 16,
-    "jaccard": 0.364,
+    "jaccard": 0.762,
     "recall": 1.0,
-    "centroid_A": 7.99,
+    "centroid_A": 3.2,
     "robust": true
   },
   {
@@ -1420,9 +1420,9 @@
       "SNI"
     ],
     "n_known": 13,
-    "jaccard": 0.565,
+    "jaccard": 0.619,
     "recall": 1.0,
-    "centroid_A": 0.69,
+    "centroid_A": 1.33,
     "robust": true
   },
   {
@@ -1432,9 +1432,9 @@
       "NAD"
     ],
     "n_known": 36,
-    "jaccard": 0.667,
-    "recall": 0.778,
-    "centroid_A": 0.86,
+    "jaccard": 0.714,
+    "recall": 0.833,
+    "centroid_A": 1.08,
     "robust": true
   },
   {
@@ -1443,9 +1443,9 @@
       "SAM"
     ],
     "n_known": 21,
-    "jaccard": 0.273,
+    "jaccard": 0.444,
     "recall": 0.571,
-    "centroid_A": 7.93,
+    "centroid_A": 5.86,
     "robust": true
   },
   {
@@ -1454,9 +1454,9 @@
       "THP"
     ],
     "n_known": 13,
-    "jaccard": 0.5,
+    "jaccard": 0.476,
     "recall": 0.769,
-    "centroid_A": 2.98,
+    "centroid_A": 2.89,
     "robust": true
   },
   {
@@ -1468,7 +1468,7 @@
     "n_known": 18,
     "jaccard": 0.895,
     "recall": 0.944,
-    "centroid_A": 1.41,
+    "centroid_A": 1.63,
     "robust": true
   },
   {
@@ -1477,9 +1477,9 @@
       "GNP"
     ],
     "n_known": 19,
-    "jaccard": 0.4,
-    "recall": 0.632,
-    "centroid_A": 9.64,
+    "jaccard": 0.391,
+    "recall": 0.474,
+    "centroid_A": 8.72,
     "robust": true
   },
   {
@@ -1488,9 +1488,9 @@
       "NAD"
     ],
     "n_known": 27,
-    "jaccard": 0.432,
-    "recall": 0.593,
-    "centroid_A": 4.52,
+    "jaccard": 0.353,
+    "recall": 0.444,
+    "centroid_A": 6.23,
     "robust": true
   },
   {
@@ -1499,10 +1499,10 @@
       "AS1"
     ],
     "n_known": 14,
-    "jaccard": 0.4,
-    "recall": 0.714,
-    "centroid_A": 3.97,
-    "robust": true
+    "jaccard": 0.032,
+    "recall": 0.071,
+    "centroid_A": 21.18,
+    "robust": false
   },
   {
     "id": "1tkyA",
@@ -1510,9 +1510,9 @@
       "A3S"
     ],
     "n_known": 17,
-    "jaccard": 0.462,
+    "jaccard": 0.6,
     "recall": 0.706,
-    "centroid_A": 4.25,
+    "centroid_A": 2.96,
     "robust": true
   },
   {
@@ -1525,9 +1525,9 @@
       "TYV"
     ],
     "n_known": 26,
-    "jaccard": 0.0,
-    "recall": 0.0,
-    "centroid_A": 25.22,
+    "jaccard": 0.121,
+    "recall": 0.154,
+    "centroid_A": 13.04,
     "robust": false
   },
   {
@@ -1537,9 +1537,9 @@
       "NDP"
     ],
     "n_known": 42,
-    "jaccard": 0.636,
-    "recall": 0.69,
-    "centroid_A": 4.7,
+    "jaccard": 0.6,
+    "recall": 0.714,
+    "centroid_A": 4.26,
     "robust": true
   },
   {
@@ -1548,9 +1548,9 @@
       "PMT"
     ],
     "n_known": 34,
-    "jaccard": 0.543,
-    "recall": 0.735,
-    "centroid_A": 3.59,
+    "jaccard": 0.475,
+    "recall": 0.618,
+    "centroid_A": 4.06,
     "robust": true
   },
   {
@@ -1559,9 +1559,9 @@
       "SAH"
     ],
     "n_known": 22,
-    "jaccard": 0.913,
+    "jaccard": 0.75,
     "recall": 0.955,
-    "centroid_A": 0.78,
+    "centroid_A": 1.37,
     "robust": true
   },
   {
@@ -1571,9 +1571,9 @@
       "URA"
     ],
     "n_known": 20,
-    "jaccard": 0.345,
+    "jaccard": 0.357,
     "recall": 0.5,
-    "centroid_A": 6.64,
+    "centroid_A": 6.27,
     "robust": true
   },
   {
@@ -1582,9 +1582,9 @@
       "ING"
     ],
     "n_known": 16,
-    "jaccard": 0.577,
+    "jaccard": 0.6,
     "recall": 0.938,
-    "centroid_A": 4.48,
+    "centroid_A": 4.66,
     "robust": true
   },
   {
@@ -1593,9 +1593,9 @@
       "FMN"
     ],
     "n_known": 24,
-    "jaccard": 0.514,
+    "jaccard": 0.545,
     "recall": 0.75,
-    "centroid_A": 4.27,
+    "centroid_A": 4.74,
     "robust": true
   },
   {
@@ -1606,7 +1606,7 @@
     "n_known": 19,
     "jaccard": 0.615,
     "recall": 0.842,
-    "centroid_A": 2.97,
+    "centroid_A": 2.98,
     "robust": true
   },
   {
@@ -1615,9 +1615,9 @@
       "ATP"
     ],
     "n_known": 22,
-    "jaccard": 0.433,
+    "jaccard": 0.464,
     "recall": 0.591,
-    "centroid_A": 6.67,
+    "centroid_A": 4.44,
     "robust": true
   },
   {
@@ -1628,9 +1628,9 @@
       "SIA"
     ],
     "n_known": 17,
-    "jaccard": 0.087,
-    "recall": 0.235,
-    "centroid_A": 11.77,
+    "jaccard": 0.05,
+    "recall": 0.118,
+    "centroid_A": 11.68,
     "robust": false
   }
 ]

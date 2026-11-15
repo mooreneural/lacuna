@@ -80,8 +80,9 @@ docking against either file will fight the receptor. Use the region to focus
 flexible-receptor docking, or as a co-folding constraint.
 
 **Ranked sites are candidates, not validated binding sites.** On the CryptoBench
-test fold Lacuna's top five contain the annotated site for about 66% of targets.
-Treat the ranking as a shortlist.
+test fold Lacuna's top five contain the annotated site for about 58% of targets
+with the default `learned` ranker, and about 66% with `learned-plm` (measured
+with 1.4.0). Treat the ranking as a shortlist.
 
 **Crypticity above roughly 0.3** indicates a site that opens substantially
 relative to the starting structure. Lower values are sites already largely open,
