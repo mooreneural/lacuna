@@ -5,6 +5,163 @@ All notable changes to Lacuna are documented here. The project follows
 governs its benchmarks: reported numbers are the ones we can defend on held-out
 data, never the most flattering ones available.
 
+## [1.5.0] - 2026-11-14
+
+The same input now gives the same pocket report on every machine. With the
+default NMA backend, `pocket_report.json` is identical at any BLAS thread count
+and on Windows and Linux, for protein, RNA, DNA and assemblies built with
+`--homodimer`. The sampler also uses about a third of the memory on large
+structures and is faster at the default 20 conformers:
+
+    residues   peak memory, 1.4.0 -> 1.5.0   ensemble time, 1.4.0 -> 1.5.0
+      339         154 MB ->   105 MB           0.89 s ->  0.23 s
+    1,327         558 MB ->   239 MB           6.6 s  ->  2.1 s
+    2,056       1,137 MB ->   435 MB          15.0 s  ->  7.7 s
+    3,724       3,563 MB -> 1,202 MB          73.4 s  -> 49.5 s
+
+The full pipeline is 7% to 30% faster on the proteins of the speed table in
+`docs/BENCHMARKS.md`, where it now takes 0.59 s at 122 residues and 5.9 s at
+536.
+
+Reports differ from 1.4.0 for the same input: every ensemble is drawn by the new
+sampler, and the lining rule under "Changed" alters which residues a pocket
+lists. The benchmark tables were re-measured with 1.5.0. Top-five recovery with
+the default ranker is 57.8% (104/180) on the CryptoBench test fold, 69% (31/45)
+on PocketMiner, 41% (9/22) on the curated set and 89% (254/286) on COACH420, and
+the per-residue propensity reaches AUROC 0.766 and AUPRC 0.340. The ranker
+weights are unchanged. The `learned-plm` and `surface-fusion` figures need the
+`plm` extra and stand as measured with 1.4.0.
+
+### Changed
+- **The NMA sampler is reproducible across thread counts and platforms.** The
+  eigensolver is the one step whose output depends on how BLAS is threaded, and
+  three things used to carry that into the conformers. Every intermediate is now
+  float64 (distances, Hessian, eigendecomposition, mode combination and the
+  propagation to all atoms), and a conformer is cast to float32 once, at the
+  end. Every mode gets a fixed sign. Modes that share an eigenvalue, which any
+  assembly with a three-fold or higher axis has, get a basis computed from the
+  space they span instead of the one the solver happened to return. The Hessian
+  is assembled a slab of rows at a time and factored in place, and the
+  propagation weights are built once per call, which is where the memory and
+  time go down.
+
+  For this release the report was compared byte for byte between the default
+  thread count and a single thread on 30 inputs (6 proteins of 122 to 3,724
+  residues, 17 RNA, 2 DNA, 2 protein and nucleic-acid complexes, 2 `--homodimer`
+  assemblies and the K-Ras example): 30 of 30 identical. The conformer
+  coordinates themselves agree to float32 rounding. Across 184 structures at 1,
+  2, 8 and the default number of threads, and between a Windows and a Linux
+  build, at most 40 of 26 million coordinates differed, none by more than
+  1.9e-6 Å. See [docs/USAGE.md](docs/USAGE.md#reproducibility).
+
+- **RNA and DNA are sampled through the same loop as protein.** The nucleic
+  backend carried its own copy of the sampling loop. It now selects its beads
+  and hands them to the shared one, so a nucleic-acid ensemble is reproducible
+  on the same terms and at the same cost: on a 1,483-bead complex, peak memory
+  for 20 conformers falls from 2,607 MB to 671 MB and the time from 44 s to
+  6.4 s.
+
+- **A pocket's lining residues are a strict majority of the conformers it
+  appears in.** The lining was built by counting member pockets against half the
+  number of conformers, which for a pocket seen in one or two conformers kept
+  every residue of every member. The rule is now a strict majority over distinct
+  conformers at every count, the way `residue_propensity` already counted.
+
+  This changes rankings as well as the residue lists. A pocket's lining feeds
+  the ranker features `n_lin`, `vol_per_lin` and `chain_shares` and the
+  sequence terms of `learned-plm`, so ranks and `residue_propensity` can move
+  even on an identical ensemble. Measured on 120 CryptoBench test targets, with
+  the same detections clustered under both rules: top-five recovery 71 before
+  and 73 after (exact McNemar p = 0.688), coverage 89 and 89, median lining 20
+  to 18 residues, and proposals 10% closer to the size of the annotated site
+  (1.38 to 1.27 times), which matters for docking boxes and for the
+  per-residue output. A cluster whose members reach no majority falls back to
+  the residues they agree on most, so no pocket is reported with an empty
+  lining.
+  `CONSENSUS_STRICT_MAJORITY` in `lacuna/pockets/clusterer.py` keeps the earlier
+  rule reachable.
+
+- **`docs/BENCHMARKS.md` names the command behind each headline figure.** The
+  COACH420 block lists the full run that gives the 286-structure figure beside
+  the `--limit 150` run that gives the paired tables, and the CryptoBench row
+  says which script prints it. The speed table reports 1.4.0 and 1.5.0 side by
+  side. The K-Ras worked example in `docs/USAGE.md` selects the switch-II pocket
+  by its lining residues. The zPocket figures in the README acknowledgement were
+  corrected against that paper's Table A7.
+
+### Added
+- **A `RuntimeWarning` when the elastic network is under-constrained.** If the
+  zero modes of the network fill the whole window of eigenvalues the sampler
+  requests, there is no vibration to sample and the ensemble is built from
+  rigid-body and free-bead motion. That case is outside the reproducibility
+  guarantee, and it is now detected and reported instead of passing silently.
+  The report is still written. Of 157 structures in the benchmark cache it fires
+  on two, both AlphaFold models with long extended disordered regions.
+
+- **`canonical_sign` and `canonical_basis`** are public functions of
+  `lacuna.ensemble.nma_backend`: the sign rule and the degenerate-set basis the
+  sampler uses, for anyone building on the modes directly.
+
+- **A warning when an ensemble does not describe the input structure.** Every
+  quantity Lacuna reports is relative to the input, so a conformer set that no
+  longer resembles it makes every pocket look newly opened. Four measurements
+  now catch that whatever produced the conformers: drift from the input relative
+  to its radius of gyration, rigid-body offset, the radius-of-gyration ratio,
+  and the spread between conformers. It warns and continues, because a genuine
+  large hinge motion can exceed the bars legitimately. On input that mixes
+  protein and nucleic acid it measures both polymers together. It stayed silent
+  on all 58 default-backend runs checked for this release. The check is
+  `lacuna.ensemble.sanity.check_ensemble`.
+
+- **`--no-msa-server`.** `--backend boltz` sends the query protein sequence to
+  the public ColabFold MSA server at `https://api.colabfold.com` by default,
+  because Boltz-2 does not fold usefully without an alignment. `--backend auto`
+  tries `boltz` first, so on a machine where the `boltz` extra is installed a
+  plain `lacuna discover protein.pdb` makes that call too. The help text now
+  says so, and `--no-msa-server` turns it off. An install without the `boltz`
+  extra is not affected: `auto` selects the NMA backend and no sequence leaves
+  the machine.
+
+- **`--rank-by learned-fused`** can be selected by name. It was already the
+  ranker `--detector surface-fusion` picks automatically.
+
+- **`superpose` and `align_frame`** in `lacuna.ensemble.base`, the Kabsch
+  helpers the external and Boltz backends now share.
+
+### Fixed
+- **`--ensemble` frames are superposed onto the input before analysis.** An MD
+  trajectory exported without fitting, or the output of a generative model that
+  folds in its own frame, used to put every pocket in a cluster of its own and
+  report the whole protein as cryptic. On 4OBE chain A, with Lacuna's own
+  ensemble exported in displaced frames: 28 clusters and 93% flagged cryptic
+  before, 7 clusters after, against 6 for the native ensemble.
+
+- **`--ensemble` frames that a tool renumbered are paired by residue order.**
+  Structure predictors and samplers commonly renumber their output from 1. Three
+  keys are tried in turn (the input's own numbering, the numbering with the
+  chain letter ignored, then position in the sequence), the first whose paired
+  residues agree with the input on at least 90% of residue names is used, and
+  pairing by order prints a warning. A frame that agrees under no key is
+  reported and skipped. The chain-letter fallback applies only when both the
+  input and the frame have a single chain; a single-chain frame against a
+  multi-chain input is refused instead of being mapped onto every chain.
+
+- **`--backend boltz` pairs residues by sequence order**, with a 90%
+  residue-identity check, so conformers correspond to the input when the file
+  does not start at residue 1, and it requests an alignment by default (see
+  `--no-msa-server` above). The backend remains experimental.
+
+- **Warnings go to stderr, so `--quiet` leaves stdout empty.**
+
+- **Bad input is reported in one line instead of a traceback**: a file that is
+  not a structure, a structure with no polymer atoms, a directory given as the
+  input, `-o` pointing at an existing file, and `dock-prep` given its two
+  arguments in the wrong order. `LACUNA_TRACEBACK=1` restores the traceback.
+
+- **`--homodimer` no longer crashes on a Windows console.** On a structure
+  without BIOMT records it printed a character the default cp1252 console cannot
+  encode, and any redirect or pipe ended the run with no results written.
+
 ## [1.4.0] - 2026-10-28
 
 Ranking behaviour is unchanged. Every number in `docs/BENCHMARKS.md` stands, the
