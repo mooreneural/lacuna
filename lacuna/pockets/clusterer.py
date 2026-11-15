@@ -63,9 +63,9 @@ APO_SEARCH_A: float | None = None
 CRYPTICITY_THRESHOLD = 0.3
 
 # Ranking strategies. The default "learned" is a fitted model (see below) and
-# recovers roughly three times as many known sites as the analytic rules on
-# CryptoBench (55.6% vs 17.8% on the held-out test fold, n=180). It also wins on
-# always-open / orthosteric sites: +20.1 points [+13.2, +27.1] over "druggability"
+# recovers roughly twice as many known sites as the analytic rules on
+# CryptoBench (57.8% vs 30.6% on the held-out test fold, n=180). It also wins on
+# always-open / orthosteric sites: +22.9 points [+15.3, +30.6] over "druggability"
 # on COACH420 (docs/BENCHMARKS.md), so there is no case for a separate ranking
 # path for general pocket finding. "crypticity" is the previous default and ranks
 # purely by how much a site opens relative to the input; "druggability" is the
@@ -488,7 +488,7 @@ def _chain_id(label: str) -> str:
 
 
 #: Build a cluster's lining as a strict majority of the conformers it appears
-#: in, counting distinct conformers. Set False to restore the pre-1.4.1 rule.
+#: in, counting distinct conformers. Set False to restore the rule of 1.4.0.
 #:
 #: The old rule counted MEMBER POCKETS against a threshold of
 #: ``len(conformer_set) * 0.5``, two different units, and because the count is
@@ -579,7 +579,7 @@ def residue_propensity(clusters: list[PocketCluster]) -> dict[str, float]:
     =========================  ======  ======
     scorer                     AUROC   AUPRC
     =========================  ======  ======
-    this, 20 conformers         0.774   0.345
+    this, 20 conformers         0.766   0.340
     this, input structure only  0.697   0.249
     burial neighbour count      0.586   0.115
     random expectation          0.500   0.067
@@ -587,7 +587,7 @@ def residue_propensity(clusters: list[PocketCluster]) -> dict[str, float]:
 
     The burial comparison is the load-bearing one, because a cavity-lining score
     could be a restatement of how buried a residue is. Paired over targets it is
-    +0.188 AUROC (95% CI +0.164 to +0.211) and +0.229 AUPRC (+0.199 to +0.261).
+    +0.180 AUROC and +0.225 AUPRC.
 
     Ranks must already be assigned, so call this after ``cluster_pockets``.
 

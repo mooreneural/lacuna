@@ -188,10 +188,10 @@ def main():
     default="learned", show_default=True,
     help=(
         "Pocket ranking strategy. 'learned' (default) uses the fitted ranker and "
-        "recovers roughly three times as many known sites as the analytic rules on "
+        "recovers roughly twice as many known sites as the analytic rules on "
         "CryptoBench (see benchmarks/train_ranker.py). It is also the right choice "
         "for always-open/orthosteric sites, where it beats 'druggability' by "
-        "+20.1 points on COACH420 (see docs/BENCHMARKS.md). 'crypticity' ranks "
+        "+22.9 points on COACH420 (see docs/BENCHMARKS.md). 'crypticity' ranks "
         "purely by how much a site opens relative to the input; 'druggability' is "
         "the legacy pre-model rule ranking by peak open-state druggability, kept "
         "for reproducibility; 'balanced' adds a mild persistence bonus; "
