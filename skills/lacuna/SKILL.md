@@ -13,8 +13,9 @@ snapshot finds nothing there.
 
 This skill describes **v1.5.0**. The default backend now writes the same
 `pocket_report.json` at any thread count and on Windows and Linux, with lower
-memory and run time, so a result can be reproduced on another machine. Reports
-differ from those 1.4.0 wrote for the same input; the ranker weights are
+memory and, at the default 20 conformers, shorter run time, so a result can be
+reproduced on another machine. Reports differ from those 1.4.0 wrote for the
+same input; the ranker weights are
 unchanged. v1.4.0 added a per-residue `residue_propensity` map and per-pocket
 `chain_shares` / `interface` fields to `pocket_report.json`, and corrected the
 Boltz backend's frame handling. v1.3.0 added nucleic-acid support; v1.3.1
@@ -84,9 +85,12 @@ statistically indistinguishable from twenty at roughly half the wall clock.
 
 `nma` (normal mode analysis) is the fast, dependency-free default and is what
 `auto` selects on a base install. `openmm` runs implicit-solvent MD and `boltz`
-uses diffusion sampling, both needing their extras. Measured on CryptoBench, MD
-did **not** beat NMA (10% against 12% at n=924), so prefer `nma` unless there is a
-specific reason.
+uses diffusion sampling, both needing their extras. Where the `boltz` extra is
+installed, `auto` picks `boltz`, which sends the sequence to the public
+ColabFold server; pass `-b nma` or `--no-msa-server` when the sequence must stay
+on the machine. Measured on CryptoBench, MD did **not** beat NMA (10% against
+13% at n=924, measured before 1.4.0), so prefer `nma` unless there is a specific
+reason.
 
 **Detector** (`--detector`, default `alpha`)
 
@@ -137,9 +141,9 @@ persistence (fraction of conformers it appears in), and centroid.
 
 **Report a ranked shortlist, not a single answer.** Lacuna's own benchmarking is
 the reason: on CryptoBench the site is usually proposed somewhere and then
-out-ranked. Top-five recovery is 73.9% with `surface-fusion`, so the top hit alone is
-frequently not the answer even when the answer is in the list. Show the top three
-to five with their scores.
+out-ranked. Top-five recovery is 73.9% with `surface-fusion` (measured with
+1.4.0), so the top hit alone is frequently not the answer even when the answer
+is in the list. Show the top three to five with their scores.
 
 ## RNA and DNA
 
@@ -172,7 +176,7 @@ Still true: a 400 nt RNA yields 40 or more clusters where a 30-mer yields a
 handful, so quote top-10 above 200 nt rather than top-5. The correction shortens
 that distance, it does not remove it.
 
-Runtime on CPU, 20 conformers: about 1.4 s at 25 nt, 5.6 s at 200 nt, 27 s at 459 nt.
+Runtime on CPU, 20 conformers: about 1.5 s at 25 nt, 5.6 s at 200 nt, 27 s at 459 nt.
 
 Say plainly what this is NOT. There are no validated cryptic RNA pockets in the
 strict protein sense, and this tool recovers shallow sites a single structure
@@ -196,9 +200,10 @@ protein structure handed to that backend raises rather than silently degrading.
   itself: if a run prints a `RuntimeWarning` that the elastic network is
   under-constrained, the ensemble is not physically meaningful, so say that
   instead of reporting its pockets.
-- Lacuna is at **statistical parity with P2Rank**, not better: +2.8% on the
-  CryptoBench test fold with a paired interval of [-4.4, +9.4] that includes zero.
-  Do not claim superiority.
+- Lacuna is at **statistical parity with P2Rank**, not better. With `learned-plm`
+  the paired difference on the CryptoBench test fold is +2.8% [-4.4, +9.4]
+  (measured with 1.4.0); with the default `learned` ranker it is -5.6 points
+  [-12.2, +1.1]. Both intervals include zero. Do not claim superiority.
 - On general open binding sites, rather than cryptic ones, **P2Rank is a strong
   and faster alternative**. Lacuna is built for the closed-in-apo case.
 - Combining detectors beats any single one: across four detectors, the union

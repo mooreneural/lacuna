@@ -67,10 +67,10 @@ top-five hit is close to free and a bare percentage there says little. These
 nucleic-acid figures were measured with 1.3.0.
 
 **The same input gives the same report on every machine.** Since 1.5.0 the
-default backend writes an identical `pocket_report.json` at any BLAS thread
-count and on Windows and Linux, uses about a third of the memory on large
-structures, and runs faster. See
-[Reproducibility](docs/USAGE.md#reproducibility).
+default NMA backend writes an identical `pocket_report.json` at any BLAS thread
+count and on Windows and Linux, uses less than half the memory from 1,300
+residues up (about a third at 3,700), and runs faster at the default 20
+conformers. See [Reproducibility](docs/USAGE.md#reproducibility).
 
 ## Install
 
@@ -168,7 +168,8 @@ the 20-conformer cohort (n=180).
 
 The default row was re-measured with 1.5.0 (104/180 in the top five, 131/180
 covered). The PLM-reranker, `surface-fusion` and union rows were measured with
-1.4.0.
+1.4.0. The 57.8% applies the Jaccard term alone, as in the head-to-head; with
+the centroid term the same structures read 59.4% (107/180).
 
 ### Per-residue recovery
 
@@ -188,7 +189,8 @@ coordinates alone reaches 0.249, so the conformational ensemble is doing real
 work rather than restating the input (paired over targets, +0.092 AUPRC, 95% CI
 +0.069 to +0.115). The third row is the control that matters, since a
 cavity-lining score could easily be a re-description of how buried a residue
-is. Paired over targets the propensity beats burial by **+0.225 AUPRC**.
+is. The propensity is **+0.225 AUPRC** above that row (0.340 against 0.115; the
+burial row does not use the ensemble and is carried over from 1.4.0).
 
 **[Full results, including head-to-head comparisons and where Lacuna loses →](docs/BENCHMARKS.md)**
 

@@ -1,8 +1,8 @@
 # Benchmarks: full detail
 
 Per-target breakdowns, ablations and timings behind the headline results in the
-[README](../README.md#results). Every number here is reproducible with the
-command shown; each benchmark script prints the full per-metric breakdown
+[README](../README.md#results). Headline numbers here are reproducible with the
+commands shown; each benchmark script prints the full per-metric breakdown
 (centroid, Jaccard at 0.20/0.25/0.30, and legacy recall) when you run it.
 
 Unless stated otherwise: NMA backend, 20 conformers, the default `learned`
@@ -174,7 +174,7 @@ apo structure only, so their rows do not depend on the Lacuna release.
 | P2Rank | 63.3% (114/180) | 82% | +2.8% CI[-4.4, +9.4], includes zero |
 | **Lacuna** (`learned`, default) | **57.8% (104/180)** | 73% | +10.6% CI[+6.1, +15.0], with `learned` at 55.6% in 1.4.0 |
 | MDpocket (best of 10 configs, 1.4.0) | 43.9% (79/180) | - | +22.2% CI[+14.4, +30.0] |
-| fpocket | 43.6% (78/179) | 32% | +22.9% CI[+14.5, +31.3] |
+| fpocket | 43.3% (78/180) | 56% | +22.8% CI[+15.0, +31.1] |
 
 The PLM-assisted ranker is level with P2Rank: the interval on the difference spans
 zero, so parity is the claim, not a win.
@@ -186,7 +186,7 @@ measurement was +11.7% (CI +3.9 to +19.4).
 
 ### Cohort note: 180 here, 178 in the preprint
 
-Every figure on this page uses all 180 CryptoBench test-fold structures,
+The head-to-head above uses all 180 CryptoBench test-fold structures,
 which is the right cohort for evaluating the software on its own. The
 companion preprint compares four detectors and therefore keeps only the 178
 structures on which all four produced output, so that every comparison is
@@ -246,9 +246,9 @@ Coarse literature labels for the dominant motion that opens each site.
 
 Both hinge sites are recovered. Interface sites are the weakest class, which is
 expected: a harmonic elastic-network ensemble cannot generate large
-inter-subunit motions. Dimer-interface pockets are partly addressable with `--homodimer`
-(reads BIOMT records and builds the biological assembly), though this
-benchmark's single-chain-referenced scoring does not credit them.
+inter-subunit motions. Dimer-interface pockets are partly addressable with
+`--homodimer` (reads BIOMT records and builds the biological assembly), though
+this benchmark's single-chain-referenced scoring does not credit them.
 
 ```bash
 python benchmarks/cryptic_benchmark.py --category cryptic
@@ -738,8 +738,8 @@ returns rRNA nucleotides and rejects every entry for the wrong reason.
 ## Speed (NMA backend, no GPU)
 
 Wall clock for the full pipeline (ensemble generation, per-conformer detection,
-clustering, scoring, ranking) at 20 conformers on a laptop CPU. Median of three
-runs, with 1.4.0 timed back to back on the same machine.
+clustering, scoring, ranking) at 20 conformers on a 12-core desktop CPU. Median
+of three runs, with 1.4.0 timed back to back on the same machine.
 
 | Protein | Residues | 1.4.0 | 1.5.0 |
 |---------|---------:|------:|------:|

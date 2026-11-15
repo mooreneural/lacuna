@@ -64,13 +64,16 @@ for c in clusters[:5]:
 | `random` | built-in | baseline | ~0.04s/conf | Gaussian backbone perturbation |
 
 **Auto-selection order:** `boltz` → `openmm` → `nma` → `random`. On a plain
-`pip install lacuna-pockets`, the NMA backend runs automatically.
+`pip install lacuna-pockets`, the NMA backend runs automatically. With the
+`boltz` extra installed, `auto` selects `boltz`, which sends the query sequence
+to the public ColabFold MSA server at `https://api.colabfold.com` unless
+`--no-msa-server` is given.
 
 The `nma` backend samples physically meaningful collective motions, the same
 hinge-bending and breathing modes that open cryptic pockets in nature, without
 requiring a GPU or a force field. It is the zero-dependency default.
 
-NMA runtime is sub-second to about 6s per protein on a laptop CPU.
+NMA runtime is sub-second to about 6s per protein on a 12-core desktop CPU.
 **[Per-size timing →](BENCHMARKS.md#speed-nma-backend-no-gpu)**
 
 > **Boltz backend status, honestly.** The `boltz` backend runs Boltz-2 diffusion
@@ -78,8 +81,9 @@ NMA runtime is sub-second to about 6s per protein on a laptop CPU.
 > sequence* rather than by partial diffusion from the input structure, which
 > yields structurally divergent, noisy ensembles (150-300+ pocket clusters
 > against NMA's ~35). In GPU benchmarking it did **not** reliably improve cryptic
-> detection over NMA. A proper apo-templated integration with sequence-based
-> residue mapping is planned; until then NMA is the recommended backend.
+> detection over NMA. Since 1.5.0 its conformers are paired to the input by
+> sequence order. A proper apo-templated integration is planned; until then NMA
+> is the recommended backend.
 
 ### Reproducibility
 
@@ -89,7 +93,8 @@ is nothing to configure: no thread variable to pin and no seed to pass. The
 conformer coordinates behind the report agree to float32 rounding (about one
 coordinate in a million differs, by one unit in its last place), which is below
 anything the pocket analysis can see. Nucleic-acid input and symmetric
-assemblies built with `--homodimer` are covered by the same guarantee.
+assemblies built with `--homodimer` give the same report at any thread count;
+the Windows and Linux comparison was made on proteins.
 
 Reports differ from those 1.4.0 wrote for the same input, because every
 ensemble is drawn by the new sampler and a pocket's lining residues follow the

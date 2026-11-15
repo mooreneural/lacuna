@@ -113,8 +113,9 @@ class PocketCluster:
     #: True when at least two chains each contribute a meaningful share of the
     #: lining (see clusterer.INTERFACE_MIN_SHARE / INTERFACE_MIN_RESIDUES). On
     #: CryptoBench this flag is ANTI-correlated with being an annotated site:
-    #: 73.6% of top-5 pockets are interfacial against 14.8% of true sites, so it
-    #: is useful for de-prioritising, not for finding.
+    #: 73.6% of top-5 pockets are interfacial against 14.8% of true sites
+    #: (measured with 1.4.0), so it is useful for de-prioritising, not for
+    #: finding.
     interface: bool = False
     member_pockets: list[Pocket] = field(default_factory=list, repr=False)
 

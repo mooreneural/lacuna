@@ -26,10 +26,10 @@ abstract: >
   top five (66.1% with an optional PLM-assisted ranker, measured with version
   1.4.0), and 69%, 41% and 89% on the PocketMiner set, a curated set of
   literature apo/holo pairs, and COACH420 respectively. The default backend
-  completes in a median of 2.6 seconds per chain on one CPU core and writes
-  the same report at any thread count and on Windows and Linux. Outputs are
-  docking-ready Boltz YAML constraints, AutoDock Vina boxes and pseudoatom PDB
-  files.
+  writes the same report at any thread count and on Windows and Linux; the
+  cited paper reports a median of 2.6 seconds per chain on one CPU core.
+  Outputs are docking-ready Boltz YAML constraints, AutoDock Vina boxes and
+  pseudoatom PDB files.
 keywords:
   - cryptic-pockets
   - binding-site-prediction

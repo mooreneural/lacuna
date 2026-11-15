@@ -586,8 +586,9 @@ def residue_propensity(clusters: list[PocketCluster]) -> dict[str, float]:
     =========================  ======  ======
 
     The burial comparison is the load-bearing one, because a cavity-lining score
-    could be a restatement of how buried a residue is. Paired over targets it is
-    +0.180 AUROC and +0.225 AUPRC.
+    could be a restatement of how buried a residue is. Against the burial row,
+    which does not use the ensemble and is carried over from 1.4.0, the
+    difference is +0.180 AUROC and +0.225 AUPRC.
 
     Ranks must already be assigned, so call this after ``cluster_pockets``.
 

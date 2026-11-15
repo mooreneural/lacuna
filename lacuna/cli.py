@@ -220,7 +220,8 @@ def main():
         "surface with a learned model and has no such filter, reaching sites the "
         "geometry discards. 'surface-fusion' pools both, which held out on "
         "CryptoBench takes coverage from 68.5% to 86.4% and top-five recovery "
-        "from 57.1% to 73.9%; it selects the matching ranker automatically. "
+        "from 57.1% to 73.9% (measured before 1.5.0); it selects the matching "
+        "ranker automatically. "
         "'p2rank'/'fusion' use P2Rank instead and need it installed "
         "(Java 11+; 'prank' on PATH or set LACUNA_P2RANK)."
     ),

@@ -9,9 +9,10 @@ data, never the most flattering ones available.
 
 The same input now gives the same pocket report on every machine. With the
 default NMA backend, `pocket_report.json` is identical at any BLAS thread count
-and on Windows and Linux, for protein, RNA, DNA and assemblies built with
-`--homodimer`. The sampler also uses about a third of the memory on large
-structures and is faster at the default 20 conformers:
+for protein, RNA, DNA and assemblies built with `--homodimer`, and identical
+between a Windows and a Linux build on the 40 proteins compared. The sampler
+also uses less than half the memory from 1,300 residues up, about a third at
+3,700, and is faster at the default 20 conformers:
 
     residues   peak memory, 1.4.0 -> 1.5.0   ensemble time, 1.4.0 -> 1.5.0
       339         154 MB ->   105 MB           0.89 s ->  0.23 s
@@ -73,8 +74,8 @@ weights are unchanged. The `learned-plm` and `surface-fusion` figures need the
   even on an identical ensemble. Measured on 120 CryptoBench test targets, with
   the same detections clustered under both rules: top-five recovery 71 before
   and 73 after (exact McNemar p = 0.688), coverage 89 and 89, median lining 20
-  to 18 residues, and proposals 10% closer to the size of the annotated site
-  (1.38 to 1.27 times), which matters for docking boxes and for the
+  to 18 residues, and proposals closer to the size of the annotated site (1.38
+  to 1.27 times its size), which matters for docking boxes and for the
   per-residue output. A cluster whose members reach no majority falls back to
   the residues they agree on most, so no pocket is reported with an empty
   lining.
@@ -119,8 +120,8 @@ weights are unchanged. The `learned-plm` and `surface-fusion` figures need the
   tries `boltz` first, so on a machine where the `boltz` extra is installed a
   plain `lacuna discover protein.pdb` makes that call too. The help text now
   says so, and `--no-msa-server` turns it off. An install without the `boltz`
-  extra is not affected: `auto` selects the NMA backend and no sequence leaves
-  the machine.
+  extra is not affected: `auto` then selects `openmm` if that extra is
+  installed and the NMA backend otherwise, and no sequence leaves the machine.
 
 - **`--rank-by learned-fused`** can be selected by name. It was already the
   ranker `--detector surface-fusion` picks automatically.
