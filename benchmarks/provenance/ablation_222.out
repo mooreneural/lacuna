@@ -1,0 +1,29 @@
+learned    {'conformers': 20, 'rank_by': 'learned', 'backend': 'nma', 'max_residues': 1200, 'n_scored': 222, 'n_unscored': 0, 'wall_minutes': 11.34}
+crypticity {'conformers': 20, 'rank_by': 'crypticity', 'backend': 'nma', 'max_residues': 1200, 'n_scored': 222, 'n_unscored': 0, 'wall_minutes': 10.76}
+unscored: 0 0
+
+paired ids: 222  (learned 222, crypticity 222)
+candidate-set differences (n_clusters, n_residues, n_known, site_radius, any-rank best): 0
+
+criterion                  learned            crypticity         paired difference
+Jaccard only >= 0.25        133/222 (59.9%)    72/222 (32.4%)  +27.5 pts  95% CI [+21.2, +33.8]
+                           learned-only 65  crypticity-only 4  both 68  neither 85
+                           ratio learned/crypticity 1.847
+centroid <=4A or Jac        136/222 (61.3%)    73/222 (32.9%)  +28.4 pts  95% CI [+22.1, +34.7]
+                           learned-only 67  crypticity-only 4  both 69  neither 82
+                           ratio learned/crypticity 1.863
+
+other columns, crypticity arm (222):
+  top5 legacy recall>=0.30 : 122/222 (55.0%)
+  top8 cen-or-jac          : 98/222 (44.1%)
+  coverage ceiling any rank: 175/222 (78.8%)
+  top8 jaccard only        : 97/222
+  ceiling jaccard only     : 170/222
+learned arm (222) for reference:
+  top5 legacy              : 167/222
+  top8 jaccard only        : 146/222
+  ceiling jaccard only     : 170/222
+
+sub-cohort that the old harness scored (180):
+  Jaccard only   learned 104/180  crypticity 55/180  +27.2 pts CI [+20.6, +34.4]
+  cen-or-jac     learned 107/180  crypticity 56/180  +28.3 pts CI [+21.1, +35.6]

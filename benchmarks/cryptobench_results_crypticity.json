@@ -1,0 +1,6909 @@
+{
+ "summary": {
+  "folds": "test",
+  "conformers": 20,
+  "rank_by": "crypticity",
+  "backend": "nma",
+  "max_residues": 1200,
+  "centroid_threshold_a": 4.0,
+  "jaccard_threshold": 0.25,
+  "overlap_threshold": 0.3,
+  "n_attempted": 222,
+  "n_scored": 222,
+  "n_unscored": 0,
+  "top5_found": 73,
+  "top5_found_legacy": 122,
+  "top8_found": 98,
+  "coverage_ceiling_found": 175,
+  "top5_strict_found_over_attempted": [
+   73,
+   222
+  ],
+  "wall_minutes": 10.76
+ },
+ "unscored": [],
+ "structures": [
+  {
+   "id": "7qoq",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 302,
+   "n_known": 10,
+   "site_radius_a": 6.342196317590569,
+   "n_clusters": 20,
+   "elapsed_s": 1.9,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 20.522,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 18.736,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.7143,
+    "recall": 1.0,
+    "centroid_dist_a": 4.25,
+    "rank": 9,
+    "found": true
+   }
+  },
+  {
+   "id": "4x19",
+   "chain": "M-O-P",
+   "composite": true,
+   "n_residues": 171,
+   "n_known": 11,
+   "site_radius_a": 8.309454304580068,
+   "n_clusters": 10,
+   "elapsed_s": 1.8,
+   "top5": {
+    "jaccard": 0.3077,
+    "recall": 0.4545,
+    "centroid_dist_a": 5.771,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.6111,
+    "recall": 1.0,
+    "centroid_dist_a": 4.623,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.625,
+    "recall": 1.0,
+    "centroid_dist_a": 4.623,
+    "rank": 8,
+    "found": true
+   }
+  },
+  {
+   "id": "8i84",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 285,
+   "n_known": 17,
+   "site_radius_a": 8.350797526620584,
+   "n_clusters": 20,
+   "elapsed_s": 2.01,
+   "top5": {
+    "jaccard": 0.1429,
+    "recall": 0.2353,
+    "centroid_dist_a": 8.887,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1429,
+    "recall": 0.2353,
+    "centroid_dist_a": 8.887,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4074,
+    "recall": 0.6471,
+    "centroid_dist_a": 3.658,
+    "rank": 17,
+    "found": true
+   }
+  },
+  {
+   "id": "5igh",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 293,
+   "n_known": 24,
+   "site_radius_a": 12.299347033255406,
+   "n_clusters": 22,
+   "elapsed_s": 2.5,
+   "top5": {
+    "jaccard": 0.3514,
+    "recall": 0.5417,
+    "centroid_dist_a": 7.047,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3514,
+    "recall": 0.5417,
+    "centroid_dist_a": 6.211,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3514,
+    "recall": 0.5417,
+    "centroid_dist_a": 6.211,
+    "rank": 8,
+    "found": true
+   }
+  },
+  {
+   "id": "7w19",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 293,
+   "n_known": 23,
+   "site_radius_a": 9.90566070176812,
+   "n_clusters": 23,
+   "elapsed_s": 2.27,
+   "top5": {
+    "jaccard": 0.05,
+    "recall": 0.087,
+    "centroid_dist_a": 15.478,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0606,
+    "recall": 0.087,
+    "centroid_dist_a": 15.478,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4643,
+    "recall": 0.5652,
+    "centroid_dist_a": 4.44,
+    "rank": 10,
+    "found": true
+   }
+  },
+  {
+   "id": "5uxa",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 301,
+   "n_known": 24,
+   "site_radius_a": 10.384546841645303,
+   "n_clusters": 27,
+   "elapsed_s": 2.21,
+   "top5": {
+    "jaccard": 0.0476,
+    "recall": 0.0833,
+    "centroid_dist_a": 15.087,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.3667,
+    "recall": 0.4583,
+    "centroid_dist_a": 5.616,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4706,
+    "recall": 0.7083,
+    "centroid_dist_a": 1.036,
+    "rank": 25,
+    "found": true
+   }
+  },
+  {
+   "id": "3h8a",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 430,
+   "n_known": 18,
+   "site_radius_a": 9.326824011810492,
+   "n_clusters": 25,
+   "elapsed_s": 3.2,
+   "top5": {
+    "jaccard": 0.32,
+    "recall": 0.8889,
+    "centroid_dist_a": 5.957,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.32,
+    "recall": 0.8889,
+    "centroid_dist_a": 5.957,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.75,
+    "recall": 0.8889,
+    "centroid_dist_a": 1.027,
+    "rank": 19,
+    "found": true
+   }
+  },
+  {
+   "id": "6isu",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 227,
+   "n_known": 20,
+   "site_radius_a": 8.979559855055975,
+   "n_clusters": 25,
+   "elapsed_s": 1.45,
+   "top5": {
+    "jaccard": 0.3571,
+    "recall": 0.5,
+    "centroid_dist_a": 3.551,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3571,
+    "recall": 0.5,
+    "centroid_dist_a": 3.551,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3793,
+    "recall": 0.55,
+    "centroid_dist_a": 3.551,
+    "rank": 4,
+    "found": true
+   }
+  },
+  {
+   "id": "5yhb",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 178,
+   "n_known": 5,
+   "site_radius_a": 6.291276298120607,
+   "n_clusters": 15,
+   "elapsed_s": 1.34,
+   "top5": {
+    "jaccard": 0.2308,
+    "recall": 0.6,
+    "centroid_dist_a": 6.277,
+    "rank": 3,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2308,
+    "recall": 0.6,
+    "centroid_dist_a": 6.277,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2308,
+    "recall": 0.6,
+    "centroid_dist_a": 6.277,
+    "rank": 3,
+    "found": false
+   }
+  },
+  {
+   "id": "3rwv",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 205,
+   "n_known": 18,
+   "site_radius_a": 9.08314881341396,
+   "n_clusters": 17,
+   "elapsed_s": 1.88,
+   "top5": {
+    "jaccard": 0.2941,
+    "recall": 0.5556,
+    "centroid_dist_a": 8.802,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4231,
+    "recall": 0.6111,
+    "centroid_dist_a": 2.269,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4231,
+    "recall": 0.6111,
+    "centroid_dist_a": 2.269,
+    "rank": 6,
+    "found": true
+   }
+  },
+  {
+   "id": "2i3a",
+   "chain": "D",
+   "composite": false,
+   "n_residues": 347,
+   "n_known": 10,
+   "site_radius_a": 8.194757588961842,
+   "n_clusters": 29,
+   "elapsed_s": 2.64,
+   "top5": {
+    "jaccard": 0.4737,
+    "recall": 0.9,
+    "centroid_dist_a": 1.485,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4737,
+    "recall": 0.9,
+    "centroid_dist_a": 1.485,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4737,
+    "recall": 0.9,
+    "centroid_dist_a": 1.485,
+    "rank": 1,
+    "found": true
+   }
+  },
+  {
+   "id": "4oqo",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 348,
+   "n_known": 7,
+   "site_radius_a": 5.616559182252158,
+   "n_clusters": 26,
+   "elapsed_s": 2.67,
+   "top5": {
+    "jaccard": 0.04,
+    "recall": 0.1429,
+    "centroid_dist_a": 13.427,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0476,
+    "recall": 0.1429,
+    "centroid_dist_a": 13.427,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.125,
+    "recall": 0.4286,
+    "centroid_dist_a": 11.656,
+    "rank": 24,
+    "found": false
+   }
+  },
+  {
+   "id": "3gdg",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 267,
+   "n_known": 31,
+   "site_radius_a": 10.45263812877931,
+   "n_clusters": 18,
+   "elapsed_s": 1.87,
+   "top5": {
+    "jaccard": 0.1915,
+    "recall": 0.2903,
+    "centroid_dist_a": 6.952,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.3171,
+    "recall": 0.4194,
+    "centroid_dist_a": 6.952,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4,
+    "recall": 0.4516,
+    "centroid_dist_a": 3.007,
+    "rank": 16,
+    "found": true
+   }
+  },
+  {
+   "id": "1kx9",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 108,
+   "n_known": 14,
+   "site_radius_a": 8.83027839716565,
+   "n_clusters": 10,
+   "elapsed_s": 0.59,
+   "top5": {
+    "jaccard": 0.3448,
+    "recall": 0.7143,
+    "centroid_dist_a": 2.845,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3448,
+    "recall": 0.7143,
+    "centroid_dist_a": 2.845,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3448,
+    "recall": 0.7143,
+    "centroid_dist_a": 2.845,
+    "rank": 3,
+    "found": true
+   }
+  },
+  {
+   "id": "1kxr",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 320,
+   "n_known": 19,
+   "site_radius_a": 8.738352376277913,
+   "n_clusters": 24,
+   "elapsed_s": 2.55,
+   "top5": {
+    "jaccard": 0.0238,
+    "recall": 0.0526,
+    "centroid_dist_a": 15.3,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0238,
+    "recall": 0.0526,
+    "centroid_dist_a": 15.3,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5556,
+    "recall": 0.7895,
+    "centroid_dist_a": 2.684,
+    "rank": 16,
+    "found": true
+   }
+  },
+  {
+   "id": "1ute",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 302,
+   "n_known": 2,
+   "site_radius_a": 3.0185548508690045,
+   "n_clusters": 17,
+   "elapsed_s": 1.51,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 16.147,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0714,
+    "recall": 0.5,
+    "centroid_dist_a": 8.597,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0714,
+    "recall": 0.5,
+    "centroid_dist_a": 8.573,
+    "rank": 13,
+    "found": false
+   }
+  },
+  {
+   "id": "7f4y",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 901,
+   "n_known": 13,
+   "site_radius_a": 8.790919539856715,
+   "n_clusters": 81,
+   "elapsed_s": 10.45,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 17.366,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 17.366,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.32,
+    "recall": 0.6154,
+    "centroid_dist_a": 4.79,
+    "rank": 57,
+    "found": true
+   }
+  },
+  {
+   "id": "7nlx",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 290,
+   "n_known": 15,
+   "site_radius_a": 8.521382324208295,
+   "n_clusters": 25,
+   "elapsed_s": 1.92,
+   "top5": {
+    "jaccard": 0.1071,
+    "recall": 0.2,
+    "centroid_dist_a": 11.307,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1071,
+    "recall": 0.2,
+    "centroid_dist_a": 11.307,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5556,
+    "recall": 0.6667,
+    "centroid_dist_a": 2.753,
+    "rank": 12,
+    "found": true
+   }
+  },
+  {
+   "id": "1se8",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 205,
+   "n_known": 3,
+   "site_radius_a": 7.963965051227291,
+   "n_clusters": 25,
+   "elapsed_s": 1.66,
+   "top5": {
+    "jaccard": 0.1111,
+    "recall": 0.6667,
+    "centroid_dist_a": 6.851,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1111,
+    "recall": 0.6667,
+    "centroid_dist_a": 6.696,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1667,
+    "recall": 0.6667,
+    "centroid_dist_a": 6.696,
+    "rank": 6,
+    "found": false
+   }
+  },
+  {
+   "id": "7xgf",
+   "chain": "E",
+   "composite": false,
+   "n_residues": 151,
+   "n_known": 21,
+   "site_radius_a": 9.658524270493391,
+   "n_clusters": 7,
+   "elapsed_s": 1.5,
+   "top5": {
+    "jaccard": 0.2941,
+    "recall": 0.4762,
+    "centroid_dist_a": 6.897,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2941,
+    "recall": 0.4762,
+    "centroid_dist_a": 6.897,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.2941,
+    "recall": 0.4762,
+    "centroid_dist_a": 6.897,
+    "rank": 5,
+    "found": true
+   }
+  },
+  {
+   "id": "5yj2",
+   "chain": "C",
+   "composite": false,
+   "n_residues": 302,
+   "n_known": 7,
+   "site_radius_a": 4.195057377131343,
+   "n_clusters": 12,
+   "elapsed_s": 3.75,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 23.279,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 23.279,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 16.617,
+    "rank": 10,
+    "found": false
+   }
+  },
+  {
+   "id": "7e5q",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 352,
+   "n_known": 6,
+   "site_radius_a": 5.963563212706153,
+   "n_clusters": 24,
+   "elapsed_s": 2.6,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 19.04,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0588,
+    "recall": 0.1667,
+    "centroid_dist_a": 11.151,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0588,
+    "recall": 0.1667,
+    "centroid_dist_a": 11.151,
+    "rank": 6,
+    "found": false
+   }
+  },
+  {
+   "id": "5e0v",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 249,
+   "n_known": 15,
+   "site_radius_a": 8.05694972028894,
+   "n_clusters": 8,
+   "elapsed_s": 1.96,
+   "top5": {
+    "jaccard": 0.1818,
+    "recall": 0.2667,
+    "centroid_dist_a": 9.125,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1818,
+    "recall": 0.2667,
+    "centroid_dist_a": 9.125,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1818,
+    "recall": 0.2667,
+    "centroid_dist_a": 9.125,
+    "rank": 3,
+    "found": false
+   }
+  },
+  {
+   "id": "6jq9",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 483,
+   "n_known": 7,
+   "site_radius_a": 8.110561939780618,
+   "n_clusters": 34,
+   "elapsed_s": 3.22,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 20.387,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1111,
+    "recall": 0.2857,
+    "centroid_dist_a": 8.121,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4615,
+    "recall": 0.8571,
+    "centroid_dist_a": 3.795,
+    "rank": 24,
+    "found": true
+   }
+  },
+  {
+   "id": "7o1i",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 726,
+   "n_known": 3,
+   "site_radius_a": 6.384787785379265,
+   "n_clusters": 56,
+   "elapsed_s": 6.29,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 15.746,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 15.746,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2143,
+    "recall": 1.0,
+    "centroid_dist_a": 2.609,
+    "rank": 24,
+    "found": true
+   }
+  },
+  {
+   "id": "1fd4",
+   "chain": "G-H",
+   "composite": true,
+   "n_residues": 82,
+   "n_known": 12,
+   "site_radius_a": 8.47720072791965,
+   "n_clusters": 4,
+   "elapsed_s": 0.65,
+   "top5": {
+    "jaccard": 0.35,
+    "recall": 0.5833,
+    "centroid_dist_a": 5.999,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.35,
+    "recall": 0.5833,
+    "centroid_dist_a": 5.999,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.35,
+    "recall": 0.5833,
+    "centroid_dist_a": 5.999,
+    "rank": 3,
+    "found": true
+   }
+  },
+  {
+   "id": "3ly8",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 323,
+   "n_known": 5,
+   "site_radius_a": 3.408561228765718,
+   "n_clusters": 28,
+   "elapsed_s": 2.54,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 19.14,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 19.14,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0952,
+    "recall": 0.4,
+    "centroid_dist_a": 9.804,
+    "rank": 22,
+    "found": false
+   }
+  },
+  {
+   "id": "1bzj",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 297,
+   "n_known": 10,
+   "site_radius_a": 7.009599409949342,
+   "n_clusters": 14,
+   "elapsed_s": 1.78,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 14.427,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.2941,
+    "recall": 0.5,
+    "centroid_dist_a": 6.167,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.2941,
+    "recall": 0.5,
+    "centroid_dist_a": 6.167,
+    "rank": 6,
+    "found": true
+   }
+  },
+  {
+   "id": "7c63",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 416,
+   "n_known": 10,
+   "site_radius_a": 8.939945752027239,
+   "n_clusters": 27,
+   "elapsed_s": 3.09,
+   "top5": {
+    "jaccard": 0.0222,
+    "recall": 0.1,
+    "centroid_dist_a": 17.111,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0222,
+    "recall": 0.1,
+    "centroid_dist_a": 17.111,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4286,
+    "recall": 0.6,
+    "centroid_dist_a": 5.692,
+    "rank": 18,
+    "found": true
+   }
+  },
+  {
+   "id": "7x0i",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 406,
+   "n_known": 12,
+   "site_radius_a": 9.13362516592486,
+   "n_clusters": 10,
+   "elapsed_s": 3.02,
+   "top5": {
+    "jaccard": 0.1579,
+    "recall": 0.25,
+    "centroid_dist_a": 9.722,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.3333,
+    "recall": 0.6667,
+    "centroid_dist_a": 6.356,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4375,
+    "recall": 0.6667,
+    "centroid_dist_a": 6.195,
+    "rank": 9,
+    "found": true
+   }
+  },
+  {
+   "id": "5ysb",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 385,
+   "n_known": 6,
+   "site_radius_a": 9.06788641655823,
+   "n_clusters": 25,
+   "elapsed_s": 2.62,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 17.358,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1154,
+    "recall": 0.5,
+    "centroid_dist_a": 9.124,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1538,
+    "recall": 0.6667,
+    "centroid_dist_a": 8.021,
+    "rank": 24,
+    "found": false
+   }
+  },
+  {
+   "id": "3k01",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 391,
+   "n_known": 26,
+   "site_radius_a": 10.934229037535456,
+   "n_clusters": 21,
+   "elapsed_s": 2.6,
+   "top5": {
+    "jaccard": 0.1628,
+    "recall": 0.2692,
+    "centroid_dist_a": 10.868,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.3103,
+    "recall": 0.3462,
+    "centroid_dist_a": 7.201,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3103,
+    "recall": 0.3846,
+    "centroid_dist_a": 5.983,
+    "rank": 13,
+    "found": true
+   }
+  },
+  {
+   "id": "5kcg",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 397,
+   "n_known": 15,
+   "site_radius_a": 10.074737243883865,
+   "n_clusters": 41,
+   "elapsed_s": 2.78,
+   "top5": {
+    "jaccard": 0.1111,
+    "recall": 0.2667,
+    "centroid_dist_a": 12.739,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.24,
+    "recall": 0.4,
+    "centroid_dist_a": 4.776,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.36,
+    "recall": 0.6,
+    "centroid_dist_a": 4.776,
+    "rank": 8,
+    "found": true
+   }
+  },
+  {
+   "id": "8b9p",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 596,
+   "n_known": 5,
+   "site_radius_a": 6.358398990635298,
+   "n_clusters": 51,
+   "elapsed_s": 4.81,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 28.255,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 28.255,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3333,
+    "recall": 1.0,
+    "centroid_dist_a": 4.515,
+    "rank": 49,
+    "found": true
+   }
+  },
+  {
+   "id": "3bjp",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 295,
+   "n_known": 5,
+   "site_radius_a": 5.284897135127822,
+   "n_clusters": 16,
+   "elapsed_s": 2.58,
+   "top5": {
+    "jaccard": 0.037,
+    "recall": 0.2,
+    "centroid_dist_a": 10.499,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.05,
+    "recall": 0.2,
+    "centroid_dist_a": 8.53,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.05,
+    "recall": 0.2,
+    "centroid_dist_a": 8.53,
+    "rank": 7,
+    "found": false
+   }
+  },
+  {
+   "id": "5aon",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 98,
+   "n_known": 17,
+   "site_radius_a": 7.8491333152810405,
+   "n_clusters": 6,
+   "elapsed_s": 0.71,
+   "top5": {
+    "jaccard": 0.44,
+    "recall": 0.6471,
+    "centroid_dist_a": 10.296,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.44,
+    "recall": 0.6471,
+    "centroid_dist_a": 9.401,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.44,
+    "recall": 0.6471,
+    "centroid_dist_a": 9.401,
+    "rank": 6,
+    "found": true
+   }
+  },
+  {
+   "id": "4uc8",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 222,
+   "n_known": 3,
+   "site_radius_a": 5.568142274033659,
+   "n_clusters": 20,
+   "elapsed_s": 1.65,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 18.238,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 18.238,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0714,
+    "recall": 0.3333,
+    "centroid_dist_a": 7.929,
+    "rank": 19,
+    "found": false
+   }
+  },
+  {
+   "id": "5b0e",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 104,
+   "n_known": 13,
+   "site_radius_a": 8.329673849918768,
+   "n_clusters": 6,
+   "elapsed_s": 0.71,
+   "top5": {
+    "jaccard": 0.3704,
+    "recall": 0.7692,
+    "centroid_dist_a": 3.072,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3704,
+    "recall": 0.7692,
+    "centroid_dist_a": 3.072,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3704,
+    "recall": 0.7692,
+    "centroid_dist_a": 3.072,
+    "rank": 1,
+    "found": true
+   }
+  },
+  {
+   "id": "5yqp",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 185,
+   "n_known": 25,
+   "site_radius_a": 10.010696733568674,
+   "n_clusters": 14,
+   "elapsed_s": 1.23,
+   "top5": {
+    "jaccard": 0.3878,
+    "recall": 0.76,
+    "centroid_dist_a": 6.286,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3878,
+    "recall": 0.76,
+    "centroid_dist_a": 6.286,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3878,
+    "recall": 0.76,
+    "centroid_dist_a": 6.119,
+    "rank": 12,
+    "found": true
+   }
+  },
+  {
+   "id": "1nd7",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 374,
+   "n_known": 4,
+   "site_radius_a": 3.9460583683809887,
+   "n_clusters": 34,
+   "elapsed_s": 3.4,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 25.181,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 10.669,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2,
+    "recall": 1.0,
+    "centroid_dist_a": 5.668,
+    "rank": 33,
+    "found": false
+   }
+  },
+  {
+   "id": "4fkm",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 209,
+   "n_known": 16,
+   "site_radius_a": 10.36403810130089,
+   "n_clusters": 17,
+   "elapsed_s": 1.43,
+   "top5": {
+    "jaccard": 0.4074,
+    "recall": 0.6875,
+    "centroid_dist_a": 3.26,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4074,
+    "recall": 0.6875,
+    "centroid_dist_a": 3.26,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4074,
+    "recall": 0.6875,
+    "centroid_dist_a": 3.26,
+    "rank": 4,
+    "found": true
+   }
+  },
+  {
+   "id": "2phz",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 270,
+   "n_known": 17,
+   "site_radius_a": 11.392564011748503,
+   "n_clusters": 23,
+   "elapsed_s": 1.82,
+   "top5": {
+    "jaccard": 0.0811,
+    "recall": 0.1765,
+    "centroid_dist_a": 15.319,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0811,
+    "recall": 0.1765,
+    "centroid_dist_a": 15.319,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.125,
+    "recall": 0.2353,
+    "centroid_dist_a": 10.303,
+    "rank": 16,
+    "found": false
+   }
+  },
+  {
+   "id": "3mwg",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 272,
+   "n_known": 16,
+   "site_radius_a": 11.160235380162698,
+   "n_clusters": 20,
+   "elapsed_s": 2.04,
+   "top5": {
+    "jaccard": 0.0263,
+    "recall": 0.0625,
+    "centroid_dist_a": 15.791,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.125,
+    "recall": 0.1875,
+    "centroid_dist_a": 9.926,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4,
+    "recall": 0.5625,
+    "centroid_dist_a": 2.777,
+    "rank": 20,
+    "found": true
+   }
+  },
+  {
+   "id": "2vl2",
+   "chain": "C",
+   "composite": false,
+   "n_residues": 161,
+   "n_known": 10,
+   "site_radius_a": 8.71734668125146,
+   "n_clusters": 7,
+   "elapsed_s": 1.01,
+   "top5": {
+    "jaccard": 0.381,
+    "recall": 0.8,
+    "centroid_dist_a": 4.656,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.381,
+    "recall": 0.8,
+    "centroid_dist_a": 4.656,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.381,
+    "recall": 0.8,
+    "centroid_dist_a": 4.656,
+    "rank": 5,
+    "found": true
+   }
+  },
+  {
+   "id": "6bty",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 128,
+   "n_known": 9,
+   "site_radius_a": 9.853709853630011,
+   "n_clusters": 6,
+   "elapsed_s": 0.77,
+   "top5": {
+    "jaccard": 0.087,
+    "recall": 0.2222,
+    "centroid_dist_a": 13.208,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.087,
+    "recall": 0.2222,
+    "centroid_dist_a": 13.208,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.087,
+    "recall": 0.2222,
+    "centroid_dist_a": 13.208,
+    "rank": 2,
+    "found": false
+   }
+  },
+  {
+   "id": "2fhz",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 93,
+   "n_known": 14,
+   "site_radius_a": 8.28320492038462,
+   "n_clusters": 5,
+   "elapsed_s": 0.49,
+   "top5": {
+    "jaccard": 0.5238,
+    "recall": 0.7857,
+    "centroid_dist_a": 2.548,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.5238,
+    "recall": 0.7857,
+    "centroid_dist_a": 2.548,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5238,
+    "recall": 0.7857,
+    "centroid_dist_a": 2.548,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "5caz",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 161,
+   "n_known": 3,
+   "site_radius_a": 2.981266982418441,
+   "n_clusters": 10,
+   "elapsed_s": 0.92,
+   "top5": {
+    "jaccard": 0.1579,
+    "recall": 1.0,
+    "centroid_dist_a": 6.29,
+    "rank": 2,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1579,
+    "recall": 1.0,
+    "centroid_dist_a": 6.29,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1579,
+    "recall": 1.0,
+    "centroid_dist_a": 6.29,
+    "rank": 2,
+    "found": false
+   }
+  },
+  {
+   "id": "3n4u",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 301,
+   "n_known": 10,
+   "site_radius_a": 10.109805437947703,
+   "n_clusters": 28,
+   "elapsed_s": 2.33,
+   "top5": {
+    "jaccard": 0.12,
+    "recall": 0.3,
+    "centroid_dist_a": 10.275,
+    "rank": 2,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.12,
+    "recall": 0.3,
+    "centroid_dist_a": 8.266,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2903,
+    "recall": 0.9,
+    "centroid_dist_a": 4.37,
+    "rank": 12,
+    "found": true
+   }
+  },
+  {
+   "id": "6fc2",
+   "chain": "C",
+   "composite": false,
+   "n_residues": 177,
+   "n_known": 12,
+   "site_radius_a": 9.26081849841583,
+   "n_clusters": 6,
+   "elapsed_s": 1.64,
+   "top5": {
+    "jaccard": 0.5238,
+    "recall": 0.9167,
+    "centroid_dist_a": 4.76,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.5882,
+    "recall": 0.9167,
+    "centroid_dist_a": 4.76,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5882,
+    "recall": 0.9167,
+    "centroid_dist_a": 4.76,
+    "rank": 1,
+    "found": true
+   }
+  },
+  {
+   "id": "4hye",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 200,
+   "n_known": 4,
+   "site_radius_a": 4.522915079046944,
+   "n_clusters": 10,
+   "elapsed_s": 1.29,
+   "top5": {
+    "jaccard": 0.1739,
+    "recall": 1.0,
+    "centroid_dist_a": 5.503,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1765,
+    "recall": 1.0,
+    "centroid_dist_a": 5.503,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1765,
+    "recall": 1.0,
+    "centroid_dist_a": 5.503,
+    "rank": 1,
+    "found": false
+   }
+  },
+  {
+   "id": "1i7n",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 308,
+   "n_known": 20,
+   "site_radius_a": 8.385188694546795,
+   "n_clusters": 19,
+   "elapsed_s": 2.03,
+   "top5": {
+    "jaccard": 0.197,
+    "recall": 0.65,
+    "centroid_dist_a": 10.636,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3056,
+    "recall": 0.65,
+    "centroid_dist_a": 9.187,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3056,
+    "recall": 0.65,
+    "centroid_dist_a": 7.627,
+    "rank": 13,
+    "found": true
+   }
+  },
+  {
+   "id": "1vsn",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 215,
+   "n_known": 5,
+   "site_radius_a": 5.233820099578734,
+   "n_clusters": 12,
+   "elapsed_s": 1.2,
+   "top5": {
+    "jaccard": 0.069,
+    "recall": 0.4,
+    "centroid_dist_a": 9.386,
+    "rank": 2,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.069,
+    "recall": 0.4,
+    "centroid_dist_a": 9.386,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.069,
+    "recall": 0.4,
+    "centroid_dist_a": 9.386,
+    "rank": 2,
+    "found": false
+   }
+  },
+  {
+   "id": "2d05",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 259,
+   "n_known": 15,
+   "site_radius_a": 8.405767971244229,
+   "n_clusters": 15,
+   "elapsed_s": 1.72,
+   "top5": {
+    "jaccard": 0.1667,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.336,
+    "rank": 5,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1667,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.336,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3333,
+    "recall": 0.4667,
+    "centroid_dist_a": 6.629,
+    "rank": 14,
+    "found": true
+   }
+  },
+  {
+   "id": "1ksg",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 128,
+   "n_known": 18,
+   "site_radius_a": 9.387954799850622,
+   "n_clusters": 13,
+   "elapsed_s": 1.13,
+   "top5": {
+    "jaccard": 0.3333,
+    "recall": 0.5,
+    "centroid_dist_a": 3.78,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3333,
+    "recall": 0.8333,
+    "centroid_dist_a": 3.78,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3429,
+    "recall": 0.8333,
+    "centroid_dist_a": 3.78,
+    "rank": 5,
+    "found": true
+   }
+  },
+  {
+   "id": "3flg",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 135,
+   "n_known": 8,
+   "site_radius_a": 8.355477310200714,
+   "n_clusters": 8,
+   "elapsed_s": 0.74,
+   "top5": {
+    "jaccard": 0.4,
+    "recall": 0.75,
+    "centroid_dist_a": 1.18,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4,
+    "recall": 0.75,
+    "centroid_dist_a": 1.18,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4,
+    "recall": 0.75,
+    "centroid_dist_a": 1.18,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "3t8b",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 237,
+   "n_known": 15,
+   "site_radius_a": 8.335433065416941,
+   "n_clusters": 21,
+   "elapsed_s": 1.52,
+   "top5": {
+    "jaccard": 0.0256,
+    "recall": 0.0667,
+    "centroid_dist_a": 12.044,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0256,
+    "recall": 0.0667,
+    "centroid_dist_a": 12.044,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1875,
+    "recall": 0.4,
+    "centroid_dist_a": 8.654,
+    "rank": 18,
+    "found": false
+   }
+  },
+  {
+   "id": "4gpi",
+   "chain": "C",
+   "composite": false,
+   "n_residues": 235,
+   "n_known": 14,
+   "site_radius_a": 8.089965481494348,
+   "n_clusters": 16,
+   "elapsed_s": 1.61,
+   "top5": {
+    "jaccard": 0.125,
+    "recall": 0.2857,
+    "centroid_dist_a": 11.582,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1667,
+    "recall": 0.4286,
+    "centroid_dist_a": 9.807,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.375,
+    "recall": 0.6429,
+    "centroid_dist_a": 5.139,
+    "rank": 14,
+    "found": true
+   }
+  },
+  {
+   "id": "4gv9",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 198,
+   "n_known": 5,
+   "site_radius_a": 4.324922837785565,
+   "n_clusters": 15,
+   "elapsed_s": 1.42,
+   "top5": {
+    "jaccard": 0.1053,
+    "recall": 0.4,
+    "centroid_dist_a": 10.873,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1053,
+    "recall": 0.4,
+    "centroid_dist_a": 10.873,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1364,
+    "recall": 0.6,
+    "centroid_dist_a": 8.303,
+    "rank": 14,
+    "found": false
+   }
+  },
+  {
+   "id": "4kmy",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 207,
+   "n_known": 16,
+   "site_radius_a": 9.983076550171686,
+   "n_clusters": 13,
+   "elapsed_s": 1.4,
+   "top5": {
+    "jaccard": 0.3056,
+    "recall": 0.6875,
+    "centroid_dist_a": 4.968,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3056,
+    "recall": 0.6875,
+    "centroid_dist_a": 4.968,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3056,
+    "recall": 0.6875,
+    "centroid_dist_a": 4.968,
+    "rank": 1,
+    "found": true
+   }
+  },
+  {
+   "id": "4mwi",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 266,
+   "n_known": 25,
+   "site_radius_a": 9.369103376349724,
+   "n_clusters": 22,
+   "elapsed_s": 1.86,
+   "top5": {
+    "jaccard": 0.5294,
+    "recall": 0.72,
+    "centroid_dist_a": 4.069,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.5294,
+    "recall": 0.72,
+    "centroid_dist_a": 4.069,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5294,
+    "recall": 0.76,
+    "centroid_dist_a": 4.069,
+    "rank": 1,
+    "found": true
+   }
+  },
+  {
+   "id": "1lbe",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 248,
+   "n_known": 8,
+   "site_radius_a": 10.012420998763496,
+   "n_clusters": 14,
+   "elapsed_s": 1.79,
+   "top5": {
+    "jaccard": 0.08,
+    "recall": 0.25,
+    "centroid_dist_a": 13.997,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1176,
+    "recall": 0.25,
+    "centroid_dist_a": 8.859,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3,
+    "recall": 0.75,
+    "centroid_dist_a": 5.688,
+    "rank": 10,
+    "found": true
+   }
+  },
+  {
+   "id": "1zm0",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 96,
+   "n_known": 10,
+   "site_radius_a": 7.501086793728421,
+   "n_clusters": 5,
+   "elapsed_s": 0.62,
+   "top5": {
+    "jaccard": 0.4375,
+    "recall": 0.7,
+    "centroid_dist_a": 2.96,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4375,
+    "recall": 0.7,
+    "centroid_dist_a": 2.96,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4375,
+    "recall": 0.7,
+    "centroid_dist_a": 2.96,
+    "rank": 3,
+    "found": true
+   }
+  },
+  {
+   "id": "1fe6",
+   "chain": "A-D",
+   "composite": true,
+   "n_residues": 104,
+   "n_known": 5,
+   "site_radius_a": 5.460050350778299,
+   "n_clusters": 3,
+   "elapsed_s": 0.76,
+   "top5": {
+    "jaccard": 0.1667,
+    "recall": 0.2,
+    "centroid_dist_a": 15.261,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1667,
+    "recall": 0.2,
+    "centroid_dist_a": 15.261,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1667,
+    "recall": 0.2,
+    "centroid_dist_a": 15.261,
+    "rank": 3,
+    "found": false
+   }
+  },
+  {
+   "id": "4dnc",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 267,
+   "n_known": 20,
+   "site_radius_a": 8.248458607425228,
+   "n_clusters": 21,
+   "elapsed_s": 2.25,
+   "top5": {
+    "jaccard": 0.0769,
+    "recall": 0.15,
+    "centroid_dist_a": 12.407,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.2424,
+    "recall": 0.4,
+    "centroid_dist_a": 8.386,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4242,
+    "recall": 0.7,
+    "centroid_dist_a": 7.349,
+    "rank": 16,
+    "found": true
+   }
+  },
+  {
+   "id": "4ttp",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 201,
+   "n_known": 16,
+   "site_radius_a": 7.900701295818036,
+   "n_clusters": 17,
+   "elapsed_s": 1.36,
+   "top5": {
+    "jaccard": 0.1786,
+    "recall": 0.3125,
+    "centroid_dist_a": 12.337,
+    "rank": 5,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1786,
+    "recall": 0.375,
+    "centroid_dist_a": 12.337,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.55,
+    "recall": 0.6875,
+    "centroid_dist_a": 4.035,
+    "rank": 9,
+    "found": true
+   }
+  },
+  {
+   "id": "5i3t",
+   "chain": "E",
+   "composite": false,
+   "n_residues": 363,
+   "n_known": 4,
+   "site_radius_a": 5.792260271704113,
+   "n_clusters": 24,
+   "elapsed_s": 2.78,
+   "top5": {
+    "jaccard": 0.0312,
+    "recall": 0.25,
+    "centroid_dist_a": 10.556,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0312,
+    "recall": 0.25,
+    "centroid_dist_a": 10.556,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0312,
+    "recall": 0.25,
+    "centroid_dist_a": 10.556,
+    "rank": 5,
+    "found": false
+   }
+  },
+  {
+   "id": "1arl",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 307,
+   "n_known": 7,
+   "site_radius_a": 7.592376547303315,
+   "n_clusters": 17,
+   "elapsed_s": 1.65,
+   "top5": {
+    "jaccard": 0.0769,
+    "recall": 0.2857,
+    "centroid_dist_a": 9.125,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0769,
+    "recall": 0.2857,
+    "centroid_dist_a": 9.125,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1923,
+    "recall": 0.7143,
+    "centroid_dist_a": 8.801,
+    "rank": 14,
+    "found": false
+   }
+  },
+  {
+   "id": "6cqe",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 287,
+   "n_known": 21,
+   "site_radius_a": 9.166195685451113,
+   "n_clusters": 24,
+   "elapsed_s": 2.14,
+   "top5": {
+    "jaccard": 0.1351,
+    "recall": 0.2381,
+    "centroid_dist_a": 10.517,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1351,
+    "recall": 0.2381,
+    "centroid_dist_a": 10.517,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5517,
+    "recall": 0.7619,
+    "centroid_dist_a": 2.165,
+    "rank": 20,
+    "found": true
+   }
+  },
+  {
+   "id": "2aka",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 764,
+   "n_known": 23,
+   "site_radius_a": 10.56240347135746,
+   "n_clusters": 82,
+   "elapsed_s": 8.04,
+   "top5": {
+    "jaccard": 0.0526,
+    "recall": 0.087,
+    "centroid_dist_a": 15.196,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0526,
+    "recall": 0.087,
+    "centroid_dist_a": 15.196,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3529,
+    "recall": 0.5217,
+    "centroid_dist_a": 6.89,
+    "rank": 60,
+    "found": true
+   }
+  },
+  {
+   "id": "3ugk",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 372,
+   "n_known": 26,
+   "site_radius_a": 10.260979784609717,
+   "n_clusters": 27,
+   "elapsed_s": 2.61,
+   "top5": {
+    "jaccard": 0.15,
+    "recall": 0.2308,
+    "centroid_dist_a": 12.257,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.15,
+    "recall": 0.2308,
+    "centroid_dist_a": 12.257,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3125,
+    "recall": 0.3846,
+    "centroid_dist_a": 7.728,
+    "rank": 11,
+    "found": true
+   }
+  },
+  {
+   "id": "6eqj",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 245,
+   "n_known": 14,
+   "site_radius_a": 7.934405121472624,
+   "n_clusters": 14,
+   "elapsed_s": 1.46,
+   "top5": {
+    "jaccard": 0.125,
+    "recall": 0.2857,
+    "centroid_dist_a": 9.541,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.2,
+    "recall": 0.3571,
+    "centroid_dist_a": 9.541,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2222,
+    "recall": 0.4286,
+    "centroid_dist_a": 5.999,
+    "rank": 14,
+    "found": false
+   }
+  },
+  {
+   "id": "1xtc",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 192,
+   "n_known": 18,
+   "site_radius_a": 8.387409922898232,
+   "n_clusters": 9,
+   "elapsed_s": 1.33,
+   "top5": {
+    "jaccard": 0.2857,
+    "recall": 0.5,
+    "centroid_dist_a": 7.083,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2857,
+    "recall": 0.5,
+    "centroid_dist_a": 7.083,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4231,
+    "recall": 0.6111,
+    "centroid_dist_a": 5.163,
+    "rank": 9,
+    "found": true
+   }
+  },
+  {
+   "id": "8aeq",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 624,
+   "n_known": 8,
+   "site_radius_a": 8.575037415458691,
+   "n_clusters": 50,
+   "elapsed_s": 5.21,
+   "top5": {
+    "jaccard": 0.1579,
+    "recall": 0.375,
+    "centroid_dist_a": 8.446,
+    "rank": 3,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1579,
+    "recall": 0.375,
+    "centroid_dist_a": 8.446,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2188,
+    "recall": 0.875,
+    "centroid_dist_a": 2.718,
+    "rank": 39,
+    "found": true
+   }
+  },
+  {
+   "id": "2dfp",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 533,
+   "n_known": 11,
+   "site_radius_a": 8.281809122237917,
+   "n_clusters": 35,
+   "elapsed_s": 3.44,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 24.326,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0606,
+    "recall": 0.1818,
+    "centroid_dist_a": 12.841,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.18,
+    "recall": 0.8182,
+    "centroid_dist_a": 8.323,
+    "rank": 32,
+    "found": false
+   }
+  },
+  {
+   "id": "5tvi",
+   "chain": "V",
+   "composite": false,
+   "n_residues": 90,
+   "n_known": 16,
+   "site_radius_a": 7.126813401816189,
+   "n_clusters": 6,
+   "elapsed_s": 0.43,
+   "top5": {
+    "jaccard": 0.5263,
+    "recall": 0.625,
+    "centroid_dist_a": 4.232,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.5263,
+    "recall": 0.625,
+    "centroid_dist_a": 4.232,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5263,
+    "recall": 0.625,
+    "centroid_dist_a": 4.232,
+    "rank": 4,
+    "found": true
+   }
+  },
+  {
+   "id": "7nbc",
+   "chain": "AAA-CCC",
+   "composite": true,
+   "n_residues": 647,
+   "n_known": 18,
+   "site_radius_a": 9.647000272536715,
+   "n_clusters": 45,
+   "elapsed_s": 4.54,
+   "top5": {
+    "jaccard": 0.1481,
+    "recall": 0.2222,
+    "centroid_dist_a": 10.651,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1481,
+    "recall": 0.2222,
+    "centroid_dist_a": 10.651,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5455,
+    "recall": 1.0,
+    "centroid_dist_a": 0.728,
+    "rank": 20,
+    "found": true
+   }
+  },
+  {
+   "id": "2v6m",
+   "chain": "D",
+   "composite": false,
+   "n_residues": 303,
+   "n_known": 32,
+   "site_radius_a": 9.957847916998858,
+   "n_clusters": 22,
+   "elapsed_s": 2.24,
+   "top5": {
+    "jaccard": 0.234,
+    "recall": 0.3438,
+    "centroid_dist_a": 9.049,
+    "rank": 5,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.234,
+    "recall": 0.3438,
+    "centroid_dist_a": 9.049,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4242,
+    "recall": 0.4375,
+    "centroid_dist_a": 5.571,
+    "rank": 15,
+    "found": true
+   }
+  },
+  {
+   "id": "2rfj",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 106,
+   "n_known": 12,
+   "site_radius_a": 8.45581189853352,
+   "n_clusters": 6,
+   "elapsed_s": 0.92,
+   "top5": {
+    "jaccard": 0.4118,
+    "recall": 0.5833,
+    "centroid_dist_a": 5.426,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4118,
+    "recall": 0.5833,
+    "centroid_dist_a": 5.426,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4118,
+    "recall": 0.5833,
+    "centroid_dist_a": 5.426,
+    "rank": 5,
+    "found": true
+   }
+  },
+  {
+   "id": "7x0g",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 287,
+   "n_known": 18,
+   "site_radius_a": 9.823388384708055,
+   "n_clusters": 21,
+   "elapsed_s": 2.48,
+   "top5": {
+    "jaccard": 0.2222,
+    "recall": 0.3333,
+    "centroid_dist_a": 7.887,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2222,
+    "recall": 0.3333,
+    "centroid_dist_a": 6.238,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3846,
+    "recall": 0.5556,
+    "centroid_dist_a": 6.238,
+    "rank": 7,
+    "found": true
+   }
+  },
+  {
+   "id": "6vle",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 460,
+   "n_known": 19,
+   "site_radius_a": 8.859506230446366,
+   "n_clusters": 33,
+   "elapsed_s": 4.21,
+   "top5": {
+    "jaccard": 0.1579,
+    "recall": 0.3684,
+    "centroid_dist_a": 10.653,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1667,
+    "recall": 0.3684,
+    "centroid_dist_a": 10.653,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4,
+    "recall": 0.6316,
+    "centroid_dist_a": 5.022,
+    "rank": 21,
+    "found": true
+   }
+  },
+  {
+   "id": "5acv",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 232,
+   "n_known": 4,
+   "site_radius_a": 7.496720887190186,
+   "n_clusters": 6,
+   "elapsed_s": 1.51,
+   "top5": {
+    "jaccard": 0.2,
+    "recall": 1.0,
+    "centroid_dist_a": 7.636,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2,
+    "recall": 1.0,
+    "centroid_dist_a": 4.224,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2,
+    "recall": 1.0,
+    "centroid_dist_a": 4.224,
+    "rank": 6,
+    "found": false
+   }
+  },
+  {
+   "id": "6g6y",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 319,
+   "n_known": 22,
+   "site_radius_a": 9.0337508512142,
+   "n_clusters": 28,
+   "elapsed_s": 2.52,
+   "top5": {
+    "jaccard": 0.1923,
+    "recall": 0.4545,
+    "centroid_dist_a": 8.005,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1923,
+    "recall": 0.4545,
+    "centroid_dist_a": 8.005,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2353,
+    "recall": 0.5,
+    "centroid_dist_a": 6.234,
+    "rank": 20,
+    "found": false
+   }
+  },
+  {
+   "id": "5wm9",
+   "chain": "B-C",
+   "composite": true,
+   "n_residues": 386,
+   "n_known": 14,
+   "site_radius_a": 8.683041178497865,
+   "n_clusters": 29,
+   "elapsed_s": 3.14,
+   "top5": {
+    "jaccard": 0.28,
+    "recall": 1.0,
+    "centroid_dist_a": 5.754,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.28,
+    "recall": 1.0,
+    "centroid_dist_a": 5.754,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4194,
+    "recall": 1.0,
+    "centroid_dist_a": 5.754,
+    "rank": 3,
+    "found": true
+   }
+  },
+  {
+   "id": "5wbm",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 302,
+   "n_known": 13,
+   "site_radius_a": 8.099043573170658,
+   "n_clusters": 21,
+   "elapsed_s": 2.06,
+   "top5": {
+    "jaccard": 0.1081,
+    "recall": 0.3077,
+    "centroid_dist_a": 13.097,
+    "rank": 3,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1739,
+    "recall": 0.3077,
+    "centroid_dist_a": 10.326,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3333,
+    "recall": 0.6923,
+    "centroid_dist_a": 5.592,
+    "rank": 17,
+    "found": true
+   }
+  },
+  {
+   "id": "2i3r",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 286,
+   "n_known": 17,
+   "site_radius_a": 9.082109570933886,
+   "n_clusters": 16,
+   "elapsed_s": 1.92,
+   "top5": {
+    "jaccard": 0.05,
+    "recall": 0.1176,
+    "centroid_dist_a": 14.187,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.05,
+    "recall": 0.1176,
+    "centroid_dist_a": 13.313,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3333,
+    "recall": 0.4706,
+    "centroid_dist_a": 5.06,
+    "rank": 13,
+    "found": true
+   }
+  },
+  {
+   "id": "7kay",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 583,
+   "n_known": 36,
+   "site_radius_a": 10.759684093383033,
+   "n_clusters": 49,
+   "elapsed_s": 5.37,
+   "top5": {
+    "jaccard": 0.1698,
+    "recall": 0.25,
+    "centroid_dist_a": 11.203,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1698,
+    "recall": 0.25,
+    "centroid_dist_a": 11.203,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4675,
+    "recall": 1.0,
+    "centroid_dist_a": 3.817,
+    "rank": 30,
+    "found": true
+   }
+  },
+  {
+   "id": "7yjc",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 381,
+   "n_known": 6,
+   "site_radius_a": 6.648451083905346,
+   "n_clusters": 40,
+   "elapsed_s": 2.77,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 14.367,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 14.367,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2667,
+    "recall": 0.6667,
+    "centroid_dist_a": 6.388,
+    "rank": 19,
+    "found": true
+   }
+  },
+  {
+   "id": "1dq2",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 224,
+   "n_known": 9,
+   "site_radius_a": 6.011270847636163,
+   "n_clusters": 9,
+   "elapsed_s": 1.35,
+   "top5": {
+    "jaccard": 0.1304,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.244,
+    "rank": 4,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1304,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.244,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1304,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.244,
+    "rank": 4,
+    "found": false
+   }
+  },
+  {
+   "id": "3la7",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 414,
+   "n_known": 13,
+   "site_radius_a": 7.742837058260215,
+   "n_clusters": 31,
+   "elapsed_s": 3.17,
+   "top5": {
+    "jaccard": 0.4074,
+    "recall": 0.8462,
+    "centroid_dist_a": 4.11,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4074,
+    "recall": 0.8462,
+    "centroid_dist_a": 4.11,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4074,
+    "recall": 1.0,
+    "centroid_dist_a": 4.11,
+    "rank": 3,
+    "found": true
+   }
+  },
+  {
+   "id": "3bk9",
+   "chain": "E-H",
+   "composite": true,
+   "n_residues": 517,
+   "n_known": 12,
+   "site_radius_a": 7.802824774410842,
+   "n_clusters": 49,
+   "elapsed_s": 5.71,
+   "top5": {
+    "jaccard": 0.1622,
+    "recall": 0.5,
+    "centroid_dist_a": 8.54,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1622,
+    "recall": 0.5,
+    "centroid_dist_a": 8.54,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1905,
+    "recall": 0.5,
+    "centroid_dist_a": 8.54,
+    "rank": 1,
+    "found": false
+   }
+  },
+  {
+   "id": "2czd",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 413,
+   "n_known": 23,
+   "site_radius_a": 10.038620078084332,
+   "n_clusters": 31,
+   "elapsed_s": 2.44,
+   "top5": {
+    "jaccard": 0.4103,
+    "recall": 0.6957,
+    "centroid_dist_a": 7.908,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4103,
+    "recall": 0.6957,
+    "centroid_dist_a": 5.833,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5417,
+    "recall": 0.6957,
+    "centroid_dist_a": 2.778,
+    "rank": 16,
+    "found": true
+   }
+  },
+  {
+   "id": "3ve9",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 408,
+   "n_known": 20,
+   "site_radius_a": 9.326828986067476,
+   "n_clusters": 41,
+   "elapsed_s": 2.54,
+   "top5": {
+    "jaccard": 0.4103,
+    "recall": 0.8,
+    "centroid_dist_a": 3.301,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.475,
+    "recall": 0.95,
+    "centroid_dist_a": 3.301,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5429,
+    "recall": 0.95,
+    "centroid_dist_a": 3.301,
+    "rank": 3,
+    "found": true
+   }
+  },
+  {
+   "id": "5tc0",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 250,
+   "n_known": 22,
+   "site_radius_a": 9.528024659131919,
+   "n_clusters": 19,
+   "elapsed_s": 2.16,
+   "top5": {
+    "jaccard": 0.5,
+    "recall": 0.6818,
+    "centroid_dist_a": 4.185,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.5,
+    "recall": 0.6818,
+    "centroid_dist_a": 4.185,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5,
+    "recall": 0.6818,
+    "centroid_dist_a": 4.185,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "5ujp",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 224,
+   "n_known": 22,
+   "site_radius_a": 9.828401393510566,
+   "n_clusters": 23,
+   "elapsed_s": 1.29,
+   "top5": {
+    "jaccard": 0.1111,
+    "recall": 0.1818,
+    "centroid_dist_a": 12.131,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.6,
+    "recall": 0.6818,
+    "centroid_dist_a": 4.397,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.6,
+    "recall": 0.6818,
+    "centroid_dist_a": 4.397,
+    "rank": 8,
+    "found": true
+   }
+  },
+  {
+   "id": "1pu5",
+   "chain": "C",
+   "composite": false,
+   "n_residues": 161,
+   "n_known": 11,
+   "site_radius_a": 8.382179265263929,
+   "n_clusters": 10,
+   "elapsed_s": 1.15,
+   "top5": {
+    "jaccard": 0.2609,
+    "recall": 0.5455,
+    "centroid_dist_a": 6.556,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2609,
+    "recall": 0.5455,
+    "centroid_dist_a": 6.556,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.2609,
+    "recall": 0.5455,
+    "centroid_dist_a": 6.556,
+    "rank": 1,
+    "found": true
+   }
+  },
+  {
+   "id": "7np0",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 603,
+   "n_known": 11,
+   "site_radius_a": 7.292584634380751,
+   "n_clusters": 44,
+   "elapsed_s": 5.29,
+   "top5": {
+    "jaccard": 0.1,
+    "recall": 0.2727,
+    "centroid_dist_a": 11.285,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1,
+    "recall": 0.2727,
+    "centroid_dist_a": 11.285,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4706,
+    "recall": 0.7273,
+    "centroid_dist_a": 5.149,
+    "rank": 16,
+    "found": true
+   }
+  },
+  {
+   "id": "4jfr",
+   "chain": "C",
+   "composite": false,
+   "n_residues": 334,
+   "n_known": 12,
+   "site_radius_a": 8.641410534811518,
+   "n_clusters": 20,
+   "elapsed_s": 2.48,
+   "top5": {
+    "jaccard": 0.2188,
+    "recall": 0.5833,
+    "centroid_dist_a": 7.237,
+    "rank": 4,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2188,
+    "recall": 0.5833,
+    "centroid_dist_a": 7.237,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5556,
+    "recall": 0.8333,
+    "centroid_dist_a": 2.39,
+    "rank": 13,
+    "found": true
+   }
+  },
+  {
+   "id": "9atc",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 310,
+   "n_known": 16,
+   "site_radius_a": 9.241984616894447,
+   "n_clusters": 23,
+   "elapsed_s": 1.68,
+   "top5": {
+    "jaccard": 0.3214,
+    "recall": 0.5625,
+    "centroid_dist_a": 5.676,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3214,
+    "recall": 0.5625,
+    "centroid_dist_a": 5.676,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4,
+    "recall": 0.5625,
+    "centroid_dist_a": 5.676,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "3v55",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 368,
+   "n_known": 23,
+   "site_radius_a": 8.70595594431286,
+   "n_clusters": 33,
+   "elapsed_s": 3.06,
+   "top5": {
+    "jaccard": 0.0227,
+    "recall": 0.0435,
+    "centroid_dist_a": 12.948,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0227,
+    "recall": 0.0435,
+    "centroid_dist_a": 12.948,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4,
+    "recall": 0.5217,
+    "centroid_dist_a": 1.413,
+    "rank": 28,
+    "found": true
+   }
+  },
+  {
+   "id": "1tmi",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 234,
+   "n_known": 14,
+   "site_radius_a": 6.429329752513011,
+   "n_clusters": 18,
+   "elapsed_s": 1.35,
+   "top5": {
+    "jaccard": 0.1034,
+    "recall": 0.2143,
+    "centroid_dist_a": 15.333,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1786,
+    "recall": 0.3571,
+    "centroid_dist_a": 10.612,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.619,
+    "recall": 1.0,
+    "centroid_dist_a": 1.339,
+    "rank": 15,
+    "found": true
+   }
+  },
+  {
+   "id": "3hrm",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 259,
+   "n_known": 10,
+   "site_radius_a": 7.019584687577188,
+   "n_clusters": 32,
+   "elapsed_s": 1.91,
+   "top5": {
+    "jaccard": 0.2,
+    "recall": 0.5,
+    "centroid_dist_a": 9.621,
+    "rank": 3,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3182,
+    "recall": 0.7,
+    "centroid_dist_a": 6.274,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3182,
+    "recall": 0.7,
+    "centroid_dist_a": 6.274,
+    "rank": 8,
+    "found": true
+   }
+  },
+  {
+   "id": "4bg8",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 310,
+   "n_known": 16,
+   "site_radius_a": 7.317571424348478,
+   "n_clusters": 27,
+   "elapsed_s": 2.47,
+   "top5": {
+    "jaccard": 0.1765,
+    "recall": 0.375,
+    "centroid_dist_a": 9.405,
+    "rank": 4,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.25,
+    "recall": 0.4375,
+    "centroid_dist_a": 8.965,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.2963,
+    "recall": 0.5,
+    "centroid_dist_a": 8.48,
+    "rank": 14,
+    "found": true
+   }
+  },
+  {
+   "id": "2zj7",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 616,
+   "n_known": 8,
+   "site_radius_a": 7.0371357395319745,
+   "n_clusters": 41,
+   "elapsed_s": 4.82,
+   "top5": {
+    "jaccard": 0.2778,
+    "recall": 0.625,
+    "centroid_dist_a": 4.731,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2778,
+    "recall": 0.625,
+    "centroid_dist_a": 4.731,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.2778,
+    "recall": 0.625,
+    "centroid_dist_a": 4.731,
+    "rank": 4,
+    "found": true
+   }
+  },
+  {
+   "id": "4qvk",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 235,
+   "n_known": 21,
+   "site_radius_a": 8.906656000491033,
+   "n_clusters": 19,
+   "elapsed_s": 1.8,
+   "top5": {
+    "jaccard": 0.1935,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.555,
+    "rank": 2,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1935,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.555,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5769,
+    "recall": 0.7143,
+    "centroid_dist_a": 3.486,
+    "rank": 17,
+    "found": true
+   }
+  },
+  {
+   "id": "2qbv",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 73,
+   "n_known": 14,
+   "site_radius_a": 7.703396047434408,
+   "n_clusters": 4,
+   "elapsed_s": 0.6,
+   "top5": {
+    "jaccard": 0.7,
+    "recall": 1.0,
+    "centroid_dist_a": 1.931,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.7,
+    "recall": 1.0,
+    "centroid_dist_a": 1.931,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.7,
+    "recall": 1.0,
+    "centroid_dist_a": 1.931,
+    "rank": 4,
+    "found": true
+   }
+  },
+  {
+   "id": "6a98",
+   "chain": "C",
+   "composite": false,
+   "n_residues": 201,
+   "n_known": 13,
+   "site_radius_a": 8.356202819640265,
+   "n_clusters": 10,
+   "elapsed_s": 1.41,
+   "top5": {
+    "jaccard": 0.3158,
+    "recall": 0.4615,
+    "centroid_dist_a": 8.446,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3158,
+    "recall": 0.4615,
+    "centroid_dist_a": 8.446,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4138,
+    "recall": 0.9231,
+    "centroid_dist_a": 4.21,
+    "rank": 9,
+    "found": true
+   }
+  },
+  {
+   "id": "2iyt",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 175,
+   "n_known": 17,
+   "site_radius_a": 9.578132213161268,
+   "n_clusters": 9,
+   "elapsed_s": 1.32,
+   "top5": {
+    "jaccard": 0.4615,
+    "recall": 0.7059,
+    "centroid_dist_a": 4.354,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4615,
+    "recall": 0.7059,
+    "centroid_dist_a": 4.354,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4615,
+    "recall": 0.7059,
+    "centroid_dist_a": 4.354,
+    "rank": 5,
+    "found": true
+   }
+  },
+  {
+   "id": "3st6",
+   "chain": "C",
+   "composite": false,
+   "n_residues": 424,
+   "n_known": 17,
+   "site_radius_a": 8.567786248767874,
+   "n_clusters": 29,
+   "elapsed_s": 2.84,
+   "top5": {
+    "jaccard": 0.122,
+    "recall": 0.2941,
+    "centroid_dist_a": 10.201,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.303,
+    "recall": 0.5882,
+    "centroid_dist_a": 6.15,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3226,
+    "recall": 0.8824,
+    "centroid_dist_a": 2.828,
+    "rank": 22,
+    "found": true
+   }
+  },
+  {
+   "id": "1h13",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 404,
+   "n_known": 5,
+   "site_radius_a": 6.736530397425097,
+   "n_clusters": 26,
+   "elapsed_s": 2.47,
+   "top5": {
+    "jaccard": 0.12,
+    "recall": 0.6,
+    "centroid_dist_a": 10.328,
+    "rank": 5,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.12,
+    "recall": 0.6,
+    "centroid_dist_a": 10.328,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2,
+    "recall": 1.0,
+    "centroid_dist_a": 5.044,
+    "rank": 26,
+    "found": false
+   }
+  },
+  {
+   "id": "1m5w",
+   "chain": "D",
+   "composite": false,
+   "n_residues": 242,
+   "n_known": 13,
+   "site_radius_a": 9.967383349085239,
+   "n_clusters": 13,
+   "elapsed_s": 2.09,
+   "top5": {
+    "jaccard": 0.3182,
+    "recall": 0.5385,
+    "centroid_dist_a": 2.863,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3182,
+    "recall": 0.5385,
+    "centroid_dist_a": 2.863,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3704,
+    "recall": 0.7692,
+    "centroid_dist_a": 2.863,
+    "rank": 3,
+    "found": true
+   }
+  },
+  {
+   "id": "2nt1",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 994,
+   "n_known": 15,
+   "site_radius_a": 10.203724726839724,
+   "n_clusters": 87,
+   "elapsed_s": 9.47,
+   "top5": {
+    "jaccard": 0.2439,
+    "recall": 0.6667,
+    "centroid_dist_a": 14.034,
+    "rank": 2,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2439,
+    "recall": 0.6667,
+    "centroid_dist_a": 6.778,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.32,
+    "recall": 0.8,
+    "centroid_dist_a": 5.413,
+    "rank": 62,
+    "found": true
+   }
+  },
+  {
+   "id": "1g59",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 468,
+   "n_known": 15,
+   "site_radius_a": 8.372214895893155,
+   "n_clusters": 35,
+   "elapsed_s": 3.74,
+   "top5": {
+    "jaccard": 0.0909,
+    "recall": 0.2,
+    "centroid_dist_a": 12.884,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0909,
+    "recall": 0.2,
+    "centroid_dist_a": 12.884,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5238,
+    "recall": 0.7333,
+    "centroid_dist_a": 3.35,
+    "rank": 32,
+    "found": true
+   }
+  },
+  {
+   "id": "1p4v",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 295,
+   "n_known": 16,
+   "site_radius_a": 7.052163486473522,
+   "n_clusters": 10,
+   "elapsed_s": 1.66,
+   "top5": {
+    "jaccard": 0.1892,
+    "recall": 0.4375,
+    "centroid_dist_a": 10.561,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1892,
+    "recall": 0.4375,
+    "centroid_dist_a": 10.561,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4444,
+    "recall": 1.0,
+    "centroid_dist_a": 0.514,
+    "rank": 9,
+    "found": true
+   }
+  },
+  {
+   "id": "2xdo",
+   "chain": "A-C",
+   "composite": true,
+   "n_residues": 732,
+   "n_known": 13,
+   "site_radius_a": 9.061744921803497,
+   "n_clusters": 70,
+   "elapsed_s": 8.03,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 29.071,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1667,
+    "recall": 0.3846,
+    "centroid_dist_a": 21.193,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4762,
+    "recall": 0.7692,
+    "centroid_dist_a": 1.477,
+    "rank": 19,
+    "found": true
+   }
+  },
+  {
+   "id": "3b1o",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 616,
+   "n_known": 20,
+   "site_radius_a": 9.237456151777172,
+   "n_clusters": 56,
+   "elapsed_s": 5.15,
+   "top5": {
+    "jaccard": 0.1395,
+    "recall": 0.3,
+    "centroid_dist_a": 19.885,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4286,
+    "recall": 0.6,
+    "centroid_dist_a": 19.885,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5714,
+    "recall": 0.8,
+    "centroid_dist_a": 3.163,
+    "rank": 35,
+    "found": true
+   }
+  },
+  {
+   "id": "5ey7",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 291,
+   "n_known": 25,
+   "site_radius_a": 9.674405749853655,
+   "n_clusters": 35,
+   "elapsed_s": 2.23,
+   "top5": {
+    "jaccard": 0.4865,
+    "recall": 0.72,
+    "centroid_dist_a": 2.472,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4865,
+    "recall": 0.72,
+    "centroid_dist_a": 2.472,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5,
+    "recall": 0.72,
+    "centroid_dist_a": 2.472,
+    "rank": 4,
+    "found": true
+   }
+  },
+  {
+   "id": "2pkf",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 332,
+   "n_known": 18,
+   "site_radius_a": 8.231731545641951,
+   "n_clusters": 23,
+   "elapsed_s": 2.53,
+   "top5": {
+    "jaccard": 0.1282,
+    "recall": 0.2778,
+    "centroid_dist_a": 8.424,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1282,
+    "recall": 0.2778,
+    "centroid_dist_a": 8.424,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5185,
+    "recall": 0.7778,
+    "centroid_dist_a": 5.512,
+    "rank": 12,
+    "found": true
+   }
+  },
+  {
+   "id": "3idh",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 453,
+   "n_known": 22,
+   "site_radius_a": 8.518993717861278,
+   "n_clusters": 41,
+   "elapsed_s": 3.42,
+   "top5": {
+    "jaccard": 0.0222,
+    "recall": 0.0455,
+    "centroid_dist_a": 16.216,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0222,
+    "recall": 0.0455,
+    "centroid_dist_a": 16.216,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.7097,
+    "recall": 1.0,
+    "centroid_dist_a": 1.779,
+    "rank": 32,
+    "found": true
+   }
+  },
+  {
+   "id": "4jax",
+   "chain": "F",
+   "composite": false,
+   "n_residues": 459,
+   "n_known": 15,
+   "site_radius_a": 7.895760973516662,
+   "n_clusters": 37,
+   "elapsed_s": 5.1,
+   "top5": {
+    "jaccard": 0.0455,
+    "recall": 0.1333,
+    "centroid_dist_a": 14.382,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.4839,
+    "recall": 1.0,
+    "centroid_dist_a": 4.076,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4839,
+    "recall": 1.0,
+    "centroid_dist_a": 4.076,
+    "rank": 7,
+    "found": true
+   }
+  },
+  {
+   "id": "3w90",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 198,
+   "n_known": 16,
+   "site_radius_a": 9.710112558471282,
+   "n_clusters": 14,
+   "elapsed_s": 1.11,
+   "top5": {
+    "jaccard": 0.36,
+    "recall": 0.5625,
+    "centroid_dist_a": 4.966,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.36,
+    "recall": 0.5625,
+    "centroid_dist_a": 4.966,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.36,
+    "recall": 0.5625,
+    "centroid_dist_a": 4.966,
+    "rank": 4,
+    "found": true
+   }
+  },
+  {
+   "id": "2fem",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 212,
+   "n_known": 13,
+   "site_radius_a": 8.48132862534047,
+   "n_clusters": 14,
+   "elapsed_s": 1.48,
+   "top5": {
+    "jaccard": 0.1429,
+    "recall": 0.3077,
+    "centroid_dist_a": 10.346,
+    "rank": 4,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.16,
+    "recall": 0.3077,
+    "centroid_dist_a": 9.498,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2917,
+    "recall": 0.5385,
+    "centroid_dist_a": 6.13,
+    "rank": 11,
+    "found": true
+   }
+  },
+  {
+   "id": "2w8n",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 480,
+   "n_known": 11,
+   "site_radius_a": 8.100149423372143,
+   "n_clusters": 36,
+   "elapsed_s": 3.54,
+   "top5": {
+    "jaccard": 0.2143,
+    "recall": 0.5455,
+    "centroid_dist_a": 7.399,
+    "rank": 5,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2143,
+    "recall": 0.5455,
+    "centroid_dist_a": 7.399,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2143,
+    "recall": 0.5455,
+    "centroid_dist_a": 5.431,
+    "rank": 18,
+    "found": false
+   }
+  },
+  {
+   "id": "6o4f",
+   "chain": "H",
+   "composite": false,
+   "n_residues": 509,
+   "n_known": 11,
+   "site_radius_a": 8.572667113962305,
+   "n_clusters": 21,
+   "elapsed_s": 6.01,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 16.891,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 13.858,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2128,
+    "recall": 0.9091,
+    "centroid_dist_a": 1.777,
+    "rank": 17,
+    "found": true
+   }
+  },
+  {
+   "id": "5h8k",
+   "chain": "I-J",
+   "composite": true,
+   "n_residues": 591,
+   "n_known": 12,
+   "site_radius_a": 8.806698229185688,
+   "n_clusters": 36,
+   "elapsed_s": 7.81,
+   "top5": {
+    "jaccard": 0.0571,
+    "recall": 0.1667,
+    "centroid_dist_a": 13.21,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.4545,
+    "recall": 0.8333,
+    "centroid_dist_a": 1.544,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4545,
+    "recall": 1.0,
+    "centroid_dist_a": 1.544,
+    "rank": 7,
+    "found": true
+   }
+  },
+  {
+   "id": "6f52",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 233,
+   "n_known": 12,
+   "site_radius_a": 7.682792923294562,
+   "n_clusters": 16,
+   "elapsed_s": 1.76,
+   "top5": {
+    "jaccard": 0.4286,
+    "recall": 1.0,
+    "centroid_dist_a": 4.601,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4286,
+    "recall": 1.0,
+    "centroid_dist_a": 4.601,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4286,
+    "recall": 1.0,
+    "centroid_dist_a": 4.147,
+    "rank": 9,
+    "found": true
+   }
+  },
+  {
+   "id": "3kjr",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 993,
+   "n_known": 17,
+   "site_radius_a": 9.13898402320613,
+   "n_clusters": 73,
+   "elapsed_s": 10.05,
+   "top5": {
+    "jaccard": 0.3478,
+    "recall": 0.9412,
+    "centroid_dist_a": 11.067,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3478,
+    "recall": 0.9412,
+    "centroid_dist_a": 10.009,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4848,
+    "recall": 0.9412,
+    "centroid_dist_a": 7.697,
+    "rank": 54,
+    "found": true
+   }
+  },
+  {
+   "id": "8gxj",
+   "chain": "B-C",
+   "composite": true,
+   "n_residues": 369,
+   "n_known": 22,
+   "site_radius_a": 9.8488230738014,
+   "n_clusters": 35,
+   "elapsed_s": 2.55,
+   "top5": {
+    "jaccard": 0.122,
+    "recall": 0.2273,
+    "centroid_dist_a": 11.418,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.122,
+    "recall": 0.2273,
+    "centroid_dist_a": 11.418,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.6667,
+    "recall": 0.7727,
+    "centroid_dist_a": 2.443,
+    "rank": 21,
+    "found": true
+   }
+  },
+  {
+   "id": "5hij",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 240,
+   "n_known": 21,
+   "site_radius_a": 9.675028057805742,
+   "n_clusters": 19,
+   "elapsed_s": 1.46,
+   "top5": {
+    "jaccard": 0.3023,
+    "recall": 0.619,
+    "centroid_dist_a": 7.882,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3023,
+    "recall": 0.619,
+    "centroid_dist_a": 7.882,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4,
+    "recall": 0.619,
+    "centroid_dist_a": 7.482,
+    "rank": 14,
+    "found": true
+   }
+  },
+  {
+   "id": "2idj",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 562,
+   "n_known": 22,
+   "site_radius_a": 10.698406678334775,
+   "n_clusters": 42,
+   "elapsed_s": 4.79,
+   "top5": {
+    "jaccard": 0.3953,
+    "recall": 0.7727,
+    "centroid_dist_a": 4.797,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3953,
+    "recall": 0.7727,
+    "centroid_dist_a": 4.797,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3953,
+    "recall": 1.0,
+    "centroid_dist_a": 4.797,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "2vqz",
+   "chain": "F",
+   "composite": false,
+   "n_residues": 150,
+   "n_known": 7,
+   "site_radius_a": 7.4705285240284685,
+   "n_clusters": 12,
+   "elapsed_s": 1.52,
+   "top5": {
+    "jaccard": 0.0938,
+    "recall": 0.4286,
+    "centroid_dist_a": 8.407,
+    "rank": 2,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.0938,
+    "recall": 0.4286,
+    "centroid_dist_a": 8.407,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3333,
+    "recall": 0.8571,
+    "centroid_dist_a": 0.595,
+    "rank": 9,
+    "found": true
+   }
+  },
+  {
+   "id": "6fgj",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 197,
+   "n_known": 16,
+   "site_radius_a": 9.871627085950381,
+   "n_clusters": 18,
+   "elapsed_s": 1.59,
+   "top5": {
+    "jaccard": 0.4737,
+    "recall": 0.5625,
+    "centroid_dist_a": 1.863,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4737,
+    "recall": 0.5625,
+    "centroid_dist_a": 1.863,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4737,
+    "recall": 0.5625,
+    "centroid_dist_a": 1.863,
+    "rank": 5,
+    "found": true
+   }
+  },
+  {
+   "id": "1xgd",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 315,
+   "n_known": 19,
+   "site_radius_a": 10.382543732238487,
+   "n_clusters": 22,
+   "elapsed_s": 2.23,
+   "top5": {
+    "jaccard": 0.027,
+    "recall": 0.0526,
+    "centroid_dist_a": 16.756,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1667,
+    "recall": 0.2632,
+    "centroid_dist_a": 10.594,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.36,
+    "recall": 0.4737,
+    "centroid_dist_a": 5.748,
+    "rank": 10,
+    "found": true
+   }
+  },
+  {
+   "id": "3uyi",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 312,
+   "n_known": 18,
+   "site_radius_a": 9.212089186168926,
+   "n_clusters": 15,
+   "elapsed_s": 2.32,
+   "top5": {
+    "jaccard": 0.3913,
+    "recall": 0.5,
+    "centroid_dist_a": 6.086,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3913,
+    "recall": 0.5,
+    "centroid_dist_a": 6.086,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3913,
+    "recall": 0.6111,
+    "centroid_dist_a": 5.81,
+    "rank": 12,
+    "found": true
+   }
+  },
+  {
+   "id": "4ikv",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 492,
+   "n_known": 10,
+   "site_radius_a": 8.895731389782275,
+   "n_clusters": 42,
+   "elapsed_s": 3.02,
+   "top5": {
+    "jaccard": 0.2,
+    "recall": 0.8,
+    "centroid_dist_a": 3.781,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2,
+    "recall": 0.8,
+    "centroid_dist_a": 3.781,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.2778,
+    "recall": 1.0,
+    "centroid_dist_a": 3.615,
+    "rank": 26,
+    "found": true
+   }
+  },
+  {
+   "id": "5m7r",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 936,
+   "n_known": 20,
+   "site_radius_a": 9.70947221992976,
+   "n_clusters": 98,
+   "elapsed_s": 11.77,
+   "top5": {
+    "jaccard": 0.0488,
+    "recall": 0.1,
+    "centroid_dist_a": 14.232,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.4667,
+    "recall": 0.7,
+    "centroid_dist_a": 14.232,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5172,
+    "recall": 0.75,
+    "centroid_dist_a": 4.217,
+    "rank": 91,
+    "found": true
+   }
+  },
+  {
+   "id": "8j11",
+   "chain": "X",
+   "composite": false,
+   "n_residues": 173,
+   "n_known": 3,
+   "site_radius_a": 5.024927424338718,
+   "n_clusters": 8,
+   "elapsed_s": 1.34,
+   "top5": {
+    "jaccard": 0.0476,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.889,
+    "rank": 3,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.0476,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.889,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0476,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.889,
+    "rank": 3,
+    "found": false
+   }
+  },
+  {
+   "id": "8u3n",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 377,
+   "n_known": 8,
+   "site_radius_a": 5.748935083258885,
+   "n_clusters": 19,
+   "elapsed_s": 3.31,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 15.918,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 15.918,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.6154,
+    "recall": 1.0,
+    "centroid_dist_a": 2.879,
+    "rank": 11,
+    "found": true
+   }
+  },
+  {
+   "id": "2h7s",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 405,
+   "n_known": 8,
+   "site_radius_a": 6.936184214582629,
+   "n_clusters": 35,
+   "elapsed_s": 2.84,
+   "top5": {
+    "jaccard": 0.1389,
+    "recall": 0.625,
+    "centroid_dist_a": 11.152,
+    "rank": 3,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1389,
+    "recall": 0.625,
+    "centroid_dist_a": 11.152,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3333,
+    "recall": 1.0,
+    "centroid_dist_a": 2.976,
+    "rank": 35,
+    "found": true
+   }
+  },
+  {
+   "id": "4cmw",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 286,
+   "n_known": 19,
+   "site_radius_a": 8.694395965337424,
+   "n_clusters": 22,
+   "elapsed_s": 2.78,
+   "top5": {
+    "jaccard": 0.2,
+    "recall": 0.3684,
+    "centroid_dist_a": 9.419,
+    "rank": 3,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3929,
+    "recall": 0.5789,
+    "centroid_dist_a": 5.846,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5152,
+    "recall": 0.8947,
+    "centroid_dist_a": 2.22,
+    "rank": 14,
+    "found": true
+   }
+  },
+  {
+   "id": "7v8k",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 474,
+   "n_known": 5,
+   "site_radius_a": 7.765505705691921,
+   "n_clusters": 33,
+   "elapsed_s": 4.83,
+   "top5": {
+    "jaccard": 0.1667,
+    "recall": 0.8,
+    "centroid_dist_a": 7.744,
+    "rank": 2,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1667,
+    "recall": 0.8,
+    "centroid_dist_a": 7.744,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3333,
+    "recall": 0.8,
+    "centroid_dist_a": 5.735,
+    "rank": 33,
+    "found": true
+   }
+  },
+  {
+   "id": "4uum",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 334,
+   "n_known": 34,
+   "site_radius_a": 10.434249763622327,
+   "n_clusters": 10,
+   "elapsed_s": 2.69,
+   "top5": {
+    "jaccard": 0.4,
+    "recall": 0.4118,
+    "centroid_dist_a": 4.826,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.5128,
+    "recall": 0.5882,
+    "centroid_dist_a": 4.826,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5128,
+    "recall": 0.5882,
+    "centroid_dist_a": 4.826,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "1p4o",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 314,
+   "n_known": 17,
+   "site_radius_a": 10.12234705505794,
+   "n_clusters": 34,
+   "elapsed_s": 2.81,
+   "top5": {
+    "jaccard": 0.0789,
+    "recall": 0.1765,
+    "centroid_dist_a": 5.48,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0789,
+    "recall": 0.1765,
+    "centroid_dist_a": 5.48,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.375,
+    "recall": 0.7059,
+    "centroid_dist_a": 3.483,
+    "rank": 27,
+    "found": true
+   }
+  },
+  {
+   "id": "4ilg",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 321,
+   "n_known": 6,
+   "site_radius_a": 5.77700518664773,
+   "n_clusters": 34,
+   "elapsed_s": 3.72,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 15.653,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 15.653,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.125,
+    "recall": 0.5,
+    "centroid_dist_a": 8.057,
+    "rank": 27,
+    "found": false
+   }
+  },
+  {
+   "id": "4z0y",
+   "chain": "B-D-F-H",
+   "composite": true,
+   "n_residues": 716,
+   "n_known": 9,
+   "site_radius_a": 8.03370599829278,
+   "n_clusters": 19,
+   "elapsed_s": 5.7,
+   "top5": {
+    "jaccard": 0.0588,
+    "recall": 0.1111,
+    "centroid_dist_a": 18.814,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.4118,
+    "recall": 0.7778,
+    "centroid_dist_a": 4.544,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4118,
+    "recall": 0.7778,
+    "centroid_dist_a": 4.544,
+    "rank": 7,
+    "found": true
+   }
+  },
+  {
+   "id": "8h27",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 181,
+   "n_known": 27,
+   "site_radius_a": 9.835720437507296,
+   "n_clusters": 17,
+   "elapsed_s": 1.82,
+   "top5": {
+    "jaccard": 0.0577,
+    "recall": 0.1111,
+    "centroid_dist_a": 13.147,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0714,
+    "recall": 0.1111,
+    "centroid_dist_a": 13.0,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5517,
+    "recall": 0.5926,
+    "centroid_dist_a": 3.567,
+    "rank": 10,
+    "found": true
+   }
+  },
+  {
+   "id": "1cwq",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 238,
+   "n_known": 6,
+   "site_radius_a": 4.891752699569091,
+   "n_clusters": 18,
+   "elapsed_s": 1.38,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 22.591,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 22.591,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3333,
+    "recall": 1.0,
+    "centroid_dist_a": 1.235,
+    "rank": 17,
+    "found": true
+   }
+  },
+  {
+   "id": "5zj4",
+   "chain": "D",
+   "composite": false,
+   "n_residues": 160,
+   "n_known": 11,
+   "site_radius_a": 8.909309586726522,
+   "n_clusters": 6,
+   "elapsed_s": 1.29,
+   "top5": {
+    "jaccard": 0.3333,
+    "recall": 0.6364,
+    "centroid_dist_a": 3.539,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3333,
+    "recall": 0.6364,
+    "centroid_dist_a": 3.539,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3333,
+    "recall": 0.6364,
+    "centroid_dist_a": 3.539,
+    "rank": 3,
+    "found": true
+   }
+  },
+  {
+   "id": "2zcg",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 633,
+   "n_known": 14,
+   "site_radius_a": 7.594384995407144,
+   "n_clusters": 14,
+   "elapsed_s": 4.2,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 20.785,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1538,
+    "recall": 0.2857,
+    "centroid_dist_a": 8.635,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4062,
+    "recall": 1.0,
+    "centroid_dist_a": 4.125,
+    "rank": 12,
+    "found": true
+   }
+  },
+  {
+   "id": "2x47",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 229,
+   "n_known": 25,
+   "site_radius_a": 9.088960467770058,
+   "n_clusters": 13,
+   "elapsed_s": 1.39,
+   "top5": {
+    "jaccard": 0.1304,
+    "recall": 0.24,
+    "centroid_dist_a": 10.54,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.2941,
+    "recall": 0.4,
+    "centroid_dist_a": 5.335,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5882,
+    "recall": 0.8,
+    "centroid_dist_a": 2.944,
+    "rank": 11,
+    "found": true
+   }
+  },
+  {
+   "id": "1rtc",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 268,
+   "n_known": 6,
+   "site_radius_a": 5.431650033892935,
+   "n_clusters": 16,
+   "elapsed_s": 1.68,
+   "top5": {
+    "jaccard": 0.05,
+    "recall": 0.1667,
+    "centroid_dist_a": 13.34,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1667,
+    "recall": 0.5,
+    "centroid_dist_a": 8.396,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1667,
+    "recall": 0.5,
+    "centroid_dist_a": 8.396,
+    "rank": 7,
+    "found": false
+   }
+  },
+  {
+   "id": "1p9o",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 269,
+   "n_known": 16,
+   "site_radius_a": 8.584749028690021,
+   "n_clusters": 15,
+   "elapsed_s": 1.82,
+   "top5": {
+    "jaccard": 0.4483,
+    "recall": 0.8125,
+    "centroid_dist_a": 2.469,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4483,
+    "recall": 0.8125,
+    "centroid_dist_a": 2.469,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4483,
+    "recall": 0.8125,
+    "centroid_dist_a": 2.469,
+    "rank": 1,
+    "found": true
+   }
+  },
+  {
+   "id": "5n49",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 236,
+   "n_known": 7,
+   "site_radius_a": 5.826507360833381,
+   "n_clusters": 19,
+   "elapsed_s": 2.03,
+   "top5": {
+    "jaccard": 0.3333,
+    "recall": 0.7143,
+    "centroid_dist_a": 7.208,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3333,
+    "recall": 0.7143,
+    "centroid_dist_a": 7.208,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.6364,
+    "recall": 1.0,
+    "centroid_dist_a": 7.208,
+    "rank": 3,
+    "found": true
+   }
+  },
+  {
+   "id": "7f2m",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 323,
+   "n_known": 7,
+   "site_radius_a": 4.922384676340154,
+   "n_clusters": 20,
+   "elapsed_s": 2.12,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 13.946,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 13.946,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.037,
+    "recall": 0.1429,
+    "centroid_dist_a": 9.827,
+    "rank": 15,
+    "found": false
+   }
+  },
+  {
+   "id": "8hc1",
+   "chain": "d-h",
+   "composite": true,
+   "n_residues": 1138,
+   "n_known": 17,
+   "site_radius_a": 8.479098062459611,
+   "n_clusters": 98,
+   "elapsed_s": 17.07,
+   "top5": {
+    "jaccard": 0.12,
+    "recall": 0.3529,
+    "centroid_dist_a": 17.412,
+    "rank": 4,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.12,
+    "recall": 0.3529,
+    "centroid_dist_a": 11.9,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3256,
+    "recall": 0.9412,
+    "centroid_dist_a": 4.846,
+    "rank": 69,
+    "found": true
+   }
+  },
+  {
+   "id": "2vyr",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 86,
+   "n_known": 14,
+   "site_radius_a": 8.301247160959917,
+   "n_clusters": 4,
+   "elapsed_s": 1.18,
+   "top5": {
+    "jaccard": 0.4348,
+    "recall": 0.7143,
+    "centroid_dist_a": 1.655,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4348,
+    "recall": 0.7143,
+    "centroid_dist_a": 1.655,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4348,
+    "recall": 0.7143,
+    "centroid_dist_a": 1.655,
+    "rank": 4,
+    "found": true
+   }
+  },
+  {
+   "id": "3lnz",
+   "chain": "C-O",
+   "composite": true,
+   "n_residues": 165,
+   "n_known": 18,
+   "site_radius_a": 9.720513399159664,
+   "n_clusters": 13,
+   "elapsed_s": 1.47,
+   "top5": {
+    "jaccard": 0.48,
+    "recall": 0.6667,
+    "centroid_dist_a": 8.884,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.48,
+    "recall": 0.6667,
+    "centroid_dist_a": 8.884,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.48,
+    "recall": 0.6667,
+    "centroid_dist_a": 3.585,
+    "rank": 13,
+    "found": true
+   }
+  },
+  {
+   "id": "1xxo",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 286,
+   "n_known": 9,
+   "site_radius_a": 9.262387878916881,
+   "n_clusters": 18,
+   "elapsed_s": 2.03,
+   "top5": {
+    "jaccard": 0.2778,
+    "recall": 0.6667,
+    "centroid_dist_a": 9.278,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4286,
+    "recall": 0.6667,
+    "centroid_dist_a": 3.737,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4286,
+    "recall": 0.6667,
+    "centroid_dist_a": 3.737,
+    "rank": 8,
+    "found": true
+   }
+  },
+  {
+   "id": "4r0x",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 122,
+   "n_known": 21,
+   "site_radius_a": 8.7189680547171,
+   "n_clusters": 3,
+   "elapsed_s": 0.66,
+   "top5": {
+    "jaccard": 0.6364,
+    "recall": 0.6667,
+    "centroid_dist_a": 3.538,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.6364,
+    "recall": 0.6667,
+    "centroid_dist_a": 3.538,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.6364,
+    "recall": 0.6667,
+    "centroid_dist_a": 3.538,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "4nzv",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 324,
+   "n_known": 12,
+   "site_radius_a": 8.268819593654074,
+   "n_clusters": 19,
+   "elapsed_s": 2.63,
+   "top5": {
+    "jaccard": 0.3226,
+    "recall": 0.8333,
+    "centroid_dist_a": 4.7,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3226,
+    "recall": 0.8333,
+    "centroid_dist_a": 4.7,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3793,
+    "recall": 0.9167,
+    "centroid_dist_a": 1.687,
+    "rank": 18,
+    "found": true
+   }
+  },
+  {
+   "id": "3fzo",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 262,
+   "n_known": 25,
+   "site_radius_a": 10.75732180552758,
+   "n_clusters": 18,
+   "elapsed_s": 1.65,
+   "top5": {
+    "jaccard": 0.375,
+    "recall": 0.48,
+    "centroid_dist_a": 5.201,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.375,
+    "recall": 0.48,
+    "centroid_dist_a": 5.201,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.375,
+    "recall": 0.48,
+    "centroid_dist_a": 5.201,
+    "rank": 1,
+    "found": true
+   }
+  },
+  {
+   "id": "3nx1",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 165,
+   "n_known": 10,
+   "site_radius_a": 7.4719644057033205,
+   "n_clusters": 5,
+   "elapsed_s": 0.87,
+   "top5": {
+    "jaccard": 0.4,
+    "recall": 0.8,
+    "centroid_dist_a": 3.303,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4,
+    "recall": 0.8,
+    "centroid_dist_a": 3.303,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4,
+    "recall": 0.8,
+    "centroid_dist_a": 3.303,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "6tx0",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 479,
+   "n_known": 4,
+   "site_radius_a": 6.792639561135031,
+   "n_clusters": 41,
+   "elapsed_s": 4.18,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 26.435,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 26.435,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2353,
+    "recall": 1.0,
+    "centroid_dist_a": 2.381,
+    "rank": 29,
+    "found": true
+   }
+  },
+  {
+   "id": "3vgm",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 312,
+   "n_known": 19,
+   "site_radius_a": 9.12072442491534,
+   "n_clusters": 18,
+   "elapsed_s": 1.92,
+   "top5": {
+    "jaccard": 0.0833,
+    "recall": 0.1579,
+    "centroid_dist_a": 11.777,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0833,
+    "recall": 0.1579,
+    "centroid_dist_a": 11.777,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5652,
+    "recall": 0.6842,
+    "centroid_dist_a": 5.076,
+    "rank": 13,
+    "found": true
+   }
+  },
+  {
+   "id": "8vxu",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 104,
+   "n_known": 8,
+   "site_radius_a": 7.209841044694212,
+   "n_clusters": 5,
+   "elapsed_s": 0.86,
+   "top5": {
+    "jaccard": 0.2381,
+    "recall": 0.625,
+    "centroid_dist_a": 5.838,
+    "rank": 3,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2381,
+    "recall": 0.625,
+    "centroid_dist_a": 5.838,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2381,
+    "recall": 0.625,
+    "centroid_dist_a": 5.838,
+    "rank": 3,
+    "found": false
+   }
+  },
+  {
+   "id": "2pwz",
+   "chain": "G",
+   "composite": false,
+   "n_residues": 312,
+   "n_known": 31,
+   "site_radius_a": 9.419621069306862,
+   "n_clusters": 18,
+   "elapsed_s": 2.13,
+   "top5": {
+    "jaccard": 0.2157,
+    "recall": 0.3548,
+    "centroid_dist_a": 8.662,
+    "rank": 2,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.5128,
+    "recall": 0.6452,
+    "centroid_dist_a": 5.948,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.6304,
+    "recall": 0.9355,
+    "centroid_dist_a": 2.469,
+    "rank": 18,
+    "found": true
+   }
+  },
+  {
+   "id": "5hto",
+   "chain": "E",
+   "composite": false,
+   "n_residues": 305,
+   "n_known": 31,
+   "site_radius_a": 10.296417516814516,
+   "n_clusters": 25,
+   "elapsed_s": 2.24,
+   "top5": {
+    "jaccard": 0.4043,
+    "recall": 0.6129,
+    "centroid_dist_a": 9.233,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4043,
+    "recall": 0.6129,
+    "centroid_dist_a": 9.233,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4118,
+    "recall": 0.6129,
+    "centroid_dist_a": 5.775,
+    "rank": 14,
+    "found": true
+   }
+  },
+  {
+   "id": "5sc2",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 150,
+   "n_known": 5,
+   "site_radius_a": 7.027744538769084,
+   "n_clusters": 4,
+   "elapsed_s": 0.93,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 11.555,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 11.555,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 11.555,
+    "rank": 3,
+    "found": false
+   }
+  },
+  {
+   "id": "1evy",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 346,
+   "n_known": 32,
+   "site_radius_a": 10.674997220351008,
+   "n_clusters": 29,
+   "elapsed_s": 2.38,
+   "top5": {
+    "jaccard": 0.3243,
+    "recall": 0.375,
+    "centroid_dist_a": 7.357,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3243,
+    "recall": 0.375,
+    "centroid_dist_a": 7.357,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.375,
+    "recall": 0.375,
+    "centroid_dist_a": 3.602,
+    "rank": 16,
+    "found": true
+   }
+  },
+  {
+   "id": "8h49",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 643,
+   "n_known": 17,
+   "site_radius_a": 8.46322552746748,
+   "n_clusters": 59,
+   "elapsed_s": 4.65,
+   "top5": {
+    "jaccard": 0.0755,
+    "recall": 0.2353,
+    "centroid_dist_a": 22.024,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.093,
+    "recall": 0.2353,
+    "centroid_dist_a": 15.338,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.35,
+    "recall": 0.8235,
+    "centroid_dist_a": 6.65,
+    "rank": 33,
+    "found": true
+   }
+  },
+  {
+   "id": "6syh",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 631,
+   "n_known": 13,
+   "site_radius_a": 8.33547386208775,
+   "n_clusters": 50,
+   "elapsed_s": 4.78,
+   "top5": {
+    "jaccard": 0.0286,
+    "recall": 0.0769,
+    "centroid_dist_a": 19.447,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0286,
+    "recall": 0.0769,
+    "centroid_dist_a": 17.777,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4118,
+    "recall": 1.0,
+    "centroid_dist_a": 5.493,
+    "rank": 37,
+    "found": true
+   }
+  },
+  {
+   "id": "8bre",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 351,
+   "n_known": 17,
+   "site_radius_a": 7.071874629418956,
+   "n_clusters": 27,
+   "elapsed_s": 2.45,
+   "top5": {
+    "jaccard": 0.2581,
+    "recall": 0.4706,
+    "centroid_dist_a": 9.219,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2581,
+    "recall": 0.4706,
+    "centroid_dist_a": 9.219,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5385,
+    "recall": 0.8235,
+    "centroid_dist_a": 1.629,
+    "rank": 23,
+    "found": true
+   }
+  },
+  {
+   "id": "4zoe",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 724,
+   "n_known": 15,
+   "site_radius_a": 10.089765206734837,
+   "n_clusters": 49,
+   "elapsed_s": 6.45,
+   "top5": {
+    "jaccard": 0.0227,
+    "recall": 0.0667,
+    "centroid_dist_a": 14.322,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.875,
+    "recall": 0.9333,
+    "centroid_dist_a": 1.775,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.875,
+    "recall": 0.9333,
+    "centroid_dist_a": 1.775,
+    "rank": 6,
+    "found": true
+   }
+  },
+  {
+   "id": "8aqi",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 172,
+   "n_known": 13,
+   "site_radius_a": 8.702813055719961,
+   "n_clusters": 15,
+   "elapsed_s": 1.58,
+   "top5": {
+    "jaccard": 0.1613,
+    "recall": 0.3846,
+    "centroid_dist_a": 9.093,
+    "rank": 3,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1613,
+    "recall": 0.3846,
+    "centroid_dist_a": 9.093,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.3438,
+    "recall": 0.8462,
+    "centroid_dist_a": 4.349,
+    "rank": 14,
+    "found": true
+   }
+  },
+  {
+   "id": "1xjf",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 619,
+   "n_known": 15,
+   "site_radius_a": 9.540971177420849,
+   "n_clusters": 46,
+   "elapsed_s": 5.28,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 15.053,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 15.053,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2812,
+    "recall": 0.6,
+    "centroid_dist_a": 5.962,
+    "rank": 24,
+    "found": true
+   }
+  },
+  {
+   "id": "4rvt",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 297,
+   "n_known": 26,
+   "site_radius_a": 10.49088285484226,
+   "n_clusters": 23,
+   "elapsed_s": 2.1,
+   "top5": {
+    "jaccard": 0.2432,
+    "recall": 0.3462,
+    "centroid_dist_a": 8.262,
+    "rank": 5,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2432,
+    "recall": 0.3462,
+    "centroid_dist_a": 8.262,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4286,
+    "recall": 0.4615,
+    "centroid_dist_a": 5.671,
+    "rank": 15,
+    "found": true
+   }
+  },
+  {
+   "id": "7de1",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 108,
+   "n_known": 8,
+   "site_radius_a": 7.374539032043042,
+   "n_clusters": 6,
+   "elapsed_s": 0.82,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 11.932,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 11.932,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 11.932,
+    "rank": 1,
+    "found": false
+   }
+  },
+  {
+   "id": "1x2g",
+   "chain": "C",
+   "composite": false,
+   "n_residues": 332,
+   "n_known": 15,
+   "site_radius_a": 7.609419819576217,
+   "n_clusters": 26,
+   "elapsed_s": 2.64,
+   "top5": {
+    "jaccard": 0.3333,
+    "recall": 0.6,
+    "centroid_dist_a": 6.21,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3333,
+    "recall": 0.6,
+    "centroid_dist_a": 6.21,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3333,
+    "recall": 0.6,
+    "centroid_dist_a": 6.21,
+    "rank": 5,
+    "found": true
+   }
+  },
+  {
+   "id": "4aem",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 126,
+   "n_known": 4,
+   "site_radius_a": 7.988336853019979,
+   "n_clusters": 8,
+   "elapsed_s": 0.77,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 10.65,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 10.65,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 10.65,
+    "rank": 5,
+    "found": false
+   }
+  },
+  {
+   "id": "7x0f",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 446,
+   "n_known": 13,
+   "site_radius_a": 7.6155451302747545,
+   "n_clusters": 45,
+   "elapsed_s": 3.56,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 24.022,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 15.354,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4211,
+    "recall": 0.6154,
+    "centroid_dist_a": 6.174,
+    "rank": 38,
+    "found": true
+   }
+  },
+  {
+   "id": "1g1m",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 576,
+   "n_known": 25,
+   "site_radius_a": 11.007248595921697,
+   "n_clusters": 56,
+   "elapsed_s": 4.36,
+   "top5": {
+    "jaccard": 0.0877,
+    "recall": 0.2,
+    "centroid_dist_a": 17.578,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.3947,
+    "recall": 0.6,
+    "centroid_dist_a": 10.119,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4516,
+    "recall": 0.6,
+    "centroid_dist_a": 6.372,
+    "rank": 34,
+    "found": true
+   }
+  },
+  {
+   "id": "6n5j",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 301,
+   "n_known": 18,
+   "site_radius_a": 9.184142267047763,
+   "n_clusters": 4,
+   "elapsed_s": 2.32,
+   "top5": {
+    "jaccard": 0.4231,
+    "recall": 0.6111,
+    "centroid_dist_a": 4.892,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4231,
+    "recall": 0.6111,
+    "centroid_dist_a": 4.892,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4231,
+    "recall": 0.6111,
+    "centroid_dist_a": 4.892,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "7c48",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 288,
+   "n_known": 21,
+   "site_radius_a": 10.043697435560864,
+   "n_clusters": 25,
+   "elapsed_s": 1.87,
+   "top5": {
+    "jaccard": 0.0488,
+    "recall": 0.0952,
+    "centroid_dist_a": 12.816,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.5714,
+    "recall": 0.7619,
+    "centroid_dist_a": 2.386,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5714,
+    "recall": 0.8095,
+    "centroid_dist_a": 2.386,
+    "rank": 7,
+    "found": true
+   }
+  },
+  {
+   "id": "1q4k",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 222,
+   "n_known": 2,
+   "site_radius_a": 4.273666246620624,
+   "n_clusters": 19,
+   "elapsed_s": 1.62,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 13.443,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 13.443,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 13.443,
+    "rank": 2,
+    "found": false
+   }
+  },
+  {
+   "id": "1uka",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 271,
+   "n_known": 6,
+   "site_radius_a": 6.698495040056227,
+   "n_clusters": 18,
+   "elapsed_s": 1.53,
+   "top5": {
+    "jaccard": 0.1333,
+    "recall": 0.6667,
+    "centroid_dist_a": 6.983,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1333,
+    "recall": 0.6667,
+    "centroid_dist_a": 6.983,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2308,
+    "recall": 0.8333,
+    "centroid_dist_a": 3.931,
+    "rank": 12,
+    "found": true
+   }
+  },
+  {
+   "id": "1xqv",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 290,
+   "n_known": 13,
+   "site_radius_a": 7.5483624282181125,
+   "n_clusters": 22,
+   "elapsed_s": 1.65,
+   "top5": {
+    "jaccard": 0.3438,
+    "recall": 0.8462,
+    "centroid_dist_a": 4.75,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3438,
+    "recall": 0.8462,
+    "centroid_dist_a": 4.75,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3438,
+    "recall": 0.8462,
+    "centroid_dist_a": 4.75,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "3pfp",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 928,
+   "n_known": 11,
+   "site_radius_a": 7.787239180210741,
+   "n_clusters": 98,
+   "elapsed_s": 8.8,
+   "top5": {
+    "jaccard": 0.3448,
+    "recall": 0.9091,
+    "centroid_dist_a": 11.158,
+    "rank": 3,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3448,
+    "recall": 0.9091,
+    "centroid_dist_a": 6.017,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3448,
+    "recall": 0.9091,
+    "centroid_dist_a": 4.768,
+    "rank": 69,
+    "found": true
+   }
+  },
+  {
+   "id": "5dy9",
+   "chain": "H-I",
+   "composite": true,
+   "n_residues": 116,
+   "n_known": 6,
+   "site_radius_a": 8.101108815656378,
+   "n_clusters": 7,
+   "elapsed_s": 0.91,
+   "top5": {
+    "jaccard": 0.2941,
+    "recall": 0.8333,
+    "centroid_dist_a": 5.871,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2941,
+    "recall": 0.8333,
+    "centroid_dist_a": 5.871,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.2941,
+    "recall": 0.8333,
+    "centroid_dist_a": 5.871,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "7qzr",
+   "chain": "D",
+   "composite": false,
+   "n_residues": 463,
+   "n_known": 3,
+   "site_radius_a": 4.136376236549637,
+   "n_clusters": 21,
+   "elapsed_s": 4.69,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 21.989,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 21.735,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 12.86,
+    "rank": 11,
+    "found": false
+   }
+  },
+  {
+   "id": "8ias",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 501,
+   "n_known": 11,
+   "site_radius_a": 5.6022791906902,
+   "n_clusters": 35,
+   "elapsed_s": 4.11,
+   "top5": {
+    "jaccard": 0.037,
+    "recall": 0.0909,
+    "centroid_dist_a": 10.496,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.037,
+    "recall": 0.0909,
+    "centroid_dist_a": 10.496,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4783,
+    "recall": 1.0,
+    "centroid_dist_a": 0.853,
+    "rank": 35,
+    "found": true
+   }
+  },
+  {
+   "id": "6ksc",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 321,
+   "n_known": 10,
+   "site_radius_a": 7.101155085663066,
+   "n_clusters": 12,
+   "elapsed_s": 2.5,
+   "top5": {
+    "jaccard": 0.5625,
+    "recall": 0.9,
+    "centroid_dist_a": 2.393,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.5625,
+    "recall": 0.9,
+    "centroid_dist_a": 2.393,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5625,
+    "recall": 0.9,
+    "centroid_dist_a": 2.393,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "4p32",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 464,
+   "n_known": 20,
+   "site_radius_a": 9.97341860988078,
+   "n_clusters": 43,
+   "elapsed_s": 3.4,
+   "top5": {
+    "jaccard": 0.2381,
+    "recall": 0.3,
+    "centroid_dist_a": 10.242,
+    "rank": 3,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.5652,
+    "recall": 0.65,
+    "centroid_dist_a": 2.549,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.619,
+    "recall": 0.65,
+    "centroid_dist_a": 2.549,
+    "rank": 6,
+    "found": true
+   }
+  },
+  {
+   "id": "4j4e",
+   "chain": "F",
+   "composite": false,
+   "n_residues": 101,
+   "n_known": 9,
+   "site_radius_a": 5.593426335774438,
+   "n_clusters": 5,
+   "elapsed_s": 1.68,
+   "top5": {
+    "jaccard": 0.2308,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.822,
+    "rank": 3,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2308,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.822,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2308,
+    "recall": 0.3333,
+    "centroid_dist_a": 8.822,
+    "rank": 3,
+    "found": false
+   }
+  },
+  {
+   "id": "4zm7",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 180,
+   "n_known": 7,
+   "site_radius_a": 7.424906685488276,
+   "n_clusters": 3,
+   "elapsed_s": 0.91,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 17.07,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 17.07,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 17.07,
+    "rank": 2,
+    "found": false
+   }
+  },
+  {
+   "id": "6du4",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 287,
+   "n_known": 26,
+   "site_radius_a": 9.312862437825736,
+   "n_clusters": 24,
+   "elapsed_s": 2.09,
+   "top5": {
+    "jaccard": 0.1778,
+    "recall": 0.3077,
+    "centroid_dist_a": 9.03,
+    "rank": 4,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1778,
+    "recall": 0.3077,
+    "centroid_dist_a": 9.03,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4444,
+    "recall": 0.6154,
+    "centroid_dist_a": 5.234,
+    "rank": 24,
+    "found": true
+   }
+  },
+  {
+   "id": "3f4k",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 254,
+   "n_known": 19,
+   "site_radius_a": 7.652075399392459,
+   "n_clusters": 22,
+   "elapsed_s": 1.55,
+   "top5": {
+    "jaccard": 0.15,
+    "recall": 0.3158,
+    "centroid_dist_a": 10.172,
+    "rank": 4,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.15,
+    "recall": 0.3158,
+    "centroid_dist_a": 10.172,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2941,
+    "recall": 0.5263,
+    "centroid_dist_a": 6.198,
+    "rank": 22,
+    "found": true
+   }
+  },
+  {
+   "id": "3a0x",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 149,
+   "n_known": 21,
+   "site_radius_a": 9.572780253734908,
+   "n_clusters": 9,
+   "elapsed_s": 0.83,
+   "top5": {
+    "jaccard": 0.4091,
+    "recall": 0.5238,
+    "centroid_dist_a": 6.153,
+    "rank": 4,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.4091,
+    "recall": 0.5238,
+    "centroid_dist_a": 5.721,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4091,
+    "recall": 0.5238,
+    "centroid_dist_a": 5.721,
+    "rank": 8,
+    "found": true
+   }
+  },
+  {
+   "id": "4amv",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 608,
+   "n_known": 15,
+   "site_radius_a": 7.400982469039396,
+   "n_clusters": 51,
+   "elapsed_s": 4.99,
+   "top5": {
+    "jaccard": 0.0781,
+    "recall": 0.3333,
+    "centroid_dist_a": 13.665,
+    "rank": 3,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.0781,
+    "recall": 0.3333,
+    "centroid_dist_a": 13.665,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.7059,
+    "recall": 1.0,
+    "centroid_dist_a": 2.76,
+    "rank": 30,
+    "found": true
+   }
+  },
+  {
+   "id": "7ndl",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 655,
+   "n_known": 19,
+   "site_radius_a": 9.055983037195627,
+   "n_clusters": 15,
+   "elapsed_s": 5.32,
+   "top5": {
+    "jaccard": 0.0667,
+    "recall": 0.2105,
+    "centroid_dist_a": 14.162,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0667,
+    "recall": 0.2105,
+    "centroid_dist_a": 14.162,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1026,
+    "recall": 0.2632,
+    "centroid_dist_a": 11.719,
+    "rank": 14,
+    "found": false
+   }
+  },
+  {
+   "id": "3tpo",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 438,
+   "n_known": 7,
+   "site_radius_a": 5.117703771405218,
+   "n_clusters": 17,
+   "elapsed_s": 3.43,
+   "top5": {
+    "jaccard": 0.1111,
+    "recall": 0.4286,
+    "centroid_dist_a": 8.126,
+    "rank": 5,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1111,
+    "recall": 0.4286,
+    "centroid_dist_a": 8.126,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1111,
+    "recall": 0.4286,
+    "centroid_dist_a": 8.126,
+    "rank": 5,
+    "found": false
+   }
+  },
+  {
+   "id": "1bk2",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 57,
+   "n_known": 5,
+   "site_radius_a": 4.852473933428194,
+   "n_clusters": 0,
+   "elapsed_s": 0.23,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": null,
+    "rank": null,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": null,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": null,
+    "rank": null,
+    "found": false
+   }
+  },
+  {
+   "id": "1rjb",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 298,
+   "n_known": 16,
+   "site_radius_a": 7.176285753920429,
+   "n_clusters": 23,
+   "elapsed_s": 2.18,
+   "top5": {
+    "jaccard": 0.6154,
+    "recall": 1.0,
+    "centroid_dist_a": 1.073,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.6154,
+    "recall": 1.0,
+    "centroid_dist_a": 1.073,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.6154,
+    "recall": 1.0,
+    "centroid_dist_a": 1.073,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "3pbf",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 145,
+   "n_known": 7,
+   "site_radius_a": 7.474340256245062,
+   "n_clusters": 5,
+   "elapsed_s": 0.99,
+   "top5": {
+    "jaccard": 0.0833,
+    "recall": 0.2857,
+    "centroid_dist_a": 10.795,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0833,
+    "recall": 0.2857,
+    "centroid_dist_a": 10.795,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.0833,
+    "recall": 0.2857,
+    "centroid_dist_a": 10.795,
+    "rank": 2,
+    "found": false
+   }
+  },
+  {
+   "id": "3wb9",
+   "chain": "C",
+   "composite": false,
+   "n_residues": 297,
+   "n_known": 28,
+   "site_radius_a": 10.57826853012404,
+   "n_clusters": 15,
+   "elapsed_s": 2.18,
+   "top5": {
+    "jaccard": 0.2632,
+    "recall": 0.3571,
+    "centroid_dist_a": 8.275,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.3103,
+    "recall": 0.3571,
+    "centroid_dist_a": 8.275,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4419,
+    "recall": 0.6786,
+    "centroid_dist_a": 3.005,
+    "rank": 11,
+    "found": true
+   }
+  },
+  {
+   "id": "5loc",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 320,
+   "n_known": 27,
+   "site_radius_a": 11.407555163291697,
+   "n_clusters": 28,
+   "elapsed_s": 2.6,
+   "top5": {
+    "jaccard": 0.1111,
+    "recall": 0.1852,
+    "centroid_dist_a": 13.21,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1842,
+    "recall": 0.2593,
+    "centroid_dist_a": 5.031,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4595,
+    "recall": 0.6296,
+    "centroid_dist_a": 4.671,
+    "rank": 25,
+    "found": true
+   }
+  },
+  {
+   "id": "1k47",
+   "chain": "D",
+   "composite": false,
+   "n_residues": 314,
+   "n_known": 14,
+   "site_radius_a": 8.449008963507424,
+   "n_clusters": 29,
+   "elapsed_s": 2.42,
+   "top5": {
+    "jaccard": 0.2333,
+    "recall": 0.5,
+    "centroid_dist_a": 6.614,
+    "rank": 4,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2333,
+    "recall": 0.5,
+    "centroid_dist_a": 6.614,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2609,
+    "recall": 0.5,
+    "centroid_dist_a": 6.614,
+    "rank": 4,
+    "found": true
+   }
+  },
+  {
+   "id": "7nc8",
+   "chain": "D",
+   "composite": false,
+   "n_residues": 237,
+   "n_known": 11,
+   "site_radius_a": 7.662536782777672,
+   "n_clusters": 16,
+   "elapsed_s": 2.59,
+   "top5": {
+    "jaccard": 0.6,
+    "recall": 0.8182,
+    "centroid_dist_a": 4.576,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.6,
+    "recall": 0.8182,
+    "centroid_dist_a": 4.173,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.6,
+    "recall": 0.8182,
+    "centroid_dist_a": 4.173,
+    "rank": 8,
+    "found": true
+   }
+  },
+  {
+   "id": "6hei",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 346,
+   "n_known": 26,
+   "site_radius_a": 10.662568684140057,
+   "n_clusters": 24,
+   "elapsed_s": 3.26,
+   "top5": {
+    "jaccard": 0.25,
+    "recall": 0.3846,
+    "centroid_dist_a": 9.398,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.25,
+    "recall": 0.3846,
+    "centroid_dist_a": 9.398,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.3462,
+    "recall": 0.6923,
+    "centroid_dist_a": 6.366,
+    "rank": 22,
+    "found": true
+   }
+  },
+  {
+   "id": "1e6k",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 130,
+   "n_known": 8,
+   "site_radius_a": 6.369550352900698,
+   "n_clusters": 11,
+   "elapsed_s": 0.76,
+   "top5": {
+    "jaccard": 0.1111,
+    "recall": 0.375,
+    "centroid_dist_a": 9.326,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.5,
+    "recall": 0.875,
+    "centroid_dist_a": 1.839,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.5,
+    "recall": 0.875,
+    "centroid_dist_a": 1.839,
+    "rank": 7,
+    "found": true
+   }
+  },
+  {
+   "id": "4p2f",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 189,
+   "n_known": 10,
+   "site_radius_a": 6.351320628614603,
+   "n_clusters": 7,
+   "elapsed_s": 1.09,
+   "top5": {
+    "jaccard": 0.08,
+    "recall": 0.2,
+    "centroid_dist_a": 10.292,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1905,
+    "recall": 0.4,
+    "centroid_dist_a": 8.667,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.1905,
+    "recall": 0.4,
+    "centroid_dist_a": 8.667,
+    "rank": 7,
+    "found": false
+   }
+  },
+  {
+   "id": "8onn",
+   "chain": "E",
+   "composite": false,
+   "n_residues": 268,
+   "n_known": 22,
+   "site_radius_a": 9.22822266855061,
+   "n_clusters": 18,
+   "elapsed_s": 2.48,
+   "top5": {
+    "jaccard": 0.0882,
+    "recall": 0.1364,
+    "centroid_dist_a": 11.625,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0882,
+    "recall": 0.1364,
+    "centroid_dist_a": 11.625,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5714,
+    "recall": 0.7273,
+    "centroid_dist_a": 3.921,
+    "rank": 17,
+    "found": true
+   }
+  },
+  {
+   "id": "6w10",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 223,
+   "n_known": 12,
+   "site_radius_a": 7.383912095281238,
+   "n_clusters": 18,
+   "elapsed_s": 1.63,
+   "top5": {
+    "jaccard": 0.0312,
+    "recall": 0.0833,
+    "centroid_dist_a": 12.047,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0312,
+    "recall": 0.0833,
+    "centroid_dist_a": 12.047,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.2667,
+    "recall": 0.3333,
+    "centroid_dist_a": 6.175,
+    "rank": 12,
+    "found": true
+   }
+  },
+  {
+   "id": "2huw",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 199,
+   "n_known": 7,
+   "site_radius_a": 7.1119867389901295,
+   "n_clusters": 14,
+   "elapsed_s": 1.15,
+   "top5": {
+    "jaccard": 0.2857,
+    "recall": 0.5714,
+    "centroid_dist_a": 5.256,
+    "rank": 2,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2857,
+    "recall": 0.5714,
+    "centroid_dist_a": 5.256,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.2857,
+    "recall": 0.8571,
+    "centroid_dist_a": 5.256,
+    "rank": 2,
+    "found": true
+   }
+  },
+  {
+   "id": "3i8s",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 261,
+   "n_known": 16,
+   "site_radius_a": 8.482539314036783,
+   "n_clusters": 14,
+   "elapsed_s": 1.84,
+   "top5": {
+    "jaccard": 0.0244,
+    "recall": 0.0625,
+    "centroid_dist_a": 11.809,
+    "rank": 4,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.28,
+    "recall": 0.4375,
+    "centroid_dist_a": 8.784,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.375,
+    "recall": 0.5625,
+    "centroid_dist_a": 6.11,
+    "rank": 12,
+    "found": true
+   }
+  },
+  {
+   "id": "5z18",
+   "chain": "C",
+   "composite": false,
+   "n_residues": 588,
+   "n_known": 14,
+   "site_radius_a": 9.614259943783134,
+   "n_clusters": 46,
+   "elapsed_s": 6.37,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 17.839,
+    "rank": 2,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0294,
+    "recall": 0.0714,
+    "centroid_dist_a": 12.854,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5833,
+    "recall": 1.0,
+    "centroid_dist_a": 3.624,
+    "rank": 36,
+    "found": true
+   }
+  },
+  {
+   "id": "4e1y",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 353,
+   "n_known": 5,
+   "site_radius_a": 10.911414851730473,
+   "n_clusters": 25,
+   "elapsed_s": 2.42,
+   "top5": {
+    "jaccard": 0.1667,
+    "recall": 0.6,
+    "centroid_dist_a": 9.141,
+    "rank": 1,
+    "found": false,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.1667,
+    "recall": 0.6,
+    "centroid_dist_a": 9.141,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4167,
+    "recall": 1.0,
+    "centroid_dist_a": 2.245,
+    "rank": 13,
+    "found": true
+   }
+  },
+  {
+   "id": "5gmc",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 345,
+   "n_known": 24,
+   "site_radius_a": 8.093057471318168,
+   "n_clusters": 29,
+   "elapsed_s": 2.38,
+   "top5": {
+    "jaccard": 0.84,
+    "recall": 0.9583,
+    "centroid_dist_a": 1.449,
+    "rank": 5,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.84,
+    "recall": 0.9583,
+    "centroid_dist_a": 1.449,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.84,
+    "recall": 0.9583,
+    "centroid_dist_a": 1.449,
+    "rank": 5,
+    "found": true
+   }
+  },
+  {
+   "id": "1r3m",
+   "chain": "A-B",
+   "composite": true,
+   "n_residues": 244,
+   "n_known": 10,
+   "site_radius_a": 7.878408234357605,
+   "n_clusters": 17,
+   "elapsed_s": 1.69,
+   "top5": {
+    "jaccard": 0.2632,
+    "recall": 0.5,
+    "centroid_dist_a": 8.86,
+    "rank": 1,
+    "found": true,
+    "found_legacy": true
+   },
+   "top8": {
+    "jaccard": 0.2632,
+    "recall": 0.5,
+    "centroid_dist_a": 8.86,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4118,
+    "recall": 0.7,
+    "centroid_dist_a": 7.833,
+    "rank": 9,
+    "found": true
+   }
+  },
+  {
+   "id": "6nei",
+   "chain": "B",
+   "composite": false,
+   "n_residues": 339,
+   "n_known": 21,
+   "site_radius_a": 9.930861412063301,
+   "n_clusters": 32,
+   "elapsed_s": 2.88,
+   "top5": {
+    "jaccard": 0.1282,
+    "recall": 0.2381,
+    "centroid_dist_a": 10.839,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.1282,
+    "recall": 0.2381,
+    "centroid_dist_a": 10.839,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4783,
+    "recall": 0.5238,
+    "centroid_dist_a": 5.27,
+    "rank": 32,
+    "found": true
+   }
+  },
+  {
+   "id": "2xsa",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 443,
+   "n_known": 15,
+   "site_radius_a": 8.251315509236909,
+   "n_clusters": 38,
+   "elapsed_s": 3.65,
+   "top5": {
+    "jaccard": 0.0465,
+    "recall": 0.1333,
+    "centroid_dist_a": 13.882,
+    "rank": 1,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0465,
+    "recall": 0.1333,
+    "centroid_dist_a": 12.679,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.4054,
+    "recall": 1.0,
+    "centroid_dist_a": 4.429,
+    "rank": 36,
+    "found": true
+   }
+  },
+  {
+   "id": "5o8b",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 243,
+   "n_known": 4,
+   "site_radius_a": 3.630238675899582,
+   "n_clusters": 15,
+   "elapsed_s": 1.91,
+   "top5": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 25.753,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0,
+    "recall": 0.0,
+    "centroid_dist_a": 25.753,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.25,
+    "recall": 0.5,
+    "centroid_dist_a": 11.961,
+    "rank": 10,
+    "found": true
+   }
+  },
+  {
+   "id": "3x0x",
+   "chain": "E-G",
+   "composite": true,
+   "n_residues": 800,
+   "n_known": 19,
+   "site_radius_a": 9.899042537787976,
+   "n_clusters": 84,
+   "elapsed_s": 8.85,
+   "top5": {
+    "jaccard": 0.1667,
+    "recall": 0.2632,
+    "centroid_dist_a": 12.181,
+    "rank": 5,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.3051,
+    "recall": 0.9474,
+    "centroid_dist_a": 12.181,
+    "found": true
+   },
+   "any_rank": {
+    "jaccard": 0.4643,
+    "recall": 0.9474,
+    "centroid_dist_a": 3.232,
+    "rank": 35,
+    "found": true
+   }
+  },
+  {
+   "id": "3jzg",
+   "chain": "A",
+   "composite": false,
+   "n_residues": 359,
+   "n_known": 12,
+   "site_radius_a": 7.429351297266978,
+   "n_clusters": 23,
+   "elapsed_s": 2.3,
+   "top5": {
+    "jaccard": 0.0278,
+    "recall": 0.0833,
+    "centroid_dist_a": 13.522,
+    "rank": 3,
+    "found": false,
+    "found_legacy": false
+   },
+   "top8": {
+    "jaccard": 0.0714,
+    "recall": 0.1667,
+    "centroid_dist_a": 12.662,
+    "found": false
+   },
+   "any_rank": {
+    "jaccard": 0.5294,
+    "recall": 0.75,
+    "centroid_dist_a": 5.974,
+    "rank": 13,
+    "found": true
+   }
+  }
+ ]
+}
