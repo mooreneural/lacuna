@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://www.biorxiv.org/content/10.64898/2026.08.14.744956v2"><img alt="bioRxiv" src="https://img.shields.io/badge/bioRxiv-10.64898%2F2026.08.14.744956-bc2635"></a>
+  <a href="https://www.biorxiv.org/content/10.64898/2026.08.14.744956v3"><img alt="bioRxiv" src="https://img.shields.io/badge/bioRxiv-10.64898%2F2026.08.14.744956-bc2635"></a>
 </p>
 
 <p align="center">
