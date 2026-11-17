@@ -654,6 +654,67 @@ def residue_jaccard(cluster_residues: list[str], known: set[int]) -> float:
     return len(found & known) / len(union) if union else 0.0
 
 
+# ── chain-aware residue metrics ────────────────────────────────────────────────
+#
+# ``_found_resnums`` above throws the chain away. On a single-chain structure that
+# is harmless: one chain is loaded, so sequence numbers cannot collide and the map
+# n -> (chain, n) is a bijection on both the found set and the known set, leaving
+# every intersection, union, recall and Jaccard identical. On an interface site
+# loaded with two or more chains it is not harmless: a candidate pocket sitting
+# entirely on chain A can be credited against site residues that live on chain B
+# purely because the two chains reuse a sequence number.
+#
+# The chain-aware pair below is added rather than folded into the functions above,
+# because the stored baselines for fpocket, P2Rank, MDpocket and IF-SitePred in
+# this directory were collected under the chain-blind convention and several
+# scripts here import ``residue_overlap``/``residue_jaccard`` directly. Callers
+# that want the chain honoured ask for it by name and pass a (chain, seq) known
+# set; everyone else keeps exactly what they had.
+
+def _found_respairs(cluster_residues: list[str]) -> set[tuple[str, int]]:
+    """Parse ``(chain_id, seq_num)`` pairs out of Lacuna lining-residue labels.
+
+    Labels are ``NAME+seq:chain`` (e.g. ``ALA123:A``, ``GLY7:AAA``). The sequence
+    number is parsed exactly as :func:`_found_resnums` parses it, digits of the
+    part before ``:``, so the only difference between the two functions is that
+    this one keeps the chain. A label with no ``:`` carries no chain and is
+    dropped, as it cannot be compared against a chain-qualified site.
+    """
+    found: set[tuple[str, int]] = set()
+    for label in cluster_residues:
+        head, sep, chain_id = label.partition(":")
+        if not sep or not chain_id:
+            continue
+        try:
+            found.add((chain_id, int("".join(c for c in head if c.isdigit()))))
+        except (ValueError, IndexError):
+            pass
+    return found
+
+
+def residue_overlap_pairs(cluster_residues: list[str],
+                          known: set[tuple[str, int]]) -> float:
+    """Chain-aware recall: |found ∩ known| / |known| over (chain, seq) pairs.
+
+    Same size-gameable caveat as :func:`residue_overlap`; backward comparison only.
+    """
+    found = _found_respairs(cluster_residues)
+    return len(found & known) / len(known) if known else 0.0
+
+
+def residue_jaccard_pairs(cluster_residues: list[str],
+                          known: set[tuple[str, int]]) -> float:
+    """Chain-aware size-robust IoU over (chain, seq) pairs.
+
+    Identical to :func:`residue_jaccard` on a single-chain structure; strictly
+    less than or equal to it on a multi-chain one, since qualifying each residue
+    with its chain can only shrink the intersection and grow the union.
+    """
+    found = _found_respairs(cluster_residues)
+    union = found | known
+    return len(found & known) / len(union) if union else 0.0
+
+
 # ── Lacuna runner ──────────────────────────────────────────────────────────────
 
 def _make_backend(name: str, nma_rmsd: float = 2.0, nma_modes: int = 10,
